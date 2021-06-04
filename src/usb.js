@@ -16,12 +16,13 @@ export const connectDevice = async (pair = false) => {
             console.log('Found device: ' + p.productName);
         })
         // select first available device
-        device = devices[0];
-        if (!device || pair) {
+        if (pair || !devices.length) {
             device = await navigator.usb.requestDevice({filters: [{vendorId: 0x04d8, productId: 0xfd92}]});
             if (!device) {
                 throw new Error("No EBB device available.");
             }
+        } else {
+            device = devices[0];
         }
     }
     if (!device.opened) {
@@ -63,7 +64,7 @@ const lineEndingCodes = {
     [RESPONSE_OK_CR_NL]: encoder.encode('OK\r\n'),
 };
 
-const detectLineEnding = (buffer, lineEndingBuffer) => {
+const detectEnding = (buffer, lineEndingBuffer) => {
     let n = lineEndingBuffer.length;
     let m = buffer.length;
     for (let i = 1; i <= n; i++) {
@@ -75,25 +76,26 @@ const detectLineEnding = (buffer, lineEndingBuffer) => {
 }
 
 const reader = {
-    readline: async (lineEnding) => {
+    readUntil: async (lineEnding) => {
         let result;
         let buffer = [];
-        let foundLineEnding = false;
+        let foundEnding = false;
         do {
             result = await device.transferIn(TRANSFER_ENDPOINT, TRANSFER_PACKET_SIZE);
             if (result.status !== 'ok') {
                 throw new Error("Can not receive response to device.");
             }
             buffer.push(...new Uint8Array(result.data.buffer));
-            foundLineEnding = detectLineEnding(buffer, lineEndingCodes[lineEnding ?? RESPONSE_OK_CR_NL])
-        } while (!foundLineEnding);
-        return decoder.decode(Uint8Array.from(buffer));
+            foundEnding = detectEnding(buffer, lineEndingCodes[lineEnding ?? RESPONSE_OK_CR_NL])
+        } while (!foundEnding);
+        return decoder.decode(Uint8Array.from(buffer)).trim();
     }
 }
 
-export const sendCommand = async (command) => {
+export const sendCommand = async (command, params) => {
     checkDevice();
-    const data = encoder.encode(command.name + '\r');
+    const commandWithParams = `${command.name}${params ? `,${params}` : ''}\r`
+    const data = encoder.encode(commandWithParams);
     let result = await device.transferOut(TRANSFER_ENDPOINT, data);
     if (result.status !== 'ok') {
         throw new Error("Can not sent command to device.");

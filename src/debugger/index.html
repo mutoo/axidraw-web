@@ -8,12 +8,17 @@
 <div id="app">
     <noscript>This app requires a modern browser with javascript enabled.</noscript>
     <p>
+        <button type="button" id="pair-btn">Pair</button>
         <button type="button" id="connect-btn">Connect</button>
         <button type="button" id="disconnect-btn">Disconnect</button>
+        <button type="button" id="music-btn">Music</button>
     </p>
     <form id="cmd-form">
         <p>
-            <label for="cmd">Command:</label> <input type="text" id="cmd"/>
+            <label for="cmd">Command:</label> <select id="cmd"></select>
+        </p>
+        <p>
+            <label for="params">Params:</label> <input type="text" id="params"/>
             <button type="submit">Send</button>
         </p>
         <p>
