@@ -59,6 +59,30 @@ cmdForm.addEventListener('submit', async (e) => {
     }
 })
 
+const batchForm = document.getElementById("batch-form");
+batchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await checkDevice();
+    } catch (e) {
+        await connectDevice();
+    }
+    const batch = batchForm.cmds.value.trim();
+    const cmds = batch.split(/\s+/);
+    debugTxt.value = '';
+    for (let cmdWithParams of cmds) {
+        const parts = cmdWithParams.split(',');
+        const cmd = parts.shift();
+        const params = parts.join(',');
+        const result = await sendCommand(commands[cmd], params);
+        if (typeof result === "object") {
+            debugTxt.value += JSON.stringify(result);
+        } else {
+            debugTxt.value += result;
+        }
+    }
+})
+
 const musicBtn = document.getElementById('music-btn');
 musicBtn.addEventListener('click', async (e) => {
     const pitch = {
@@ -83,22 +107,25 @@ musicBtn.addEventListener('click', async (e) => {
         ['F5', 'F5', 'E5', 'E5', 'D5', 'D5', 'C5', 1],
     ].flatMap(i => i);
     let dir = 1;
-    let bpm = 120;
+    let bpm = 80;
     let spb = 60 / bpm;
     let mspb = (60 / bpm * 1000) | 0;
     for (let note of notes) {
+        const shouldStop = await sendCommand(commands['QB']);
+        if (shouldStop) {
+            await sendCommand(commands['R']);
+            break;
+        }
         if (typeof note === "number") {
             await sendCommand(commands['XM'], `${mspb * note},0,0`);
         } else {
             const frequency = pitch[note]
-            const dist = Math.floor(frequency * spb);
             await sendCommand(commands['CS']);
-            // await sendCommand(commands['HM'], dir ? `${frequency},${dist},0` : `${frequency},0,${dist}`);
-            await sendCommand(commands['SM'], `${mspb},${(frequency * spb * dir) | 0},0`);
+            const dist = Math.floor(frequency * spb);
+            await sendCommand(commands['SM'], `${mspb},${(dist * dir) | 0},0`);
             dir *= -1;
         }
     }
-    console.log('send');
 })
 
 const cmdList = document.getElementById('cmd');

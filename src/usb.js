@@ -88,7 +88,7 @@ const reader = {
             buffer.push(...new Uint8Array(result.data.buffer));
             foundEnding = detectEnding(buffer, lineEndingCodes[lineEnding ?? RESPONSE_OK_CR_NL])
         } while (!foundEnding);
-        return decoder.decode(Uint8Array.from(buffer)).trim();
+        return decoder.decode(Uint8Array.from(buffer));
     }
 }
 
