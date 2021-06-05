@@ -16,7 +16,7 @@ const createCommand = (name, description, parser, options) => {
 }
 
 export const okParser = async (reader) => {
-    return await reader.readUntil(RESPONSE_OK_CR_NL);
+    return (await reader.readUntil(RESPONSE_OK_CR_NL)).trim();
 }
 
 export const toInt = i => parseInt(i, 10);
@@ -108,6 +108,38 @@ export const commandsList = [
             execution: EXECUTION_FIFO,
         }
     ),
+    createCommand("MR",
+        "Memory Read",
+        async (reader) => {
+            // example response: "MR,071\r\n"
+            const data = await reader.readUntil(RESPONSE_CR_NL);
+            return toInt(data.trim().substr(3));
+        },
+    ),
+    createCommand("MW",
+        "Memory Write",
+        okParser,
+    ),
+    createCommand("ND",
+        "Node count Decrement",
+        okParser,
+    ),
+    createCommand("NI",
+        "Node count Increment",
+        okParser,
+    ),
+    createCommand("O",
+        "Output (digital)",
+        okParser,
+    ),
+    createCommand("PC",
+        "Pulse Configure",
+        okParser,
+    ),
+    createCommand("PG",
+        "Pulse Go",
+        okParser,
+    ),
     createCommand("XM",
         "Stepper Move (mixed)",
         okParser,
@@ -117,10 +149,18 @@ export const commandsList = [
     ),
     createCommand("QB",
         "Query Button",
-        async(reader)=>{
+        async (reader) => {
             const data = await reader.readUntil(RESPONSE_OK_CR_NL);
             return toInt(data);
         },
+    ),
+    createCommand("QN",
+        "Query Node count",
+        async (reader) => {
+            // example response: "256\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return toInt(data.substring(0, data.length - 6));
+        }
     ),
     createCommand("SM",
         "Stepper Move",
@@ -128,6 +168,10 @@ export const commandsList = [
         {
             execution: EXECUTION_FIFO,
         }
+    ),
+    createCommand("SN",
+        "Set Node count",
+        okParser,
     ),
     createCommand("SP",
         "Set Pen state",

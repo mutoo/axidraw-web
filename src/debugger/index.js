@@ -24,6 +24,7 @@ connectBtn.addEventListener('click', async () => {
     try {
         await connectDevice();
         await checkDevice();
+        await sendCommand(commands.R)
         debugTxt.value = await sendCommand(commands.V);
     } catch (e) {
         throw new Error("Can not connect to the EBB: " + e.message);
@@ -33,6 +34,7 @@ connectBtn.addEventListener('click', async () => {
 const disconnectBtn = document.getElementById('disconnect-btn');
 disconnectBtn.addEventListener('click', async (e) => {
     try {
+        await sendCommand(commands.R)
         await disconnectDevice();
         debugTxt.value = "Disconnected"
     } catch (e) {
@@ -72,7 +74,7 @@ batchForm.addEventListener('submit', async (e) => {
     debugTxt.value = '';
     for (let cmdWithParams of cmds) {
         const parts = cmdWithParams.split(',');
-        const cmd = parts.shift();
+        const cmd = parts.shift().toUpperCase();
         const params = parts.join(',');
         const result = await sendCommand(commands[cmd], params);
         if (typeof result === "object") {
@@ -80,6 +82,7 @@ batchForm.addEventListener('submit', async (e) => {
         } else {
             debugTxt.value += result;
         }
+        debugTxt.value += "\n";
     }
 })
 
