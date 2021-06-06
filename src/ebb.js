@@ -140,12 +140,17 @@ export const commandsList = [
         "Pulse Go",
         okParser,
     ),
-    createCommand("XM",
-        "Stepper Move (mixed)",
+    createCommand("PI",
+        "Pin Input",
+        async (reader) => {
+            // example response: "PI,1\r\n"
+            const data = await reader.readUntil(RESPONSE_CR_NL);
+            return toInt(data.trim().substr(3));
+        },
+    ),
+    createCommand("PO",
+        "Pin Output",
         okParser,
-        {
-            execution: EXECUTION_FIFO,
-        }
     ),
     createCommand("QB",
         "Query Button",
@@ -154,12 +159,166 @@ export const commandsList = [
             return toInt(data);
         },
     ),
+    createCommand("QC",
+        "Query Current",
+        async (reader) => {
+            // example response: "0394,0300\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            const values = data.substring(0, data.length - 6)
+                .split(",")
+                .map(v => (toInt(v) / 1023 * 3.3).toFixed(2));
+            const wrap = (v) => ({
+                voltage: v,
+                maxCurrent: (v / 1.76).toFixed(2),
+            });
+            return {
+                ra0: wrap(values[0]),
+                vPlus: wrap(values[1])
+            }
+        },
+    ),
+    createCommand("QE",
+        "Query motor Enables",
+        async (reader) => {
+            // example response: "0,4\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return data.substring(0, data.length - 6)
+                .split(",")
+                .map(toInt);
+        },
+        {
+            version: "2.8.0"
+        }
+    ),
+    createCommand("QG",
+        "Query General",
+        async (reader) => {
+            // example response: "3E\r\n"
+            const data = await reader.readUntil(RESPONSE_CR_NL);
+            const results = parseInt(data, 16);
+            return {
+                fifo: (results & 1) > 0,
+                mtr2: (results & 2) > 0,
+                mtr1: (results & 4) > 0,
+                cmd: (results & 8) > 0,
+                pen: (results & 16) > 0,
+                prg: (results & 32) > 0,
+                rb2: (results & 64) > 0,
+                rb5: (results & 128) > 0,
+            }
+        },
+        {
+            version: "2.6.2"
+        }
+    ),
+    createCommand("QL",
+        "Query Layer",
+        async (reader) => {
+            // example response: "4\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return toInt(data);
+        },
+        {
+            version: "1.9.2"
+        }
+    ),
+    createCommand("QM",
+        "Query Motors",
+        async (reader) => {
+            // example response: "QM,0,0,0,0\n\r"
+            const data = await reader.readUntil(RESPONSE_NL_CR);
+            const results = data.trim().substr(3).split(',').map(toInt);
+            return {
+                command: results[0],
+                motor1: results[1],
+                motor2: results[2],
+                fifo: results[3],
+            }
+        },
+        {
+            version: "2.4.4"
+        }
+    ),
     createCommand("QN",
         "Query Node count",
         async (reader) => {
             // example response: "256\r\nOK\r\n"
             const data = await reader.readUntil(RESPONSE_OK_CR_NL);
             return toInt(data.substring(0, data.length - 6));
+        }
+    ),
+    createCommand("QP",
+        "Query Pen",
+        async (reader) => {
+            // example response: "1\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return toInt(data);
+        },
+        {
+            version: "1.9"
+        }
+    ),
+    createCommand("QR",
+        "Query Rc servo",
+        async (reader) => {
+            // example response: "1\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return toInt(data);
+        },
+        {
+            version: "2.6"
+        }
+    ),
+    createCommand("QS",
+        "Query Step pos",
+        async (reader) => {
+            // example response: "1024,-512\n\rOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return data.substring(0, data.length - 6)
+                .split(",")
+                .map(toInt);
+        },
+        {
+            version: "2.4.3"
+        }
+    ),
+    createCommand("QT",
+        "Query nickname Tag",
+        async (reader) => {
+            // example response: "East EBB\r\nOK\r\n"
+            const data = await reader.readUntil(RESPONSE_OK_CR_NL);
+            return data.substring(0, data.length - 6);
+        },
+        {
+            version: "2.5.4"
+        }
+    ),
+    createCommand("RB",
+        "ReBoot",
+        async () => {
+        },
+    ),
+    createCommand("R",
+        "Reset",
+        okParser,
+    ),
+    createCommand("S2",
+        "Servo Output",
+        okParser,
+    ),
+    createCommand("SC",
+        "Stepper & servo mode Configure",
+        okParser,
+    ),
+    createCommand("SE",
+        "Set Engraver",
+        okParser,
+    ),
+    createCommand("SL",
+        "Set Layer",
+        okParser,
+        {
+            version: '1.9.2',
         }
     ),
     createCommand("SM",
@@ -177,6 +336,19 @@ export const commandsList = [
         "Set Pen state",
         okParser,
     ),
+
+    createCommand("SR",
+        "Servo poweR timeout",
+        okParser,
+    ),
+    createCommand("T",
+        "Timed ",
+        okParser,
+    ),
+    createCommand("TP",
+        "Toggle Pen",
+        okParser,
+    ),
     createCommand("V",
         "Version",
         async (reader) => {
@@ -184,11 +356,14 @@ export const commandsList = [
             return (await reader.readUntil(RESPONSE_CR_NL)).trim();
         }
     ),
-    createCommand("R",
-        "Reset",
-        okParser,
-    ),
 
+    createCommand("XM",
+        "Stepper Move (mixed)",
+        okParser,
+        {
+            execution: EXECUTION_FIFO,
+        }
+    ),
 ];
 
 export const commands = commandsList.reduce((map, cmd) => ({

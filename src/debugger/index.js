@@ -125,7 +125,8 @@ musicBtn.addEventListener('click', async (e) => {
             const frequency = pitch[note]
             await sendCommand(commands['CS']);
             const dist = Math.floor(frequency * spb);
-            await sendCommand(commands['SM'], `${mspb},${(dist * dir) | 0},0`);
+            const step = (dist * dir) | 0;
+            await sendCommand(commands['SM'], `${mspb},${step},${step}`);
             dir *= -1;
         }
     }
