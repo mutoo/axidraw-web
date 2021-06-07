@@ -3,6 +3,10 @@ export const RESPONSE_NL_CR = 1;
 export const RESPONSE_OK_CR_NL = 2;
 export const EXECUTION_IMMEDIATE = 0;
 export const EXECUTION_FIFO = 1;
+
+export const HIGH_DPI_AA = 2870;
+export const HIGH_DPI_XY = 2029; // HIGH_DPI_AA / Sqrt(2)
+
 const createCommand = (name, description, parser, options) => {
     return {
         name,

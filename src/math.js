@@ -6,6 +6,8 @@
  * @param y
  * @returns {{a1: number, a2: number}}
  */
+import {HIGH_DPI_XY} from "./ebb.js";
+
 export const xy2aa = ({x, y}) => ({
     a1: x + y,
     a2: x - y,
@@ -73,4 +75,18 @@ export const ira2s = ({interval, rate, acc}) => {
     const V = rate2s(rate);
     const A = rate2s(acc * 25000);
     return (V * T + A * T * T / 2) >> 0;
+}
+
+/**
+ * calculator axis steps {a1, a2} from {x, y} coordinate
+ * @param x x component in mm
+ * @param y y component in mm
+ * @param mode the motor mode
+ * @returns {{a1: number, a2: number}}
+ */
+export const xyDist2aaSteps = ({x, y}, mode = 1) => {
+    const stepPerMm = HIGH_DPI_XY / Math.pow(2, mode - 1) / 25.4;
+    const xSteps = stepPerMm * x;
+    const ySteps = stepPerMm * y;
+    return xy2aa({x: xSteps, y: ySteps})
 }
