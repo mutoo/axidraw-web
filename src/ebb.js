@@ -1,6 +1,3 @@
-export const RESPONSE_MULTI_LINE = 0;
-export const RESPONSE_SINGLE_LINE = 1;
-export const RESPONSE_OK = 2;
 export const RESPONSE_CR_NL = 0;
 export const RESPONSE_NL_CR = 1;
 export const RESPONSE_OK_CR_NL = 2;
@@ -33,15 +30,24 @@ export const commandsList = [
                 memo[toInt(port)] = toInt(value);
                 return memo;
             }, {});
+        },
+        {
+            version: "2.2.3"
         }
     ),
     createCommand("AC",
         "Analog Configure",
         okParser,
+        {
+            version: "2.2.3"
+        }
     ),
     createCommand("BL",
         "enter BootLoader",
         okParser,
+        {
+            version: "1.9.5"
+        }
     ),
     createCommand("C",
         "Configure (pin dirs)",
@@ -50,6 +56,9 @@ export const commandsList = [
     createCommand("CS",
         "Clear Step position",
         okParser,
+        {
+            version: "2.4.3"
+        }
     ),
     createCommand("CK",
         "ChecK input",
@@ -78,12 +87,16 @@ export const commandsList = [
     createCommand("ES",
         "E Stop",
         okParser,
+        {
+            version: "2.2.7"
+        }
     ),
     createCommand("HM",
         "Home or absolute Move",
         okParser,
         {
             execution: EXECUTION_FIFO,
+            version: "2.6.2"
         }
     ),
     createCommand("I",
@@ -99,6 +112,7 @@ export const commandsList = [
         okParser,
         {
             execution: EXECUTION_FIFO,
+            version: "2.7.0",
         }
     ),
     createCommand("LT",
@@ -106,6 +120,7 @@ export const commandsList = [
         okParser,
         {
             execution: EXECUTION_FIFO,
+            version: "2.7.0",
         }
     ),
     createCommand("MR",
@@ -123,6 +138,9 @@ export const commandsList = [
     createCommand("ND",
         "Node count Decrement",
         okParser,
+        {
+            version: "1.9.5"
+        }
     ),
     createCommand("NI",
         "Node count Increment",
@@ -158,6 +176,9 @@ export const commandsList = [
             const data = await reader.readUntil(RESPONSE_OK_CR_NL);
             return toInt(data);
         },
+        {
+            version: "1.9.2"
+        }
     ),
     createCommand("QC",
         "Query Current",
@@ -176,6 +197,9 @@ export const commandsList = [
                 vPlus: wrap(values[1])
             }
         },
+        {
+            version: "2.2.3"
+        }
     ),
     createCommand("QE",
         "Query motor Enables",
@@ -245,6 +269,9 @@ export const commandsList = [
             // example response: "256\r\nOK\r\n"
             const data = await reader.readUntil(RESPONSE_OK_CR_NL);
             return toInt(data.substring(0, data.length - 6));
+        },
+        {
+            version: "1.9"
         }
     ),
     createCommand("QP",
@@ -297,6 +324,9 @@ export const commandsList = [
         "ReBoot",
         async () => {
         },
+        {
+            version: "2.5.4"
+        }
     ),
     createCommand("R",
         "Reset",
@@ -305,6 +335,9 @@ export const commandsList = [
     createCommand("S2",
         "Servo Output",
         okParser,
+        {
+            version: "2.2.0"
+        }
     ),
     createCommand("SC",
         "Stepper & servo mode Configure",
@@ -313,6 +346,9 @@ export const commandsList = [
     createCommand("SE",
         "Set Engraver",
         okParser,
+        {
+            version: "2.1.0"
+        }
     ),
     createCommand("SL",
         "Set Layer",
@@ -331,6 +367,9 @@ export const commandsList = [
     createCommand("SN",
         "Set Node count",
         okParser,
+        {
+            version: "1.9.5"
+        }
     ),
     createCommand("SP",
         "Set Pen state",
@@ -340,6 +379,9 @@ export const commandsList = [
     createCommand("SR",
         "Servo poweR timeout",
         okParser,
+        {
+            version: "2.6.0"
+        }
     ),
     createCommand("T",
         "Timed ",
@@ -348,11 +390,14 @@ export const commandsList = [
     createCommand("TP",
         "Toggle Pen",
         okParser,
+        {
+            version: "1.9"
+        }
     ),
     createCommand("V",
         "Version",
         async (reader) => {
-            // example response: "EBBv13_and_above EB Firmware Version 2.4.2\r\n"
+            // example response: "EBBv13_and_above EB Firmware Version 2.7.0\r\n"
             return (await reader.readUntil(RESPONSE_CR_NL)).trim();
         }
     ),
@@ -362,6 +407,9 @@ export const commandsList = [
         okParser,
         {
             execution: EXECUTION_FIFO,
+        },
+        {
+            version: "2.3.0"
         }
     ),
 ];

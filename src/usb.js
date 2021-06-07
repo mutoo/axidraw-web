@@ -1,9 +1,10 @@
-import {RESPONSE_CR_NL, RESPONSE_NL_CR, RESPONSE_OK_CR_NL} from "./ebb.js";
+import {commands, RESPONSE_CR_NL, RESPONSE_NL_CR, RESPONSE_OK_CR_NL} from "./ebb.js";
 
 const TRANSFER_ENDPOINT = 2;
 const TRANSFER_PACKET_SIZE = 64;
 
 let device;
+let version;
 
 export const connectDevice = async (pair = false) => {
     if (!navigator.usb) {
@@ -33,12 +34,16 @@ export const connectDevice = async (pair = false) => {
     await device.selectConfiguration(1);
     console.log("Claiming interface...");
     await device.claimInterface(1);
+    const ret = await sendCommand(commands["V"]);
+    version = ret.match(/\d\.\d\.\d/)[0];
 }
 
 export const disconnectDevice = async () => {
     checkDevice();
     console.log("Closing device...");
     await device.close();
+    device = null;
+    version = null;
     console.log("Device is closed");
 }
 
@@ -58,17 +63,17 @@ export const checkDevice = () => {
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-const lineEndingCodes = {
+const endingCodes = {
     [RESPONSE_CR_NL]: encoder.encode('\r\n'),
     [RESPONSE_NL_CR]: encoder.encode('\n\r'),
     [RESPONSE_OK_CR_NL]: encoder.encode('OK\r\n'),
 };
 
-const detectEnding = (buffer, lineEndingBuffer) => {
-    let n = lineEndingBuffer.length;
+const detectEnding = (buffer, endingBuffer) => {
+    let n = endingBuffer.length;
     let m = buffer.length;
     for (let i = 1; i <= n; i++) {
-        if (buffer[m - i] !== lineEndingBuffer[n - i]) {
+        if (buffer[m - i] !== endingBuffer[n - i]) {
             return false;
         }
     }
@@ -76,7 +81,7 @@ const detectEnding = (buffer, lineEndingBuffer) => {
 }
 
 const reader = {
-    readUntil: async (lineEnding) => {
+    readUntil: async (ending) => {
         let result;
         let buffer = [];
         let foundEnding = false;
@@ -86,14 +91,32 @@ const reader = {
                 throw new Error("Can not receive response to device.");
             }
             buffer.push(...new Uint8Array(result.data.buffer));
-            foundEnding = detectEnding(buffer, lineEndingCodes[lineEnding ?? RESPONSE_OK_CR_NL])
+            foundEnding = detectEnding(buffer, endingCodes[ending ?? RESPONSE_OK_CR_NL])
         } while (!foundEnding);
         return decoder.decode(Uint8Array.from(buffer));
     }
 }
 
+export const checkVersion = (deviceVersion, cmdVersion) => {
+    const [dMajor, dMinor, dPatch] = deviceVersion.split('.');
+    const [cMajor, cMinor, cPatch] = cmdVersion.split('.');
+    if(cMajor < dMajor) return true;
+    if (dMajor < cMajor) return false;
+    // cMajor === dMajor
+    if (cMinor < dMinor) return true;
+    if (dMinor < cMinor) return false;
+    // dMinor === dMinor
+    return cPatch <= dPatch;
+
+}
+
 export const sendCommand = async (command, params) => {
     checkDevice();
+    if (command.version) {
+        if (!checkVersion(version, command.version)) {
+            throw new Error(command.name + " Command expects higher firmware version: " + command.version);
+        }
+    }
     const commandWithParams = `${command.name}${params ? `,${params}` : ''}\r`
     const data = encoder.encode(commandWithParams);
     let result = await device.transferOut(TRANSFER_ENDPOINT, data);
