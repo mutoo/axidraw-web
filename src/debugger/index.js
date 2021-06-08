@@ -1,5 +1,6 @@
-import {checkDevice, connectDevice, disconnectDevice, sendCommand} from "../usb.js";
+import {checkDevice, connectDevice, disconnectDevice, executeCommand, sendCommand} from "../usb.js";
 import {commands, commandsList} from "../ebb.js";
+import v from "../ebb/commands/v.js";
 
 const paramsHistory = {};
 
@@ -24,17 +25,17 @@ connectBtn.addEventListener('click', async () => {
     try {
         await connectDevice();
         await checkDevice();
-        await sendCommand(commands.R)
-        debugTxt.value = await sendCommand(commands.V);
+        // await sendCommand(commands.R)
+        debugTxt.value = await executeCommand(v);
     } catch (e) {
-        throw new Error("Can not connect to the EBB: " + e.message);
+        throw new Error("Can not connect to the EBB: " + e);
     }
 });
 
 const disconnectBtn = document.getElementById('disconnect-btn');
 disconnectBtn.addEventListener('click', async (e) => {
     try {
-        await sendCommand(commands.R)
+        // await sendCommand(commands.R)
         await disconnectDevice();
         debugTxt.value = "Disconnected"
     } catch (e) {

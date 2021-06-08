@@ -1,0 +1,1 @@
+export const ENDING_CR_NL = '\r\n';
