@@ -192,13 +192,14 @@ export const commandsList = [
             const values = data.substring(0, data.length - 6)
                 .split(",")
                 .map(v => (toInt(v) / 1023 * 3.3).toFixed(2));
-            const wrap = (v) => ({
-                voltage: v,
-                maxCurrent: (v / 1.76).toFixed(2),
-            });
             return {
-                ra0: wrap(values[0]),
-                vPlus: wrap(values[1])
+                ra0: {
+                    voltage: values[0],
+                    maxCurrent: (values[0] / 1.76).toFixed(2),
+                },
+                vPlus: {
+                    voltage: (values[1] * 9.2 + 0.3).toFixed(2),
+                }
             }
         },
         {
