@@ -27,8 +27,7 @@ export const cmdWithOptionalParams = (cmd, ...optional) => {
 export const readUntil = function* (ending, dataIn) {
     let buffer = '';
     let foundEnding = -1;
-    if (!dataIn)
-        dataIn = yield;
+    let consumed = 0;
     do {
         const fragment = decode(dataIn);
         buffer += fragment;
@@ -37,10 +36,12 @@ export const readUntil = function* (ending, dataIn) {
             foundEnding += ending.length;
             return {
                 result: buffer.substring(0, foundEnding),
-                consumed: foundEnding
+                consumed: foundEnding - consumed,
+                remain: buffer.substring(foundEnding),
             };
         }
         dataIn = yield {consumed: fragment.length};
+        consumed += fragment.length;
     } while (foundEnding === -1);
 }
 
@@ -57,7 +58,17 @@ export const handleOKMessage = function* (dataIn) {
 }
 
 export const handleErrorMessage = function* () {
-    return yield* readUntil(ENDING_CR_NL);
+    let parsed = null;
+    let result = "";
+    do {
+        const dataIn = yield parsed;
+        parsed = yield* readUntil(ENDING_CR_NL, dataIn);
+        result += parsed.result
+    } while (parsed.remain[0] === '!');
+    return {
+        ...parsed,
+        result,
+    }
 }
 
 export const checkVersion = (deviceVersion, cmdVersion) => {

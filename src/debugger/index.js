@@ -33,7 +33,7 @@ connectBtn.addEventListener('click', async () => {
 const disconnectBtn = document.getElementById('disconnect-btn');
 disconnectBtn.addEventListener('click', async (e) => {
     try {
-        await executeCommand(r);
+        await executeCommand(commands.r);
         await disconnectDevice();
         debugTxt.value = "Disconnected"
     } catch (e) {
@@ -50,8 +50,9 @@ cmdForm.addEventListener('submit', async (e) => {
         await connectDevice();
     }
     const cmd = cmdForm.cmd.value.trim().toLowerCase();
-    const params = cmdForm.params.value.trim().split(',');
-    paramsHistory[cmd] = params;
+    const paramsStr = cmdForm.params.value.trim();
+    paramsHistory[cmd] = paramsStr;
+    const params = paramsStr === '' ? [] : paramsStr.split(',');
     const result = await executeCommand(commands[cmd], ...params);
     if (typeof result === "object") {
         cmdForm.result.value = JSON.stringify(result)

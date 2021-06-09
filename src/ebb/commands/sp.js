@@ -3,8 +3,8 @@ import {EXECUTION_FIFO} from "../constants.js";
 
 export default createCommand(
     "Set pen state",
-    function* (value, duration, portBpin) {
-        let dataIn = yield cmdWithOptionalParams(`SP,${value}`, duration, portBpin);
+    function* (value, duration, portBPin) {
+        let dataIn = yield cmdWithOptionalParams(`SP,${value}`, duration, portBPin);
         return yield* handleOKMessage(dataIn);
     },
     {

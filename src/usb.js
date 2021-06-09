@@ -27,11 +27,11 @@ export const executeCommand = async (command, ...params) => {
         }
     }
     const cmd = command.create(...params);
-    commandQueue.push(cmd);
     const cmdStatus = cmd.next();
     await sendToDevice(cmdStatus.value);
     // if that command is done without taking any response, resolve it immediately.
     if (cmdStatus.done) return Promise.resolve();
+    commandQueue.push(cmd);
     // otherwise queues this command and waiting msg from device.
     return new Promise((resolve, reject) => {
         cmd.resolve = resolve;
@@ -43,7 +43,6 @@ export const connectDevice = async (pair = false) => {
     if (!navigator.usb) {
         throw new Error("WebUSB feature is not supported in this browser!");
     }
-
     if (!device) {
         const devices = await navigator.usb.getDevices();
         devices.forEach(p => {
@@ -75,6 +74,10 @@ export const connectDevice = async (pair = false) => {
         let errorHandler = null;
         try {
             while (true) {
+                if (!device?.opened) {
+                    console.log('Stop listening data.')
+                    break;
+                }
                 const response = await device.transferIn(TRANSFER_ENDPOINT, TRANSFER_PACKET_SIZE);
                 if (response.status !== 'ok') {
                     throw new Error("Unexpected response status: " + response.status);
@@ -84,8 +87,10 @@ export const connectDevice = async (pair = false) => {
                 while (buffer.length) {
                     if (commandQueue.length) {
                         if (buffer[0] === '!'.charCodeAt(0)) {
-                            errorHandler = handleErrorMessage();
-                            errorHandler.next(); // ready
+                            if (!errorHandler) {
+                                errorHandler = handleErrorMessage();
+                                errorHandler.next(); // ready
+                            }
                         }
                         const cmd = commandQueue[0]
                         const handler = errorHandler || cmd;
@@ -107,8 +112,8 @@ export const connectDevice = async (pair = false) => {
                             commandQueue.shift();
                         }
                     } else {
-                        const gabage = decode(buffer);
-                        console.log('Discard garbage message: ' + gabage);
+                        const garbage = decode(buffer);
+                        console.log('Discard garbage message: ' + garbage);
                         buffer.length = 0;
                     }
                 }
@@ -129,6 +134,7 @@ export const disconnectDevice = async () => {
     await device.close();
     device = null;
     version = null;
+    commandQueue.length = 0;
     console.log("Device is closed");
 }
 
