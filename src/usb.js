@@ -1,5 +1,4 @@
-import {commands, RESPONSE_CR_NL, RESPONSE_NL_CR, RESPONSE_OK_CR_NL} from "./ebb.js";
-import {decode, handleErrorMessage} from "./ebb/utils.js";
+import {checkVersion, decode, handleErrorMessage} from "./ebb/utils.js";
 import v from './ebb/commands/v.js';
 
 const TRANSFER_ENDPOINT = 2;
@@ -10,11 +9,10 @@ let version = "2.7.0";
 
 const commandQueue = [];
 const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 export const sendToDevice = async (msg) => {
     const data = encoder.encode(msg);
-    console.log('Send to device: ', data);
+    console.log('Send to device: ', decode(data));
     let result = await device.transferOut(TRANSFER_ENDPOINT, data);
     if (result.status !== 'ok') {
         throw new Error("Can not sent command to device.");
@@ -22,13 +20,19 @@ export const sendToDevice = async (msg) => {
 }
 
 export const executeCommand = async (command, ...params) => {
+    checkDevice();
+    if (command.version) {
+        if (!checkVersion(version, command.version)) {
+            throw new Error(command.name + " Command expects higher firmware version: " + command.version);
+        }
+    }
     const cmd = command.create(...params);
+    commandQueue.push(cmd);
     const cmdStatus = cmd.next();
     await sendToDevice(cmdStatus.value);
     // if that command is done without taking any response, resolve it immediately.
     if (cmdStatus.done) return Promise.resolve();
     // otherwise queues this command and waiting msg from device.
-    commandQueue.push(cmd);
     return new Promise((resolve, reject) => {
         cmd.resolve = resolve;
         cmd.reject = reject;
@@ -97,13 +101,14 @@ export const connectDevice = async (pair = false) => {
                                 errorHandler = null;
                                 cmd.reject(result);
                             } else {
+                                console.log('Received message: ' + result)
                                 cmd.resolve(result);
                             }
                             commandQueue.shift();
                         }
                     } else {
                         const gabage = decode(buffer);
-                        console.log('discard gabage message: ' + gabage);
+                        console.log('Discard garbage message: ' + gabage);
                         buffer.length = 0;
                     }
                 }
@@ -140,66 +145,3 @@ export const checkDevice = () => {
     }
 }
 
-
-const endingCodes = {
-    [RESPONSE_CR_NL]: encoder.encode('\r\n'),
-    [RESPONSE_NL_CR]: encoder.encode('\n\r'),
-    [RESPONSE_OK_CR_NL]: encoder.encode('OK\r\n'),
-};
-
-const detectEnding = (buffer, endingBuffer) => {
-    let n = endingBuffer.length;
-    let m = buffer.length;
-    for (let i = 1; i <= n; i++) {
-        if (buffer[m - i] !== endingBuffer[n - i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-const reader = {
-    readUntil: async (ending) => {
-        let result;
-        let buffer = [];
-        let foundEnding = false;
-        do {
-            result = await device.transferIn(TRANSFER_ENDPOINT, TRANSFER_PACKET_SIZE);
-            if (result.status !== 'ok') {
-                throw new Error("Can not receive response to device.");
-            }
-            buffer.push(...new Uint8Array(result.data.buffer));
-            foundEnding = detectEnding(buffer, endingCodes[ending ?? RESPONSE_OK_CR_NL])
-        } while (!foundEnding);
-        return decoder.decode(Uint8Array.from(buffer));
-    }
-}
-
-export const checkVersion = (deviceVersion, cmdVersion) => {
-    const [dMajor, dMinor, dPatch] = deviceVersion.split('.');
-    const [cMajor, cMinor, cPatch] = cmdVersion.split('.');
-    if (cMajor < dMajor) return true;
-    if (dMajor < cMajor) return false;
-    // cMajor === dMajor
-    if (cMinor < dMinor) return true;
-    if (dMinor < cMinor) return false;
-    // dMinor === dMinor
-    return cPatch <= dPatch;
-
-}
-
-export const sendCommand = async (command, params) => {
-    checkDevice();
-    if (command.version) {
-        if (!checkVersion(version, command.version)) {
-            throw new Error(command.name + " Command expects higher firmware version: " + command.version);
-        }
-    }
-    const commandWithParams = `${command.name}${params ? `,${params}` : ''}\r`
-    const data = encoder.encode(commandWithParams);
-    let result = await device.transferOut(TRANSFER_ENDPOINT, data);
-    if (result.status !== 'ok') {
-        throw new Error("Can not sent command to device.");
-    }
-    return await command.parser(reader, command.response);
-}

@@ -1,6 +1,5 @@
-import {checkDevice, connectDevice, disconnectDevice, executeCommand, sendCommand} from "../usb.js";
-import {commands, commandsList} from "../ebb.js";
-import v from "../ebb/commands/v.js";
+import {checkDevice, connectDevice, disconnectDevice, executeCommand} from "../usb.js";
+import {commands} from "../ebb/index.js";
 
 const paramsHistory = {};
 
@@ -14,7 +13,7 @@ pairBtn.addEventListener('click', async () => {
     try {
         await connectDevice(true);
         await checkDevice();
-        debugTxt.value = await sendCommand(commands.V);
+        debugTxt.value = await executeCommand(commands.v);
     } catch (e) {
         throw new Error("Can not connect to the EBB: " + e.message);
     }
@@ -25,8 +24,7 @@ connectBtn.addEventListener('click', async () => {
     try {
         await connectDevice();
         await checkDevice();
-        // await sendCommand(commands.R)
-        debugTxt.value = await executeCommand(v);
+        debugTxt.value = await executeCommand(commands.r);
     } catch (e) {
         throw new Error("Can not connect to the EBB: " + e);
     }
@@ -35,7 +33,7 @@ connectBtn.addEventListener('click', async () => {
 const disconnectBtn = document.getElementById('disconnect-btn');
 disconnectBtn.addEventListener('click', async (e) => {
     try {
-        // await sendCommand(commands.R)
+        await executeCommand(r);
         await disconnectDevice();
         debugTxt.value = "Disconnected"
     } catch (e) {
@@ -51,10 +49,10 @@ cmdForm.addEventListener('submit', async (e) => {
     } catch (e) {
         await connectDevice();
     }
-    const cmd = cmdForm.cmd.value.trim();
-    const params = cmdForm.params.value.trim();
+    const cmd = cmdForm.cmd.value.trim().toLowerCase();
+    const params = cmdForm.params.value.trim().split(',');
     paramsHistory[cmd] = params;
-    const result = await sendCommand(commands[cmd], params);
+    const result = await executeCommand(commands[cmd], ...params);
     if (typeof result === "object") {
         cmdForm.result.value = JSON.stringify(result)
     } else {
@@ -75,9 +73,8 @@ batchForm.addEventListener('submit', async (e) => {
     debugTxt.value = '';
     for (let cmdWithParams of cmds) {
         const parts = cmdWithParams.split(',');
-        const cmd = parts.shift().toUpperCase();
-        const params = parts.join(',');
-        const result = await sendCommand(commands[cmd], params);
+        const cmd = parts.shift().toLowerCase();
+        const result = await executeCommand(commands[cmd], ...parts);
         if (typeof result === "object") {
             debugTxt.value += JSON.stringify(result);
         } else {
@@ -115,19 +112,19 @@ musicBtn.addEventListener('click', async (e) => {
     let spb = 60 / bpm;
     let mspb = (60 / bpm * 1000) | 0;
     for (let note of notes) {
-        const shouldStop = await sendCommand(commands['QB']);
+        const shouldStop = await executeCommand(commands.qb);
         if (shouldStop) {
-            await sendCommand(commands['R']);
+            await executeCommand(commands.r);
             break;
         }
         if (typeof note === "number") {
-            await sendCommand(commands['XM'], `${mspb * note},0,0`);
+            await executeCommand(commands.xm, mspb * note, 0, 0);
         } else {
             const frequency = pitch[note]
-            await sendCommand(commands['CS']);
+            await executeCommand(commands.cs);
             const dist = Math.floor(frequency * spb);
             const step = (dist * dir) | 0;
-            await sendCommand(commands['SM'], `${mspb},${step},${step}`);
+            await executeCommand(commands.sm, mspb, step, step);
             dir *= -1;
         }
     }
@@ -137,9 +134,10 @@ const cmdList = document.getElementById('cmd');
 cmdList.addEventListener('change', (e) => {
     cmdForm.params.value = paramsHistory[cmdForm.cmd.value] || '';
 })
-commandsList.forEach(command => {
+Object.keys(commands).forEach(commandName => {
     const cmdOpt = document.createElement('option');
-    cmdOpt.innerText = command.description;
-    cmdOpt.value = command.name;
+    const cmd = commands[commandName];
+    cmdOpt.innerText = cmd.title;
+    cmdOpt.value = commandName;
     cmdList.appendChild(cmdOpt);
 })
