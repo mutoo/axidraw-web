@@ -1,12 +1,12 @@
-import {createCommand, handleOKMessage} from "../utils.js";
+import { createCommand, handleOKMessage } from '../utils.js';
 
 export default createCommand(
-    "Analog configure",
-    function* (channel, enable) {
-        let dataIn = yield `AC,${[channel,enable].join(',')}\r`;
-        return yield* handleOKMessage(dataIn);
-    },
-    {
-        version: "2.2.3"
-    }
+  'Analog configure',
+  function* (channel, enable) {
+    const dataIn = yield `AC,${[channel, enable].join(',')}\r`;
+    return yield* handleOKMessage(dataIn);
+  },
+  {
+    version: '2.2.3',
+  },
 );

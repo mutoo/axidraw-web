@@ -1,13 +1,13 @@
-import {createCommand, readUntil, toInt} from "../utils.js";
-import {ENDING_OK_CR_NL} from "../constants.js";
+// eslint-disable-next-line no-unused-vars
+import { createCommand } from '../utils.js';
 
 export default createCommand(
-    "Reboot",
-    function* () {
-        return 'RB\r';
-        // no data returned
-    },
-    {
-        version: "2.5.4"
-    }
+  'Reboot',
+  function* () {
+    return 'RB\r';
+    // no data returned
+  },
+  {
+    version: '2.5.4',
+  },
 );

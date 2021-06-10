@@ -6,12 +6,12 @@
  * @param y
  * @returns {{a1: number, a2: number}}
  */
-import {HIGH_DPI_XY} from "./ebb/constants.js";
+import { HIGH_DPI_XY } from './ebb/constants.js';
 
-export const xy2aa = ({x, y}) => ({
-    a1: x + y,
-    a2: x - y,
-})
+export const xy2aa = ({ x, y }) => ({
+  a1: x + y,
+  a2: x - y,
+});
 
 /**
  * This function transform two-axis coordination to xy coordination with reverse matrix of
@@ -24,16 +24,16 @@ export const xy2aa = ({x, y}) => ({
  * @param a2
  * @returns {{x: number, y: number}}
  */
-export const aa2xy = ({a1, a2}) => ({
-    x: (a1 + a2) / 2,
-    y: (a1 - a2) / 2,
-})
+export const aa2xy = ({ a1, a2 }) => ({
+  x: (a1 + a2) / 2,
+  y: (a1 - a2) / 2,
+});
 
 // step to rate, accumulator: 2**31 rate = 1 step
-export const s2rate = (hz) => (2 ** 31 / 25000 * hz) >> 0;
+export const s2rate = (hz) => ((2 ** 31 / 25000) * hz) | 0;
 
 // rate to step, accumulator: 2**31 rate = 1 step
-export const rate2s = (rate) => (rate / (2 ** 31) * 25000) >> 0;
+export const rate2s = (rate) => ((rate / 2 ** 31) * 25000) | 0;
 
 // time to intervals: 25000 intervals per second
 export const t2interval = (t) => t * 25000;
@@ -49,19 +49,19 @@ export const interval2t = (interval) => interval / 25000;
  * @param acc the acceleration for rate per 40 μs
  * @returns {null|number}
  */
-export const rsa2t = ({rate, step, acc}) => {
-    const S = step;
-    const V = rate2s(rate);
-    const A = rate2s(acc * 25000);
-    if (A === 0) return S / V;
-    const delta = 2 * A * S + V * V;
-    if (delta < 0) return null;
-    const t0 = (Math.sqrt(delta) - V) / A;
-    if (Math.abs(delta) < 0.001) return t0;
-    const t1 = -(Math.sqrt(delta) + V) / A;
-    const [s1, s2] = t0 < t1 ? [t0, t1] : [t1, t0];
-    return s1 < 0 ? s2 : s1;
-}
+export const rsa2t = ({ rate, step, acc }) => {
+  const S = step;
+  const V = rate2s(rate);
+  const A = rate2s(acc * 25000);
+  if (A === 0) return S / V;
+  const delta = 2 * A * S + V * V;
+  if (delta < 0) return null;
+  const t0 = (Math.sqrt(delta) - V) / A;
+  if (Math.abs(delta) < 0.001) return t0;
+  const t1 = -(Math.sqrt(delta) + V) / A;
+  const [s1, s2] = t0 < t1 ? [t0, t1] : [t1, t0];
+  return s1 < 0 ? s2 : s1;
+};
 
 /**
  * Calculator steps to move from interval, rate and acc for LT command
@@ -70,12 +70,12 @@ export const rsa2t = ({rate, step, acc}) => {
  * @param rate added to accumulator each 40 μs, 2**31 rate = 1 step
  * @param acc the acceleration for rate per 40 μs
  */
-export const ira2s = ({interval, rate, acc}) => {
-    const T = interval2t(interval);
-    const V = rate2s(rate);
-    const A = rate2s(acc * 25000);
-    return (V * T + A * T * T / 2) >> 0;
-}
+export const ira2s = ({ interval, rate, acc }) => {
+  const T = interval2t(interval);
+  const V = rate2s(rate);
+  const A = rate2s(acc * 25000);
+  return (V * T + (A * T * T) / 2) | 0;
+};
 
 /**
  * calculator axis steps {a1, a2} from {x, y} coordinate
@@ -84,9 +84,9 @@ export const ira2s = ({interval, rate, acc}) => {
  * @param mode the motor mode
  * @returns {{a1: number, a2: number}}
  */
-export const xyDist2aaSteps = ({x, y}, mode = 1) => {
-    const stepPerMm = HIGH_DPI_XY / Math.pow(2, mode - 1) / 25.4;
-    const xSteps = stepPerMm * x;
-    const ySteps = stepPerMm * y;
-    return xy2aa({x: xSteps, y: ySteps})
-}
+export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
+  const stepPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
+  const xSteps = stepPerMm * x;
+  const ySteps = stepPerMm * y;
+  return xy2aa({ x: xSteps, y: ySteps });
+};
