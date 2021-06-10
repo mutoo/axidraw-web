@@ -1,0 +1,38 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "airbnb-base",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "rules": {
+    "import/extensions": [
+      1,
+      "always"
+    ],
+    "no-restricted-syntax": 0,
+    "no-bitwise": [
+      1,
+      {
+        "allow": [
+          "&"
+        ],
+        "int32Hint": true
+      }
+    ],
+    "func-names": [
+      1,
+      "as-needed",
+      {
+        "generators": "never"
+      }
+    ],
+    "require-yield": 0
+  }
+}
