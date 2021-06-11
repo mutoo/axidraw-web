@@ -16,6 +16,14 @@
       1,
       "always"
     ],
+    "import/no-unresolved": [
+      2,
+      {
+        "ignore": [
+          "^https?://"
+        ]
+      }
+    ],
     "no-restricted-syntax": 0,
     "no-bitwise": [
       1,

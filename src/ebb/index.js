@@ -1,101 +1,49 @@
-import a from './commands/a.js';
-import ac from './commands/ac.js';
-import bl from './commands/bl.js';
-import c from './commands/c.js';
-import ck from './commands/ck.js';
-import cs from './commands/cs.js';
-import cu from './commands/cu.js';
-import em from './commands/em.js';
-import es from './commands/es.js';
-import hm from './commands/hm.js';
-import i from './commands/i.js';
-import lm from './commands/lm.js';
-import lt from './commands/lt.js';
-import mr from './commands/mr.js';
-import mw from './commands/mw.js';
-import nd from './commands/nd.js';
-import ni from './commands/ni.js';
-import o from './commands/o.js';
-import pc from './commands/pc.js';
-import pd from './commands/pd.js';
-import pg from './commands/pg.js';
-import pi from './commands/pi.js';
-import po from './commands/po.js';
-import qb from './commands/qb.js';
-import qc from './commands/qc.js';
-import qe from './commands/qe.js';
-import qg from './commands/qg.js';
-import ql from './commands/ql.js';
-import qm from './commands/qm.js';
-import qn from './commands/qn.js';
-import qp from './commands/qp.js';
-import qr from './commands/qr.js';
-import qs from './commands/qs.js';
-import qt from './commands/qt.js';
-import r from './commands/r.js';
-import rb from './commands/rb.js';
-import s2 from './commands/s2.js';
-import sc from './commands/sc.js';
-import se from './commands/se.js';
-import sl from './commands/sl.js';
-import sm from './commands/sm.js';
-import sn from './commands/sn.js';
-import sp from './commands/sp.js';
-import sr from './commands/sr.js';
-import st from './commands/st.js';
-import t from './commands/t.js';
-import tp from './commands/tp.js';
-import v from './commands/v.js';
-import xm from './commands/xm.js';
-
-export default {
-  a,
-  ac,
-  bl,
-  c,
-  ck,
-  cs,
-  cu,
-  em,
-  es,
-  hm,
-  i,
-  lm,
-  lt,
-  mr,
-  mw,
-  nd,
-  ni,
-  o,
-  pc,
-  pd,
-  pg,
-  pi,
-  po,
-  qb,
-  qc,
-  qe,
-  qg,
-  ql,
-  qm,
-  qn,
-  qp,
-  qr,
-  qs,
-  qt,
-  r,
-  rb,
-  s2,
-  sc,
-  se,
-  sl,
-  sm,
-  sn,
-  sp,
-  sr,
-  st,
-  t,
-  tp,
-  v,
-  xm,
-};
+export { default as a } from './commands/a.js';
+export { default as ac } from './commands/ac.js';
+export { default as bl } from './commands/bl.js';
+export { default as c } from './commands/c.js';
+export { default as ck } from './commands/ck.js';
+export { default as cs } from './commands/cs.js';
+export { default as cu } from './commands/cu.js';
+export { default as em } from './commands/em.js';
+export { default as es } from './commands/es.js';
+export { default as hm } from './commands/hm.js';
+export { default as i } from './commands/i.js';
+export { default as lm } from './commands/lm.js';
+export { default as lt } from './commands/lt.js';
+export { default as mr } from './commands/mr.js';
+export { default as mw } from './commands/mw.js';
+export { default as nd } from './commands/nd.js';
+export { default as ni } from './commands/ni.js';
+export { default as o } from './commands/o.js';
+export { default as pc } from './commands/pc.js';
+export { default as pd } from './commands/pd.js';
+export { default as pg } from './commands/pg.js';
+export { default as pi } from './commands/pi.js';
+export { default as po } from './commands/po.js';
+export { default as qb } from './commands/qb.js';
+export { default as qc } from './commands/qc.js';
+export { default as qe } from './commands/qe.js';
+export { default as qg } from './commands/qg.js';
+export { default as ql } from './commands/ql.js';
+export { default as qm } from './commands/qm.js';
+export { default as qn } from './commands/qn.js';
+export { default as qp } from './commands/qp.js';
+export { default as qr } from './commands/qr.js';
+export { default as qs } from './commands/qs.js';
+export { default as qt } from './commands/qt.js';
+export { default as r } from './commands/r.js';
+export { default as rb } from './commands/rb.js';
+export { default as s2 } from './commands/s2.js';
+export { default as sc } from './commands/sc.js';
+export { default as se } from './commands/se.js';
+export { default as sl } from './commands/sl.js';
+export { default as sm } from './commands/sm.js';
+export { default as sn } from './commands/sn.js';
+export { default as sp } from './commands/sp.js';
+export { default as sr } from './commands/sr.js';
+export { default as st } from './commands/st.js';
+export { default as t } from './commands/t.js';
+export { default as tp } from './commands/tp.js';
+export { default as v } from './commands/v.js';
+export { default as xm } from './commands/xm.js';

@@ -6,7 +6,7 @@ export const createCommand = (title, create, options) => {
   return {
     title,
     create,
-    ...{ options },
+    ...options,
   };
 };
 

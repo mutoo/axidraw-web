@@ -5,7 +5,7 @@ const TRANSFER_ENDPOINT = 2;
 const TRANSFER_PACKET_SIZE = 64;
 
 let device;
-let version = '2.7.0';
+let version = '0.0.0';
 
 const commandQueue = [];
 const encoder = new TextEncoder();

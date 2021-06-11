@@ -30,7 +30,7 @@ export const aa2xy = ({ a1, a2 }) => ({
 });
 
 // step to rate, accumulator: 2**31 rate = 1 step
-export const s2rate = (hz) => ((2 ** 31 / 25000) * hz) | 0;
+export const s2rate = (hz) => ((2 ** 31 / 25000) * Math.abs(hz)) | 0;
 
 // rate to step, accumulator: 2**31 rate = 1 step
 export const rate2s = (rate) => ((rate / 2 ** 31) * 25000) | 0;
@@ -86,7 +86,11 @@ export const ira2s = ({ interval, rate, acc }) => {
  */
 export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
   const stepPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
-  const xSteps = stepPerMm * x;
-  const ySteps = stepPerMm * y;
+  const xSteps = (stepPerMm * x) | 0;
+  const ySteps = (stepPerMm * y) | 0;
   return xy2aa({ x: xSteps, y: ySteps });
+};
+
+export const aaStepsToLMParams = ({ a1, a2 }, t) => {
+  return [s2rate(a1 / t), a1, 0, s2rate(a2 / t), a2, 0];
 };

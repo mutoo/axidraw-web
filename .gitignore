@@ -1,3 +1,11 @@
+# ide
 .idea
+
+# dependencies
 node_modules
+
+# cache
+.eslintcache
+
+# project
 assets/cert/*
