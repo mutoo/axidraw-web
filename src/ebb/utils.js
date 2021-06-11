@@ -83,3 +83,9 @@ export const checkVersion = (deviceVersion, cmdVersion) => {
   // dMinor === dMinor
   return cPatch <= dPatch;
 };
+
+export const delay = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
