@@ -8,6 +8,8 @@ const app = express();
 
 app.use(express.static('src'));
 
+app.use('/ca', express.static('assets/cert/localhost.crt'));
+
 const options = {
   key: fs.readFileSync('assets/cert/localhost.key'),
   cert: fs.readFileSync('assets/cert/localhost.crt'),

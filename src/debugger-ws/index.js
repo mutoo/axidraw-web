@@ -15,6 +15,7 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 const wsAddress = document.getElementById('ws-address');
+wsAddress.value = `wss://${window.location.host}`;
 
 const connectBtn = document.getElementById('connect-btn');
 connectBtn.addEventListener('click', async () => {
