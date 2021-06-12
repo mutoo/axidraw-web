@@ -3,7 +3,7 @@ import {
   connectDevice,
   disconnectDevice,
   executeCommand,
-} from '../usb.js';
+} from '../websocket.js';
 import * as commands from '../ebb/index.js';
 import { delay } from '../ebb/utils.js';
 
@@ -14,21 +14,13 @@ window.addEventListener('unhandledrejection', (e) => {
   debugTxt.value = e.reason;
 });
 
-const pairBtn = document.getElementById('pair-btn');
-pairBtn.addEventListener('click', async () => {
-  try {
-    await connectDevice(true);
-    await checkDevice();
-    debugTxt.value = await executeCommand(commands.v);
-  } catch (e) {
-    throw new Error(`Can not connect to the EBB: ${e.message}`);
-  }
-});
+const wsAddress = document.getElementById('ws-address');
 
 const connectBtn = document.getElementById('connect-btn');
 connectBtn.addEventListener('click', async () => {
   try {
-    await connectDevice();
+    const address = wsAddress.value;
+    await connectDevice(address);
     await checkDevice();
     debugTxt.value = await executeCommand(commands.r);
   } catch (e) {
@@ -238,7 +230,6 @@ musicBtn.addEventListener('click', async () => {
       'eG4',
     ],
   ].flatMap((i) => i);
-  // const mix = notes.reduce((zip, _, i) => [...zip, [notes[i], accomp[i]]], []);
   const bpm = 100;
   const spb = 60 / bpm;
   const mspb = ((60 / bpm) * 1000) | 0;

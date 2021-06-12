@@ -6,6 +6,7 @@ const TRANSFER_PACKET_SIZE = 64;
 
 let device;
 let version = '0.0.0';
+let listening = false;
 
 const commandQueue = [];
 const encoder = new TextEncoder();
@@ -92,70 +93,74 @@ export const connectDevice = async (pair = false) => {
   console.debug('Claiming interface...');
   await device.claimInterface(1);
 
-  // start listening the data transferred in
-  setTimeout(async () => {
-    // eslint-disable-next-line no-console
-    console.debug('Start listening data.');
-    let buffer = [];
-    let errorHandler = null;
-    try {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        if (!device?.opened) {
-          // eslint-disable-next-line no-console
-          console.debug('Stop listening data.');
-          break;
-        }
-        // eslint-disable-next-line no-await-in-loop
-        const response = await device.transferIn(
-          TRANSFER_ENDPOINT,
-          TRANSFER_PACKET_SIZE,
-        );
-        if (response.status !== 'ok') {
-          throw new Error(`Unexpected response status: ${response.status}`);
-        }
-        buffer.push(...new Uint8Array(response.data.buffer));
-        // data arrived
-        while (buffer.length) {
-          if (commandQueue.length) {
-            if (buffer[0] === '!'.charCodeAt(0)) {
-              if (!errorHandler) {
-                errorHandler = handleErrorMessage();
-                errorHandler.next(); // ready
-              }
-            }
-            const cmd = commandQueue[0];
-            const handler = errorHandler || cmd;
-            // pass the current buffer to cmd,
-            // and let it consume what it needs.
-            const cmdStatus = handler.next(buffer);
-            const { result, consumed } = cmdStatus.value;
-            if (consumed) {
-              buffer = buffer.slice(consumed);
-            }
-            if (cmdStatus.done) {
-              if (handler === errorHandler) {
-                errorHandler = null;
-                cmd.reject(result);
-              } else {
-                // eslint-disable-next-line no-console
-                console.debug(`Received message: ${result}`);
-                cmd.resolve(result);
-              }
-              commandQueue.shift();
-            }
-          } else {
-            const garbage = decode(buffer);
+  if (!listening) {
+    listening = true;
+    // start listening the data transferred in
+    setTimeout(async () => {
+      // eslint-disable-next-line no-console
+      console.debug('Start listening data.');
+      let buffer = [];
+      let errorHandler = null;
+      try {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          if (!device?.opened) {
             // eslint-disable-next-line no-console
-            console.debug(`Discard garbage message: ${garbage}`);
-            buffer.length = 0;
+            console.debug('Stop listening data.');
+            break;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          const response = await device.transferIn(
+            TRANSFER_ENDPOINT,
+            TRANSFER_PACKET_SIZE,
+          );
+          if (response.status !== 'ok') {
+            throw new Error(`Unexpected response status: ${response.status}`);
+          }
+          buffer.push(...new Uint8Array(response.data.buffer));
+          // data arrived
+          while (buffer.length) {
+            if (commandQueue.length) {
+              if (buffer[0] === '!'.charCodeAt(0)) {
+                if (!errorHandler) {
+                  errorHandler = handleErrorMessage();
+                  errorHandler.next(); // set ready
+                }
+              }
+              const cmd = commandQueue[0];
+              const handler = errorHandler || cmd;
+              // pass the current buffer to cmd,
+              // and let it consume what it needs.
+              const cmdStatus = handler.next(buffer);
+              const { result, consumed } = cmdStatus.value;
+              if (consumed) {
+                buffer = buffer.slice(consumed);
+              }
+              if (cmdStatus.done) {
+                if (handler === errorHandler) {
+                  errorHandler = null;
+                  cmd.reject(result);
+                } else {
+                  // eslint-disable-next-line no-console
+                  console.debug(`Received message: ${result}`);
+                  cmd.resolve(result);
+                }
+                commandQueue.shift();
+              }
+            } else {
+              const garbage = decode(buffer);
+              // eslint-disable-next-line no-console
+              console.debug(`Discard garbage message: ${garbage}`);
+              buffer.length = 0;
+            }
           }
         }
+      } catch (e) {
+        listening = false;
+        throw new Error(`Can not receive response from device: ${e.message}`);
       }
-    } catch (e) {
-      throw new Error(`Can not receive response from device: ${e.message}`);
-    }
-  });
+    });
+  }
 
   const ret = await executeCommand(v);
   // eslint-disable-next-line prefer-destructuring

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web AxiDraw</title>
+</head>
+<body>
+<div id="app">
+    <noscript>This app requires a modern browser with javascript enabled.</noscript>
+    <h3>USB</h3>
+    <p>
+        <button type="button" id="pair-btn">Pair</button>
+        <button type="button" id="connect-btn">Connect</button>
+        <button type="button" id="disconnect-btn">Disconnect</button>
+        <button type="button" id="music-btn">Music</button>
+    </p>
+    <form id="cmd-form">
+        <p>
+            <label for="cmd">Command:</label> <select id="cmd"></select>
+        </p>
+        <p>
+            <label for="params">Params:</label> <input type="text" id="params"/>
+            <button type="submit">Send</button>
+        </p>
+        <p>
+            <label for="result">Result:</label><br><textarea id="result" rows="3"></textarea>
+        </p>
+    </form>
+    <form id="batch-form">
+        <p>
+            <label for="cmds">Batch:</label><br>
+            <textarea id="cmds" rows="10"></textarea><br>
+            <button type="submit">Send</button>
+        </p>
+    </form>
+    <p>
+        <label for="debug-txt">Debug:</label><br><textarea id="debug-txt" rows="10"></textarea>
+    </p>
+</div>
+<script src="index.js" type="module"></script>
+</body>
+</html>

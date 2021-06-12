@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "prepare": "husky install",
-    "start": "node index.js"
+    "start": "node server/index.js"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "@serialport/parser-regex": "^9.0.7",
+    "express": "^4.17.1",
+    "serialport": "^9.1.0",
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "eslint": "^7.28.0",
