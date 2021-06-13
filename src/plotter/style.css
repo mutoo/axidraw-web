@@ -1,0 +1,29 @@
+html {
+    font-size: 62.5%;
+}
+
+body {
+    margin: 0;
+}
+
+#app {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#content * {
+    fill: none !important;
+    stroke: #333333 !important;
+}

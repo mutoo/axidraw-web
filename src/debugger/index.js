@@ -120,6 +120,11 @@ batchForm.addEventListener('submit', async (e) => {
 
 const musicBtn = document.getElementById('music-btn');
 musicBtn.addEventListener('click', async () => {
+  try {
+    await device.checkDevice();
+  } catch (_) {
+    await device.connectDevice();
+  }
   const pitch = {
     B3: 247,
     C4: 262,

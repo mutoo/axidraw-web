@@ -33,13 +33,14 @@ wss.on('connection', async (ws) => {
     });
     ws.on('close', () => {
       // eslint-disable-next-line no-console
-      console.debug('Disconnect from EBB');
+      console.debug('Disconnect from client, close EBB');
+      port.write('R\r');
       port.close();
     });
     ws.send('!connected');
   } catch (e) {
     // eslint-disable-next-line no-console
     console.debug('Failed to connect EBB');
-    ws.close(3000, 'Failed to connect EBB');
+    ws.close(3000, e.toString());
   }
 });

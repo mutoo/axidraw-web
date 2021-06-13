@@ -21,7 +21,7 @@ export const connectDevice = async (commandQueue, address) => {
   if (!window.WebSocket) {
     throw new Error('WebSocket feature is not supported in this browser!');
   }
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const messageHandler = handleEBBMessages(commandQueue);
     messageHandler.next();
     const ws = new WebSocket(address);
@@ -38,6 +38,7 @@ export const connectDevice = async (commandQueue, address) => {
       // eslint-disable-next-line no-console
       console.debug(`Device is closed: [${e.code}]${e.reason}`);
       messageHandler.return();
+      reject(e.reason);
     };
   });
 };

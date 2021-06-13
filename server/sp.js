@@ -14,8 +14,10 @@ const waitForEBB = async (retry = 10) => {
     if (EBBs.length) {
       return EBBs[0].path;
     }
+    // eslint-disable-next-line no-console
+    console.log('EBB not found, will retry in 3s...');
     // eslint-disable-next-line no-await-in-loop
-    await delay(5000);
+    await delay(3000);
     retried += 1;
   }
   throw new Error('Device not available right now.');
