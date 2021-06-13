@@ -1,49 +1,74 @@
-import {
-  checkDevice,
-  connectDevice,
-  disconnectDevice,
-  executeCommand,
-} from '../usb.js';
 import * as commands from '../ebb/index.js';
 import { delay } from '../ebb/utils.js';
+import createDevice from '../device/index.js';
+import { DEVICE_TYPE_USB, DEVICE_TYPE_WEBSOCKET } from '../device/consts.js';
 
+let device = null;
 const paramsHistory = {};
+
+const deviceTypeUsb = document.getElementById('type-usb');
+const deviceTypeWS = document.getElementById('type-ws');
+
+const onDeviceTypeChange = async (type) => {
+  if (device) {
+    await device.disconnectDevice();
+  }
+  device = createDevice(type);
+  deviceTypeWS.style.display =
+    type === DEVICE_TYPE_WEBSOCKET ? 'block' : 'none';
+  deviceTypeUsb.style.display = type === DEVICE_TYPE_USB ? 'block' : 'none';
+};
+
+onDeviceTypeChange('usb');
+
+const deviceType = document.getElementById('device-type');
+deviceType.addEventListener('change', (e) => {
+  onDeviceTypeChange(e.target.value);
+});
 
 const debugTxt = document.getElementById('debug-txt');
 window.addEventListener('unhandledrejection', (e) => {
   debugTxt.value = e.reason;
 });
 
+const wsAddress = document.getElementById('ws-address');
+wsAddress.value = `wss://${window.location.host}`;
+
 const pairBtn = document.getElementById('pair-btn');
 pairBtn.addEventListener('click', async () => {
   try {
-    await connectDevice(true);
-    await checkDevice();
-    debugTxt.value = await executeCommand(commands.v);
+    await device.connectDevice(true);
+    await device.checkDevice();
+    debugTxt.value = await device.executeCommand(commands.v);
   } catch (e) {
-    throw new Error(`Can not connect to the EBB: ${e.message}`);
+    debugTxt.value = e.toString();
   }
 });
 
 const connectBtn = document.getElementById('connect-btn');
 connectBtn.addEventListener('click', async () => {
   try {
-    await connectDevice();
-    await checkDevice();
-    debugTxt.value = await executeCommand(commands.r);
+    if (device.type === DEVICE_TYPE_USB) {
+      await device.connectDevice();
+    } else {
+      await device.connectDevice(wsAddress.value);
+    }
+    await device.checkDevice();
+    await device.executeCommand(commands.r);
+    debugTxt.value = await device.executeCommand(commands.v);
   } catch (e) {
-    throw new Error(`Can not connect to the EBB: ${e}`);
+    debugTxt.value = e.toString();
   }
 });
 
 const disconnectBtn = document.getElementById('disconnect-btn');
 disconnectBtn.addEventListener('click', async () => {
   try {
-    await executeCommand(commands.r);
-    await disconnectDevice();
+    await device.executeCommand(commands.r);
+    await device.disconnectDevice();
     debugTxt.value = 'Disconnected';
   } catch (e) {
-    throw new Error(`Can not disconnect to the EBB: ${e.message}`);
+    debugTxt.value = e.toString();
   }
 });
 
@@ -51,15 +76,15 @@ const cmdForm = document.getElementById('cmd-form');
 cmdForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    await checkDevice();
+    await device.checkDevice();
   } catch (_) {
-    await connectDevice();
+    await device.connectDevice();
   }
   const cmd = cmdForm.cmd.value.trim().toLowerCase();
   const paramsStr = cmdForm.params.value.trim();
   paramsHistory[cmd] = paramsStr;
   const params = paramsStr === '' ? [] : paramsStr.split(',');
-  const result = await executeCommand(commands[cmd], ...params);
+  const result = await device.executeCommand(commands[cmd], ...params);
   if (typeof result === 'object') {
     cmdForm.result.value = JSON.stringify(result);
   } else {
@@ -71,9 +96,9 @@ const batchForm = document.getElementById('batch-form');
 batchForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    await checkDevice();
+    await device.checkDevice();
   } catch (_) {
-    await connectDevice();
+    await device.connectDevice();
   }
   const batch = batchForm.cmds.value.trim();
   const cmds = batch.split(/\s+/);
@@ -83,7 +108,7 @@ batchForm.addEventListener('submit', async (e) => {
     const cmd = parts.shift().toLowerCase();
     // there commands or not concurrent, their are executed one-by-one.
     // eslint-disable-next-line no-await-in-loop
-    const result = await executeCommand(commands[cmd], ...parts);
+    const result = await device.executeCommand(commands[cmd], ...parts);
     if (typeof result === 'object') {
       debugTxt.value += JSON.stringify(result);
     } else {
@@ -245,13 +270,13 @@ musicBtn.addEventListener('click', async () => {
   let dir2 = 1;
   let i = 0;
   let j = 0;
-  await executeCommand(commands.sp, 0, 1000);
+  await device.executeCommand(commands.sp, 0, 1000);
   while (notes[i] || accomp[j]) {
     // eslint-disable-next-line no-await-in-loop
-    const shouldStop = await executeCommand(commands.qb);
+    const shouldStop = await device.executeCommand(commands.qb);
     if (shouldStop) {
       // eslint-disable-next-line no-await-in-loop
-      await executeCommand(commands.r);
+      await device.executeCommand(commands.r);
       break;
     }
     let beats;
@@ -285,7 +310,7 @@ musicBtn.addEventListener('click', async () => {
       const step2 = (dist2 * dir2 * beats) | 0;
 
       // eslint-disable-next-line no-await-in-loop
-      await executeCommand(commands.sm, mspb * beats, step1, step2);
+      await device.executeCommand(commands.sm, mspb * beats, step1, step2);
 
       p1 += beats;
       p2 += beats;
@@ -295,10 +320,10 @@ musicBtn.addEventListener('click', async () => {
     j += 1;
     dir2 *= -1;
   }
-  await executeCommand(commands.xm, 500, 0, 0);
-  await executeCommand(commands.sp, 1, 1000);
+  await device.executeCommand(commands.xm, 500, 0, 0);
+  await device.executeCommand(commands.sp, 1, 1000);
   await delay(1000);
-  await executeCommand(commands.r);
+  await device.executeCommand(commands.r);
 });
 
 const cmdList = document.getElementById('cmd');

@@ -7,10 +7,20 @@
 <body>
 <div id="app">
     <noscript>This app requires a modern browser with javascript enabled.</noscript>
-    <h3>WebSocket</h3>
+    <h3>Device</h3>
     <p>
+        <label for="device-type">Select Device Type:</label>
+        <select id="device-type">
+            <option value="usb" selected>USB</option>
+            <option value="ws">WebSocket</option>
+        </select>
+    </p>
+    <p id="type-ws" style="display: none">
         <label for="ws-address">Url:</label>
-        <input type="text" id="ws-address" value="wss://localhost" />
+        <input type="text" id="ws-address" value="wss://localhost"/>
+    </p>
+    <p id="type-usb" style="display: none">
+        <button type="button" id="pair-btn">Pair</button>
     </p>
     <p>
         <button type="button" id="connect-btn">Connect</button>
