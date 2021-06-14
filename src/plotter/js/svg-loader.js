@@ -1,16 +1,19 @@
 /* global SVG */
-import { mm2px } from '../../math/svg.js';
+import plan from './svg-planner.js';
+import { a4Height, a4Width, padding } from './paper.js';
 
-export function setContent(svg) {
+export async function parseSVG(svg) {
   const content = SVG('#content');
-  content.clear();
-  content.svg(svg);
+  content.show().clear().svg(svg);
   const imported = content.first();
   imported
     .id('imported')
-    .size(mm2px(257), mm2px(170))
-    .move(mm2px(20), mm2px(20))
+    .size(a4Width - padding * 2, a4Height - padding * 2)
+    .move(padding, padding)
     .attr('preserveAspectRatio', 'xMidYMid meet');
+  imported.viewbox(imported.bbox());
+  await plan(imported);
+  content.hide();
 }
 
 const app = document.getElementById('app');
@@ -32,14 +35,16 @@ app.addEventListener('drop', (e) => {
   }
 
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    setContent(ev.target.result);
+  reader.onload = async (ev) => {
+    await parseSVG(ev.target.result);
+    // eslint-disable-next-line no-console
+    console.log('loaded');
   };
   reader.readAsText(file);
 });
 
 export default function load(path) {
-  fetch(path)
+  return fetch(path)
     .then((response) => response.text())
-    .then(setContent);
+    .then(parseSVG);
 }

@@ -1,5 +1,5 @@
 import * as commands from '../ebb/index.js';
-import { delay } from '../ebb/utils.js';
+import { delay } from '../utils/time.js';
 import createDevice from '../device/index.js';
 import { DEVICE_TYPE_USB, DEVICE_TYPE_WEBSOCKET } from '../device/consts.js';
 

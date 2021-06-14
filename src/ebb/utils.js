@@ -87,12 +87,6 @@ export const checkVersion = (deviceVersion, cmdVersion) => {
   return cPatch <= dPatch;
 };
 
-export const delay = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-};
-
 export const handleEBBMessages = function* (commandQueue) {
   let buffer = [];
   let errorHandler = null;
