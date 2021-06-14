@@ -8,11 +8,13 @@ const app = express();
 
 app.use(express.static('src'));
 
-app.use('/ca', express.static('assets/cert/localhost.crt'));
+app.use('/assets', express.static('assets'));
+
+app.use('/ca', express.static('server/cert/localhost.crt'));
 
 const options = {
-  key: fs.readFileSync('assets/cert/localhost.key'),
-  cert: fs.readFileSync('assets/cert/localhost.crt'),
+  key: fs.readFileSync('server/cert/localhost.key'),
+  cert: fs.readFileSync('server/cert/localhost.crt'),
 };
 
 const server = https.createServer(options, app).listen(443);

@@ -23,6 +23,9 @@ body {
     object-fit: contain;
 }
 
+#page {
+}
+
 #content * {
     fill: none !important;
     stroke: #333333 !important;

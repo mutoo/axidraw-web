@@ -8,4 +8,4 @@ node_modules
 .eslintcache
 
 # project
-assets/cert/*
+server/cert/*
