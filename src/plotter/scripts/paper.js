@@ -72,6 +72,11 @@ const pagePrintable = page.rect().id('page-printable').attr({
   'stroke-dasharray': '5,5',
 });
 
+const gizmo = page.group().id('gizmo');
+gizmo.line(0, 0, '10mm', 0).stroke({ width: '1mm', color: '#ff0000' });
+gizmo.line(0, 0, 0, '10mm').stroke({ width: '1mm', color: '#00ff00' });
+gizmo.circle('3mm').fill('#0000ff').move('-1.5mm', '-1.5mm');
+
 canvas.group().id('loader');
 
 export function adjustPreview(svg) {
@@ -89,8 +94,10 @@ const updatePage = () => {
   const pageSize = getPageSize(preview['page-size'].value) || defaultPageSize;
   let width = mm2px(pageSize.width);
   let height = mm2px(pageSize.height);
+  gizmo.attr('transform', null);
   if (preview.orientation.value === 'portrait') {
     [width, height] = [height, width];
+    gizmo.rotate(90, 0, 0).translate(width);
   }
 
   const padding = mm2px(preview['page-padding'].value || 20);
