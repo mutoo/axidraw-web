@@ -1,0 +1,12 @@
+#control-panel {
+    position: fixed;
+    right: 0;
+    width: var(--control-panel-width);
+    top: 0;
+    bottom: 0;
+
+    padding: 2rem;
+    background-color: #efefef;
+
+    font-size: 1.4rem;
+}
