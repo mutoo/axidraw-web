@@ -13,36 +13,85 @@
     <div id="app">
       <div id="workspace"></div>
       <div id="control-panel">
-        <section>
-          <h3>Preview</h3>
-          <p>In this phase, you could load svg and setup page.</p>
+        <section class="aw-phase aw-phase--active">
+          <h3 class="aw-phase__heading">Preview</h3>
+          <p>In this phase, you could load svg and set up the page.</p>
           <form id="preview" onsubmit="return false;">
             <p>
-              <label for="page-size">PageSize: </label>
+              <input
+                type="file"
+                id="file-input"
+                accept="image/svg+xml"
+                style="display: none"
+              />
+              <button type="button" id="file-btn">Load SVG</button>
+            </p>
+            <h4>Dimension</h4>
+            <p>
+              <label class="aw-label" for="page-size">PageSize: </label>
               <select id="page-size"></select>
             </p>
-              <p>
-                  <label for="page-padding">Padding(mm): </label>
-                  <input type="number" id="page-padding" value="20" />
-              </p>
             <p>
-              <input type="checkbox" id="page-fit" checked />
-              <label for="page-fit">Fit content to page</label>
+              <label class="aw-label" for="page-padding">Padding(mm): </label>
+              <input type="number" id="page-padding" value="20" />
             </p>
             <p>
-              <input type="radio" name="orientation" id="orientation-landscape" value="landscape" checked />
-              <label for="orientation-landscape">Landscape</label>
-              <input type="radio" name="orientation" id="orientation-portrait" value="portrait" />
-              <label for="orientation-portrait">Portrait</label>
+              <label class="aw-label">Orientation:</label>
+              <label for="orientation-landscape">
+                <input
+                  type="radio"
+                  name="orientation"
+                  id="orientation-landscape"
+                  value="landscape"
+                  checked
+                />
+                Landscape
+              </label>
+              <label for="orientation-portrait">
+                <input
+                  type="radio"
+                  name="orientation"
+                  id="orientation-portrait"
+                  value="portrait"
+                />
+                Portrait
+              </label>
             </p>
+            <p>
+              <label class="aw-label"></label>
+              <label for="page-fit">
+                <input type="checkbox" id="page-fit" checked />
+                Fit content to page
+              </label>
+            </p>
+            <h4>Alignment</h4>
+            <p>
+              <label class="aw-label" for="page-align-h">Horizontal:</label>
+              <select id="page-align-h">
+                <option value="xMin">Left</option>
+                <option value="xMid" selected>Center</option>
+                <option value="xMax">Right</option>
+              </select>
+            </p>
+            <p>
+              <label class="aw-label" for="page-align-v">Vertical:</label>
+              <select id="page-align-v">
+                <option value="YMin">Top</option>
+                <option value="YMid" selected>Center</option>
+                <option value="YMax">Bottom</option>
+              </select>
+
+            </p>
+            <h4>File Information:</h4>
+            <p id="file-info"></p>
           </form>
         </section>
-        <section>
-          <h3>Planning</h3>
+        <section class="aw-phase">
+          <h3 class="aw-phase__heading">Planning</h3>
           <div></div>
         </section>
-        <section>
-          <h3>Plotting</h3>
+        <section class="aw-phase">
+          <h3 class="aw-phase__heading">Plotting</h3>
           <div></div>
         </section>
       </div>

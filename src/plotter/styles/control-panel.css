@@ -5,8 +5,33 @@
     top: 0;
     bottom: 0;
 
-    padding: 2rem;
+    padding: 2rem 4rem;
     background-color: #efefef;
 
     font-size: 1.4rem;
+}
+
+#file-info {
+    padding: 2rem;
+    background: white;
+    white-space: pre;
+}
+
+.aw-phase {
+    overflow: hidden;
+    height: 0;
+    transition: height 300ms ease-out;
+}
+
+.aw-phase--active {
+    height: 100vh;
+}
+
+.aw-phase__heading {
+    text-transform: uppercase;
+}
+
+.aw-label {
+    display: inline-block;
+    min-width: 10rem;
 }

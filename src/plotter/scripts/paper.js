@@ -2,6 +2,8 @@
 import { mm2px } from '../../math/svg.js';
 import { PAGE_SIZE_A4, PAGE_SIZE_A5, PAGE_SIZE_A6 } from './consts.js';
 
+const { preview } = window;
+
 export const pageSizes = [
   {
     type: PAGE_SIZE_A4,
@@ -23,23 +25,10 @@ export const pageSizes = [
   },
 ];
 
-const { preview } = window;
-
-pageSizes.forEach((pageSize) => {
-  const option = document.createElement('option');
-  option.value = pageSize.type;
-  option.innerText = `${pageSize.type.toUpperCase()} (${pageSize.width}mm x ${
-    pageSize.height
-  }mm)`;
-  preview['page-size'].append(option);
-});
-
 export const getPageSize = (pageType) =>
   pageSizes.find((pageSize) => pageSize.type === pageType);
 
-const defaultPageSize = getPageSize(PAGE_SIZE_A4);
-preview['page-size'].value = defaultPageSize.type;
-preview['page-padding'].value = defaultPageSize.defaultPadding;
+export const defaultPageSize = getPageSize(PAGE_SIZE_A4);
 
 export const margin = mm2px(20);
 
@@ -75,7 +64,7 @@ const pagePrintable = page.rect().id('page-printable').attr({
 const gizmo = page.group().id('gizmo');
 gizmo.line(0, 0, '10mm', 0).stroke({ width: '1mm', color: '#ff0000' });
 gizmo.line(0, 0, 0, '10mm').stroke({ width: '1mm', color: '#00ff00' });
-gizmo.circle('3mm').fill('#0000ff').move('-1.5mm', '-1.5mm');
+gizmo.circle('3mm').fill('#0000ff').attr({ cx: 0, cy: 0 });
 
 canvas.group().id('loader');
 
@@ -88,9 +77,14 @@ export function adjustPreview(svg) {
   } else {
     svg.viewbox(svg.attr('data-original-viewBox'));
   }
+  const alignmentX = preview['page-align-h'].value;
+  const alignmentY = preview['page-align-v'].value;
+  svg.attr({
+    preserveAspectRatio: `${alignmentX}${alignmentY} meet`,
+  });
 }
 
-const updatePage = () => {
+export const updatePage = () => {
   const pageSize = getPageSize(preview['page-size'].value) || defaultPageSize;
   let width = mm2px(pageSize.width);
   let height = mm2px(pageSize.height);
@@ -114,15 +108,5 @@ const updatePage = () => {
     adjustPreview(imported);
   }
 };
-
-preview['page-size'].addEventListener('change', (e) => {
-  const pageSize = getPageSize(e.target.value);
-  preview['page-padding'].value = pageSize.defaultPadding;
-  updatePage();
-});
-preview['page-padding'].addEventListener('change', updatePage);
-preview['page-fit'].addEventListener('change', updatePage);
-preview['orientation-landscape'].addEventListener('change', updatePage);
-preview['orientation-portrait'].addEventListener('change', updatePage);
 
 updatePage();
