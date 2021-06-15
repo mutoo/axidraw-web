@@ -1,5 +1,5 @@
 import SerialPort from 'serialport';
-import { delay } from '../src/ebb/utils.js';
+import { delay } from '../src/utils/time.js';
 
 const waitForEBB = async (retry = 10) => {
   let retried = 0;

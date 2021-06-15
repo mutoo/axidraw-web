@@ -1,19 +1,32 @@
 /* global SVG */
-import plan from './svg-planner.js';
+import clean from './cleaner.js';
 import { a4Height, a4Width, padding } from './paper.js';
 
 export async function parseSVG(svg) {
-  const content = SVG('#content');
-  content.show().clear().svg(svg);
-  const imported = content.first();
+  const loader = SVG('#loader');
+  loader.show().clear().svg(svg);
+  const imported = loader.first();
   imported
     .id('imported')
     .size(a4Width - padding * 2, a4Height - padding * 2)
     .move(padding, padding)
     .attr('preserveAspectRatio', 'xMidYMid meet');
+  // const wrap = imported.group().id('wrap');
+  // for (const el of imported.children()) {
+  //   if (el !== wrap) {
+  //     if (el.toParent) {
+  //       el.toParent(wrap);
+  //     } else {
+  //       el.remove();
+  //     }
+  //   }
+  // }
+  // wrap.rotate(-90);
   imported.viewbox(imported.bbox());
-  await plan(imported);
-  content.hide();
+  clean(imported);
+  // loader.clear();
+  // flatted.addTo('#canvas');
+  // console.log('flatted');
 }
 
 const app = document.getElementById('app');

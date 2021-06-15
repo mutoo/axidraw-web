@@ -26,8 +26,8 @@ body {
 #page {
 }
 
-#content *,
-#planning * {
+#wrap *,
+#flatted * {
     fill: none !important;
     stroke: #333333 !important;
     stroke-width: 0.1;

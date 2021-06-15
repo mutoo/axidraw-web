@@ -36,4 +36,4 @@ page
     'stroke-dasharray': '5,5',
   });
 
-canvas.group().id('content');
+canvas.group().id('loader');
