@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Plotter | Web AxiDraw</title>
+    <title>Plotter | AxiDraw Web</title>
     <link rel="stylesheet" href="styles/index.css" />
   </head>
   <body>
-    <noscript
-      >This app requires a modern browser with javascript enabled.</noscript
-    >
+    <noscript>
+      This app requires a modern browser with javascript enabled.
+    </noscript>
     <div id="app">
       <div id="workspace"></div>
       <div id="control-panel">
-        <section class="aw-phase aw-phase--active">
+        <section id="phase-preview" class="aw-phase aw-phase--active">
           <h3 class="aw-phase__heading">Preview</h3>
           <p>In this phase, you could load svg and set up the page.</p>
           <form id="preview" onsubmit="return false;">
@@ -25,7 +25,9 @@
                 style="display: none"
               />
               <button type="button" id="file-btn">Load SVG</button>
+              <br />
             </p>
+            <p>Or simply <b>Drag & Drop</b> your svg into the page area.</p>
             <h4>Dimension</h4>
             <p>
               <label class="aw-label" for="page-size">PageSize: </label>
@@ -33,7 +35,7 @@
             </p>
             <p>
               <label class="aw-label" for="page-padding">Padding(mm): </label>
-              <input type="number" id="page-padding" value="20" />
+              <input type="number" id="page-padding" value="20" min="0" />
             </p>
             <p>
               <label class="aw-label">Orientation:</label>
@@ -60,7 +62,7 @@
             <p>
               <label class="aw-label"></label>
               <label for="page-fit">
-                <input type="checkbox" id="page-fit" checked />
+                <input type="checkbox" id="page-fit" />
                 Fit content to page
               </label>
             </p>
@@ -80,17 +82,36 @@
                 <option value="YMid" selected>Center</option>
                 <option value="YMax">Bottom</option>
               </select>
-
             </p>
             <h4>File Information:</h4>
             <p id="file-info"></p>
+            <div class="aw-actions">
+              <p>Plan the motion before sending it to the plotter.</p>
+              <button type="button" id="go-planning">Go</button>
+            </div>
           </form>
         </section>
-        <section class="aw-phase">
+        <section id="phase-planning" class="aw-phase">
           <h3 class="aw-phase__heading">Planning</h3>
-          <div></div>
+          <p>
+            In this phase, we are going to transform the svg into coordinates on
+            the paper, and plan the motion for AxiDraw to plot the picture.
+          </p>
+          <form id="planning">
+            <p>
+              <button type="button" id="go-preview">Back to Preview</button>
+            </p>
+            <div class="aw-actions">
+              <p>
+                You could adjust those parameter and redo the plan until you are
+                satisfied. Or sent it to AxiDraw now:
+              </p>
+              <button type="button" id="re-plan">Re-plan</button>
+              <button type="button" id="go-plotting">Plot</button>
+            </div>
+          </form>
         </section>
-        <section class="aw-phase">
+        <section id="phase-plotting" class="aw-phase">
           <h3 class="aw-phase__heading">Plotting</h3>
           <div></div>
         </section>

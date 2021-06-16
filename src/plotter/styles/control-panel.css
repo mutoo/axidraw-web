@@ -5,21 +5,23 @@
     top: 0;
     bottom: 0;
 
-    padding: 2rem 4rem;
     background-color: #efefef;
 
     font-size: 1.4rem;
 }
 
 #file-info {
+    line-height: 1.5;
     padding: 2rem;
     background: white;
     white-space: pre;
+    font-family: 'Roboto Mono', monospace;
 }
 
 .aw-phase {
-    overflow: hidden;
+    padding: 0 4rem;
     height: 0;
+    overflow: scroll;
     transition: height 300ms ease-out;
 }
 
@@ -34,4 +36,12 @@
 .aw-label {
     display: inline-block;
     min-width: 10rem;
+}
+
+.aw-actions {
+    margin: 3rem 0;
+}
+
+.aw-actions button {
+    text-transform: uppercase;
 }

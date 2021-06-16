@@ -9,19 +9,19 @@ export const pageSizes = [
     type: PAGE_SIZE_A4,
     width: 297,
     height: 210,
-    defaultPadding: 20,
+    defaultPadding: 15,
   },
   {
     type: PAGE_SIZE_A5,
     width: 210,
     height: 148,
-    defaultPadding: 12,
+    defaultPadding: 10,
   },
   {
     type: PAGE_SIZE_A6,
     width: 148,
     height: 105,
-    defaultPadding: 10,
+    defaultPadding: 5,
   },
 ];
 
@@ -52,19 +52,23 @@ const pageShadow = page
   .attr({ fill: 'rgba(0,0,0,0.25)' })
   .filterWith(dropShadow);
 
-const pageArea = page.rect().id('page-area').attr({ fill: 'white' });
+const pageArea = page.rect().id('page-area');
 
 const pagePrintable = page.rect().id('page-printable').attr({
   fill: 'none',
-  stroke: '#333',
-  'stroke-width': '0.1mm',
+  stroke: '#b8b8b8',
+  'stroke-width': '1',
   'stroke-dasharray': '5,5',
 });
 
-const gizmo = page.group().id('gizmo');
-gizmo.line(0, 0, '10mm', 0).stroke({ width: '1mm', color: '#ff0000' });
-gizmo.line(0, 0, 0, '10mm').stroke({ width: '1mm', color: '#00ff00' });
-gizmo.circle('3mm').fill('#0000ff').attr({ cx: 0, cy: 0 });
+const gizmo = page.group().id('gizmo').fill('none');
+gizmo
+  .polyline([0, 0, mm2px(10), 0, mm2px(8), mm2px(-2)])
+  .stroke({ width: '1mm', color: '#ff0000' });
+gizmo
+  .polyline([0, 0, 0, mm2px(10), mm2px(-2), mm2px(8)])
+  .stroke({ width: '1mm', color: '#00ff00' });
+gizmo.circle(mm2px(3)).attr({ cx: 0, cy: 0 }).fill('#0000ff');
 
 canvas.group().id('loader');
 

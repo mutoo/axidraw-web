@@ -11,8 +11,8 @@ export function parseSVG(svg) {
     'data-original-viewBox': imported.attr('viewBox'),
   });
   adjustPreview(imported);
-  const counts = clean(imported);
-  return { imported, counts };
+  const { counts, svgEls } = clean(imported);
+  return { counts, svgEls };
 }
 
 export const loadFromFile = (file) => {
@@ -27,23 +27,33 @@ export const loadFromFile = (file) => {
 };
 
 const app = document.getElementById('app');
-app.addEventListener('dragover', (e) => {
-  // this event is required to trigger following 'drop' event
+const pageArea = document.getElementById('page-area');
+
+// this event is required to trigger following 'drop' event
+pageArea.addEventListener('dragover', (e) => {
   e.preventDefault();
 });
-app.addEventListener('drop', async (e) => {
-  // Prevent default behavior (Prevent file from being opened)
+
+pageArea.addEventListener('dragenter', (e) => {
   e.preventDefault();
-  // Handle the first file
+  app.classList.add('aw-file-dropping');
+});
+
+pageArea.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  app.classList.remove('aw-file-dropping');
+});
+
+pageArea.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  app.classList.remove('aw-file-dropping');
   if (!e.dataTransfer.files.length) {
     return;
   }
-
   const file = e.dataTransfer.files[0];
   if (file.type !== 'image/svg+xml') {
     throw new Error('Invalid SVG Files');
   }
-
   const loaded = await loadFromFile(file);
   displayFileInfo(loaded);
 });

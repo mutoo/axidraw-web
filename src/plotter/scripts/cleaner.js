@@ -24,10 +24,12 @@ export function* walkSvg(svg) {
 
 export default function clean(svg) {
   const counts = {};
+  const svgEls = [];
   for (const node of walkSvg(svg)) {
     switch (node.action) {
       case 'count':
         counts[node.el.type] = (counts[node.el.type] || 0) + 1;
+        svgEls.push(node.el);
         break;
       case 'discard':
       default:
@@ -35,5 +37,5 @@ export default function clean(svg) {
         node.el.remove();
     }
   }
-  return counts;
+  return { counts, svgEls };
 }

@@ -1,3 +1,4 @@
+/* global SVG */
 import {
   defaultPageSize,
   getPageSize,
@@ -5,7 +6,8 @@ import {
   updatePage,
 } from './paper.js';
 import { loadFromFile } from './loader.js';
-import { displayFileInfo } from './utils.js';
+import { activePhase, displayFileInfo } from './utils.js';
+import plan from './planner.js';
 
 const { preview } = window;
 
@@ -46,3 +48,8 @@ preview['file-btn'].addEventListener(
   },
   false,
 );
+preview['go-planning'].addEventListener('click', () => {
+  activePhase('phase-planning');
+  const imported = SVG('#imported');
+  plan(imported);
+});
