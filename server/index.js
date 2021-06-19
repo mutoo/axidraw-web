@@ -10,14 +10,14 @@ app.use(express.static('src'));
 
 app.use('/assets', express.static('assets'));
 
-app.use('/ca', express.static('server/cert/localhost.crt'));
+app.use('/ca', express.static('scripts/ca.pem'));
 
 const options = {
   key: fs.readFileSync('server/cert/localhost.key'),
   cert: fs.readFileSync('server/cert/localhost.crt'),
 };
 
-const server = https.createServer(options, app).listen(443);
+const server = https.createServer(options, app).listen(8443);
 
 const wss = new WebSocket.Server({ server });
 
