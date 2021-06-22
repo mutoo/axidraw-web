@@ -16,12 +16,9 @@ export default function* svgPathToLines(svgPath, opt) {
   for (const p of pathArray) {
     switch (p[0]) {
       case 'M':
-        currPos = [p[1], p[2]];
-        // set down the startPos for Z command
-        if (!startPos) {
-          startPos = currPos;
-        }
-        prevPos = currPos;
+        prevPos = [p[1], p[2]];
+        // also set down the startPos for Z command
+        startPos = prevPos;
         break;
       case 'L':
         currPos = [p[1], p[2]];
@@ -29,12 +26,12 @@ export default function* svgPathToLines(svgPath, opt) {
         prevPos = currPos;
         break;
       case 'H':
-        currPos = [p[1], currPos[1]];
+        currPos = [p[1], prevPos[1]];
         yield transformLine(prevPos, currPos, ctm);
         prevPos = currPos;
         break;
       case 'V':
-        currPos = [currPos[0], p[1]];
+        currPos = [prevPos[0], p[1]];
         yield transformLine(prevPos, currPos, ctm);
         prevPos = currPos;
         break;
@@ -47,6 +44,10 @@ export default function* svgPathToLines(svgPath, opt) {
         prevPos = yield* svgArcToLines(p, prevPos, ctm, opt);
         break;
       case 'Z':
+        if (startPos) {
+          yield transformLine(prevPos, startPos, ctm);
+          prevPos = startPos;
+        }
         break;
       default:
     }
