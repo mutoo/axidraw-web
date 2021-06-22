@@ -5,13 +5,13 @@ import svgElementToLines from './svg-element-to-lines.js';
  * @param svg
  * @returns {any}
  */
-export default function* svgToLines(svg) {
+export default function* svgToLines(svg, opt) {
   for (const svgEl of svg.children()) {
     switch (svgEl.type) {
       case 'svg':
       case 'g':
       case 'a':
-        yield* svgToLines(svgEl);
+        yield* svgToLines(svgEl, opt);
         break;
       case 'rect':
       case 'circle':
@@ -20,7 +20,7 @@ export default function* svgToLines(svg) {
       case 'polyline':
       case 'polygon':
       case 'path':
-        yield* svgElementToLines(svgEl);
+        yield* svgElementToLines(svgEl, opt);
         break;
       default:
       // discard

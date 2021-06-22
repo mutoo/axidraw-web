@@ -27,7 +27,14 @@ export const calculateArcError = (x1, y1, x2, y2, xm, ym) =>
 export const angleFn = (ux, uy, vx, vy) =>
   Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
 
-export default function* svgPathToLines(svgPath) {
+export const estError = (error, maxError, ctm) => {
+  const mat = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, 0, 0]);
+  const p = transformPoint(error, 0, mat);
+  const errSq = p.x * p.x + p.y * p.y;
+  return errSq > maxError * maxError;
+};
+
+export default function* svgPathToLines(svgPath, opt) {
   const path = SVG(svgPath);
   if (!path.attr('d')) {
     return;
@@ -145,7 +152,7 @@ export default function* svgPathToLines(svgPath) {
           }
           // linear approximation
           // https://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
-          const maxError = 3;
+          const { maxError } = opt;
           let segments = 1;
           let error = Number.MAX_VALUE;
           let xe = x2;
@@ -164,7 +171,7 @@ export default function* svgPathToLines(svgPath) {
             error = calculateArcError(x1, y1, xe, ye, xm, ym);
             xe = xm;
             ye = ym;
-          } while (error > maxError);
+          } while (estError(error, maxError, ctm));
           const dt = delta / segments;
           for (let i = 1; i <= segments; i += 1) {
             prevPos = currPos;

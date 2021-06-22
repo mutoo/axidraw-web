@@ -1,6 +1,6 @@
 import svgPathToLines from './svg-path-to-lines.js';
 
-export default function* svgElementToPath(svgEl) {
+export default function* svgElementToPath(svgEl, opt) {
   const svgPath = null;
   switch (svgEl.type) {
     case 'rect':
@@ -13,5 +13,5 @@ export default function* svgElementToPath(svgEl) {
     default:
     // discard
   }
-  yield* svgPathToLines(svgPath);
+  yield* svgPathToLines(svgPath, opt);
 }
