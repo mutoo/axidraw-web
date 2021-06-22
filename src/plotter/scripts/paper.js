@@ -71,6 +71,7 @@ gizmo
 gizmo.circle(mm2px(3)).attr({ cx: 0, cy: 0 }).fill('#0000ff');
 
 canvas.group().id('loader');
+canvas.group().id('planner');
 
 export function adjustPreview(svg) {
   svg

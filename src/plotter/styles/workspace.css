@@ -22,9 +22,10 @@
     fill: rgb(235, 255, 240);
 }
 
-#loader * {
+#loader *,
+#planner * {
     pointer-events: none;
     fill: none !important;
     stroke: #333333 !important;
-    stroke-width: 0.01;
+    /*stroke-width: 0.01;*/
 }

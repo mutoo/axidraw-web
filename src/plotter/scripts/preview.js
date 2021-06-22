@@ -51,5 +51,11 @@ preview['file-btn'].addEventListener(
 preview['go-planning'].addEventListener('click', () => {
   activePhase('phase-planning');
   const imported = SVG('#imported');
-  plan(imported);
+  const lines = plan(imported);
+  imported.hide();
+  const planner = SVG('#planner');
+  planner.clear();
+  for (const line of lines) {
+    planner.line(line);
+  }
 });
