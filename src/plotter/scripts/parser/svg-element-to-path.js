@@ -6,9 +6,6 @@ export default function* svgElementToPath(svgEl, opt) {
     case 'rect':
     case 'circle':
     case 'ellipse':
-    case 'line':
-    case 'polyline':
-    case 'polygon':
       break;
     default:
     // discard
