@@ -2,7 +2,6 @@
 import {
   angleFn,
   calculateArcError,
-  estError,
   transformLine,
   transformPoint,
 } from './svg-math.js';
@@ -10,20 +9,18 @@ import {
 // eslint-disable-next-line consistent-return
 export default function* svgArcToLines(arc, startPos, ctm, opt) {
   if (!arc || arc[0] !== 'A') {
-    return startPos;
+    throw new Error(`invalid arc: ${arc}`);
   }
-  let prevPos = startPos;
-  let currPos;
   // B.2.4. Conversion from endpoint to center parameterization
   // @link: https://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter
   const { cos, sin, PI } = Math;
-  const [x1, y1] = prevPos;
+  const [x1, y1] = startPos;
   // eslint-disable-next-line no-unused-vars, prefer-const
   let [_, rx, ry, deg, fa, fs, x2, y2] = arc;
   // B.2.5 step 1: ensure radii are non-zero
   if (rx === 0 || ry === 0) {
-    currPos = [x2, y2];
-    yield transformLine(prevPos, currPos, ctm);
+    const currPos = [x2, y2];
+    yield transformLine(startPos, currPos, ctm);
     return currPos;
   }
   // B.2.5 step 2: ensure radii are positive
@@ -83,29 +80,24 @@ export default function* svgArcToLines(arc, startPos, ctm, opt) {
   // linear approximation
   // https://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
   const { maxError } = opt;
-  let segments = 1;
-  let error = Number.MAX_VALUE;
-  let xe = x2;
-  let ye = y2;
-  do {
-    const theta2 = theta1 + delta / segments;
-    const thetaMid = (theta1 + theta2) / 2;
-    const pm = transformPoint(rx * cos(thetaMid), ry * sin(thetaMid), mat3);
-    const xm = pm.x + cx;
-    const ym = pm.y + cy;
-    segments *= 2; // segments will be power of 2
-    error = calculateArcError(x1, y1, xe, ye, xm, ym);
-    xe = xm;
-    ye = ym;
-  } while (estError(error, maxError, ctm));
-  const dt = delta / segments;
-  for (let i = 1; i <= segments; i += 1) {
-    const theta = theta1 + dt * i;
-    const pt = transformPoint(rx * cos(theta), ry * sin(theta), mat3);
-    const xt = pt.x + cx;
-    const yt = pt.y + cy;
-    currPos = [xt, yt];
-    yield transformLine(prevPos, currPos, ctm);
-    prevPos = currPos;
+  const matE = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, 0, 0]);
+  function* arcLinearApproximation(t1, t2, sx, sy, ex, ey) {
+    const mt = (t1 + t2) / 2;
+    const mp = transformPoint(rx * cos(mt), ry * sin(mt), mat3);
+    const mx = mp.x + cx;
+    const my = mp.y + cy;
+    const error = calculateArcError(sx, sy, mx, my, ex, ey);
+    // transform error to paper space and test with maxError
+    const ep = transformPoint(error, 0, matE);
+    const errSq = ep.x * ep.x + ep.y * ep.y;
+    if (errSq > maxError * maxError) {
+      // exceed the max error, splits the arc into two segments
+      yield* arcLinearApproximation(t1, mt, sx, sy, mx, my);
+      yield* arcLinearApproximation(mt, t2, mx, my, ex, ey);
+    } else {
+      yield transformLine([sx, sy], [ex, ey], ctm);
+    }
   }
+  yield* arcLinearApproximation(theta1, theta1 + delta, x1, y1, x2, y2);
+  return [x2, y2];
 }

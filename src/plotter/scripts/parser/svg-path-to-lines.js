@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
 /* global SVG */
 import svgArcToLines from './svg-arc-to-lines.js';
+import svgBezierToLines from './svg-bezier-to-lines.js';
 import { transformLine } from './svg-math.js';
 
 export default function* svgPathToLines(svgPath, opt) {
@@ -38,7 +39,11 @@ export default function* svgPathToLines(svgPath, opt) {
       case 'S':
       case 'Q':
       case 'T':
+        // TODO: convert these type to cubic bezier
+        break;
       case 'C':
+        // TODO: covert cubic bezier to line
+        prevPos = yield* svgBezierToLines(p, prevPos, ctm, opt);
         break;
       case 'A':
         prevPos = yield* svgArcToLines(p, prevPos, ctm, opt);

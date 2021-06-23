@@ -17,16 +17,9 @@ export const transformLine = (p0, p1, ctm) => {
   return [x0, y0, x1, y1];
 };
 
-export const calculateArcError = (x1, y1, x2, y2, xm, ym) =>
+export const calculateArcError = (x1, y1, xm, ym, x2, y2) =>
   Math.abs(xm * (y2 - y1) - ym * (x2 - x1) + x2 * y1 - x1 * y2) /
   Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
 export const angleFn = (ux, uy, vx, vy) =>
   Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
-
-export const estError = (error, maxError, ctm) => {
-  const mat = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, 0, 0]);
-  const p = transformPoint(error, 0, mat);
-  const errSq = p.x * p.x + p.y * p.y;
-  return errSq > maxError * maxError;
-};

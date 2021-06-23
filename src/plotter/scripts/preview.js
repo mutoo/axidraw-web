@@ -54,7 +54,7 @@ preview['go-planning'].addEventListener('click', () => {
   const lines = plan(imported);
   imported.hide();
   const planner = SVG('#planner');
-  planner.clear();
+  planner.clear().show();
   for (const line of lines) {
     planner.line(line);
   }
