@@ -90,12 +90,12 @@ export default function* svgArcToLines(arc, startPos, ctm, opt) {
     // transform error to paper space and test with maxError
     const ep = transformPoint(error, 0, matE);
     const errSq = ep.x * ep.x + ep.y * ep.y;
-    if (errSq > maxError * maxError) {
+    if (errSq <= maxError * maxError) {
+      yield transformLine([sx, sy], [ex, ey], ctm);
+    } else {
       // exceed the max error, splits the arc into two segments
       yield* arcLinearApproximation(t1, mt, sx, sy, mx, my);
       yield* arcLinearApproximation(mt, t2, mx, my, ex, ey);
-    } else {
-      yield transformLine([sx, sy], [ex, ey], ctm);
     }
   }
   yield* arcLinearApproximation(theta1, theta1 + delta, x1, y1, x2, y2);

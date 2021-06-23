@@ -22,6 +22,7 @@ pageSizes.forEach((pageSize) => {
 
 preview['page-size'].value = defaultPageSize.type;
 preview['page-padding'].value = defaultPageSize.defaultPadding;
+preview['page-fit'].checked = true;
 
 preview['page-size'].addEventListener('change', (e) => {
   const pageSize = getPageSize(e.target.value);
