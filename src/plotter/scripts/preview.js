@@ -8,6 +8,7 @@ import {
 import { loadFromFile } from './loader.js';
 import { activePhase, displayFileInfo } from './utils.js';
 import plan from './planner.js';
+import { toSvgPath } from './presentation.js';
 
 const { preview } = window;
 
@@ -55,8 +56,8 @@ preview['go-planning'].addEventListener('click', () => {
   const lines = plan(imported);
   imported.hide();
   const planner = SVG('#planner');
+  // eslint-disable-next-line no-console
+  console.log('lines: ', lines.length);
   planner.clear().show();
-  for (const line of lines) {
-    planner.line(line);
-  }
+  planner.node.innerHTML = toSvgPath(lines);
 });
