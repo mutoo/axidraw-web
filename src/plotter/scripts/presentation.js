@@ -4,6 +4,6 @@ export const toSvgLines = (lines) =>
     .join('');
 
 export const toSvgPath = (lines) =>
-  `<Path d="${lines
+  `<path d="${lines
     .map((l) => `M${l[0]} ${l[1]} L${l[2]} ${l[3]}`)
     .join(' ')}" />`;

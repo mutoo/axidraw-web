@@ -9,13 +9,13 @@ import svgElementToLines from './svg-element-to-lines.js';
 export default function* svgToLines(svg, opt) {
   for (const svgEl of svg.children()) {
     switch (svgEl.type) {
-      // container elements
       case 'svg':
       case 'g':
       case 'a':
+        // these are container elements
+        // we are going to extract lines from there children elements
         yield* svgToLines(svgEl, opt);
         break;
-      // shape elements
       case 'rect':
       case 'circle':
       case 'ellipse':
@@ -23,10 +23,14 @@ export default function* svgToLines(svg, opt) {
       case 'polyline':
       case 'polygon':
       case 'path':
+        // these are shape elements
+        // we are going to extract lines from them directly or indirectly.
         yield* svgElementToLines(svgEl, opt);
         break;
       default:
-      // discard
+        // unsupported types, e.g. DEF,
+        // we just discard them
+        console.debug(`unsupported type: ${svgEl.type}`);
     }
   }
 }

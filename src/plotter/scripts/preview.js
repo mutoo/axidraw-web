@@ -9,6 +9,7 @@ import { loadFromFile } from './loader.js';
 import { activePhase, displayFileInfo } from './utils.js';
 import plan from './planner.js';
 import { toSvgPath } from './presentation.js';
+import { mm2px, px2mm } from '../../math/svg.js';
 
 const { preview } = window;
 
@@ -60,4 +61,16 @@ preview['go-planning'].addEventListener('click', () => {
   console.log('lines: ', lines.length);
   planner.clear().show();
   planner.node.innerHTML = toSvgPath(lines);
+  const path = planner.first();
+  const length = path.length();
+  const circle = planner.circle(mm2px(5));
+  const distance = px2mm(length);
+  const speed = 100; // mmps
+  circle
+    .animate((distance / speed) * 1000)
+    .during((pos) => {
+      const p = path.pointAt(pos * length);
+      circle.center(p.x, p.y);
+    })
+    .loop(true);
 });

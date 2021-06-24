@@ -5,7 +5,7 @@ import load from './loader.js';
 import { displayFileInfo } from './utils.js';
 
 async function main() {
-  const loaded = await load('/assets/svg/test-bezier.svg');
+  const loaded = await load('/assets/svg/test-shape.svg');
   displayFileInfo(loaded);
 }
 
