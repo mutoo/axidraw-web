@@ -1,17 +1,17 @@
-/* global SVG */
 import svgPathToLines from './svg-path-to-lines.js';
+import { createSVGElement, getAttrVal } from './svg-utils.js';
 
 export default function* svgElementToPath(svgEl, opt) {
   let pathDef = '';
-  switch (svgEl.type) {
+  switch (svgEl.nodeName) {
     case 'rect':
       {
-        let w = svgEl.width();
-        let h = svgEl.height();
-        const x = svgEl.x();
-        const y = svgEl.y();
-        let rx = svgEl.rx();
-        let ry = svgEl.ry();
+        let w = getAttrVal(svgEl, 'width');
+        let h = getAttrVal(svgEl, 'height');
+        const x = getAttrVal(svgEl, 'x');
+        const y = getAttrVal(svgEl, 'y');
+        let rx = getAttrVal(svgEl, 'rx');
+        let ry = getAttrVal(svgEl, 'ry');
         rx = Math.min(rx, w / 2);
         ry = Math.min(ry, h / 2);
         if (rx === 0 || ry === 0) {
@@ -49,10 +49,11 @@ export default function* svgElementToPath(svgEl, opt) {
     case 'circle':
     case 'ellipse':
       {
-        const cx = svgEl.cx();
-        const cy = svgEl.cy();
-        const rx = svgEl.rx();
-        const ry = svgEl.ry();
+        const cx = getAttrVal(svgEl, 'cx');
+        const cy = getAttrVal(svgEl, 'cy');
+        const r = getAttrVal(svgEl, 'r');
+        const rx = getAttrVal(svgEl, 'rx') ?? r;
+        const ry = getAttrVal(svgEl, 'ry') ?? r;
         if (rx === 0 || ry === 0) {
           // arc with no radius
           // discard
@@ -73,8 +74,9 @@ export default function* svgElementToPath(svgEl, opt) {
     default:
     // discard
   }
-  const path = SVG(`<path d="${pathDef}">`);
+  const path = createSVGElement('path');
+  path.setAttribute('d', pathDef);
   // proxy the ctm to current svg element;
-  path.node.getCTM = () => svgEl.node.getCTM();
+  path.getCTM = () => svgEl.getCTM();
   yield* svgPathToLines(path, opt);
 }

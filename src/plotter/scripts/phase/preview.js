@@ -4,12 +4,12 @@ import {
   getPageSize,
   pageSizes,
   updatePage,
-} from './paper.js';
-import { loadFromFile } from './loader.js';
-import { activePhase, displayFileInfo } from './utils.js';
-import plan from './planner.js';
-import { toSvgPath } from './presentation.js';
-import { mm2px, px2mm } from '../../math/svg.js';
+} from '../paper.js';
+import { loadFromFile } from '../loader.js';
+import { activePhase, displayFileInfo } from '../utils.js';
+import plan from '../planner.js';
+import { toSvgPath } from '../parser/svg-presentation.js';
+import { mm2px, px2mm } from '../../../math/svg.js';
 
 const { preview } = window;
 
@@ -54,7 +54,7 @@ preview['file-btn'].addEventListener(
 preview['go-planning'].addEventListener('click', () => {
   activePhase('phase-planning');
   const imported = SVG('#imported');
-  const lines = plan(imported);
+  const lines = plan(imported.node);
   imported.hide();
   const planner = SVG('#planner');
   // eslint-disable-next-line no-console

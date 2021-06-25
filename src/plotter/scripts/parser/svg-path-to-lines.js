@@ -1,16 +1,16 @@
 /* eslint-disable prefer-destructuring */
-/* global SVG */
 import svgArcToLines from './svg-arc-to-lines.js';
 import svgBezierToLines from './svg-bezier-to-lines.js';
 import { quadToCubicBezierControlPoints, transformLine } from './svg-math.js';
+import svgPathParser from './svg-path-parser/index.js';
 
 export default function* svgPathToLines(svgPath, opt) {
-  const path = SVG(svgPath);
-  if (!path.attr('d')) {
+  const pathDef = svgPath.getAttribute('d');
+  if (!pathDef) {
     return;
   }
-  const pathArray = path.array();
-  const ctm = svgPath.node.getCTM();
+  const pathArray = svgPathParser(pathDef);
+  const ctm = svgPath.getCTM();
   let prevPos = [0, 0];
   let currPos;
   let startPos;

@@ -3,7 +3,7 @@ import svgElementToPath from './svg-element-to-path.js';
 import svgPointsToLines from './svg-points-to-lines.js';
 
 export default function* svgElementToLines(svgEl, opt) {
-  switch (svgEl.type) {
+  switch (svgEl.nodeName) {
     case 'rect':
     case 'circle':
     case 'ellipse':

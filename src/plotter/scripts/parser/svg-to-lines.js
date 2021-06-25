@@ -7,8 +7,8 @@ import svgElementToLines from './svg-element-to-lines.js';
  * @returns {any}
  */
 export default function* svgToLines(svg, opt) {
-  for (const svgEl of svg.children()) {
-    switch (svgEl.type) {
+  for (const svgEl of svg.children) {
+    switch (svgEl.nodeName) {
       case 'svg':
       case 'g':
       case 'a':
@@ -30,7 +30,7 @@ export default function* svgToLines(svg, opt) {
       default:
         // unsupported types, e.g. DEF,
         // we just discard them
-        console.debug(`unsupported type: ${svgEl.type}`);
+        console.debug(`unsupported type: ${svgEl.nodeName}`);
     }
   }
 }

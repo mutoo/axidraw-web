@@ -1,6 +1,6 @@
 import './paper.js';
-import './preview.js';
-import './planning.js';
+import './phase/preview.js';
+import './phase/planning.js';
 import load from './loader.js';
 import { displayFileInfo } from './utils.js';
 

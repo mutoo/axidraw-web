@@ -1,5 +1,5 @@
 /* global SVG */
-import { activePhase } from './utils.js';
+import { activePhase } from '../utils.js';
 
 const { planning } = window;
 
