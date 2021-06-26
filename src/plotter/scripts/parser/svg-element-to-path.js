@@ -16,7 +16,7 @@ export default function* svgElementToPath(svgEl, opt) {
         ry = Math.min(ry, h / 2);
         if (rx === 0 || ry === 0) {
           // we goes the rect counter-clock-wise
-          pathDef += `M${x} ${y} v${w} h${h} v${-w} h${-h}`;
+          pathDef += `M${x} ${y} v${h} h${w} v${-h} h${-w}`;
         } else {
           // it's a rounded rect
           w -= 2 * rx;
@@ -52,8 +52,8 @@ export default function* svgElementToPath(svgEl, opt) {
         const cx = getAttrVal(svgEl, 'cx');
         const cy = getAttrVal(svgEl, 'cy');
         const r = getAttrVal(svgEl, 'r');
-        const rx = getAttrVal(svgEl, 'rx') ?? r;
-        const ry = getAttrVal(svgEl, 'ry') ?? r;
+        const rx = svgEl.nodeName === 'circle' ? r : getAttrVal(svgEl, 'rx');
+        const ry = svgEl.nodeName === 'circle' ? r : getAttrVal(svgEl, 'ry');
         if (rx === 0 || ry === 0) {
           // arc with no radius
           // discard

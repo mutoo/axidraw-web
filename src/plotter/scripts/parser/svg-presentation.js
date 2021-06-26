@@ -5,5 +5,6 @@ export const toSvgLines = (lines) =>
 
 export const toSvgPath = (lines) =>
   `<path d="${lines
+    .filter((l) => !Number.isNaN(l[0]))
     .map((l) => `M${l[0]} ${l[1]} L${l[2]} ${l[3]}`)
     .join(' ')}" />`;

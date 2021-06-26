@@ -19,12 +19,12 @@ export default function* svgPointsToLines(svgEl, opt) {
         for (let i = 0; i < len - 1; i += 1) {
           const p0 = points[i];
           const p1 = points[i + 1];
-          yield transformLine(p0, p1, ctm);
+          yield transformLine([p0.x, p0.y], [p1.x, p1.y], ctm);
         }
         if (svgEl.nodeName === 'polygon') {
           const p0 = points[len - 1];
           const p1 = points[0];
-          yield transformLine(p0, p1, ctm);
+          yield transformLine([p0.x, p0.y], [p1.x, p1.y], ctm);
         }
       }
       break;

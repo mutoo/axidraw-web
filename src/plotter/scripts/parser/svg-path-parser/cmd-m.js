@@ -17,6 +17,6 @@ export default createPathCommand('M', function* (command, params, context) {
     transformerXY,
   );
   if (rest.length) {
-    yield* L.handle({ M: 'L', m: 'l' }[command], ...rest, context);
+    yield* L.parse({ M: 'L', m: 'l' }[command], rest, context);
   }
 });

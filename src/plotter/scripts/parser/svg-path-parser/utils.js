@@ -1,10 +1,20 @@
-export const createPathCommand = (command, handle) => ({
+// a helper function to create path command
+export const createPathCommand = (command, parse) => ({
   command,
-  handle,
+  parse,
 });
 
-export const sum = (arr) => arr.reduce((s, a) => s + a, 0);
-
+/**
+ * Walking through the command, and transform from relative to absolute format if needed.
+ * Also update the context to record the current position.
+ *
+ * @param command
+ * @param params
+ * @param context
+ * @param stepper
+ * @param transformer
+ * @returns {*[]}
+ */
 export const normalize = (command, params, context, stepper, transformer) => {
   const absoluteCmd = command.toUpperCase();
   const isAbsoluteCmd = command === absoluteCmd;

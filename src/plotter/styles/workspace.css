@@ -27,5 +27,13 @@
     pointer-events: none;
     fill: none !important;
     stroke: #333333 !important;
-    /*stroke-width: 0.01;*/
+}
+
+#loader * {
+    stroke-width: 0.1;
+}
+
+#panner * {
+    /* 0.4mm / 297mm */
+    stroke-width: 0.13;
 }

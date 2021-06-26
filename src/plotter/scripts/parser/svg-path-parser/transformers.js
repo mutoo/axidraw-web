@@ -12,3 +12,6 @@ export const transformerX = (params, context) => {
 export const transformerY = (params, context) => {
   return [params[0] + context.y];
 };
+
+export const transformerXYPairs = (params, context) =>
+  params.map((p, idx) => p + (idx % 2 === 0 ? context.x : context.y));
