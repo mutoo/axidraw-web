@@ -7,9 +7,10 @@ import {
 } from '../paper.js';
 import { loadFromFile } from '../loader.js';
 import { activePhase, displayFileInfo } from '../utils.js';
-import plan from '../planner.js';
 import { toSvgPath } from '../parser/svg-presentation.js';
 import { mm2px, px2mm } from '../../../math/svg.js';
+import svgToLines from '../parser/svg-to-lines.js';
+import plan from '../planner.js';
 
 const { preview } = window;
 
@@ -54,13 +55,14 @@ preview['file-btn'].addEventListener(
 preview['go-planning'].addEventListener('click', () => {
   activePhase('phase-planning');
   const imported = SVG('#imported');
-  const lines = plan(imported.node);
+  const lines = [...svgToLines(imported.node, { maxError: mm2px(0.1) })];
   imported.hide();
   const planner = SVG('#planner');
   // eslint-disable-next-line no-console
   console.log('lines: ', lines.length);
+  const motions = plan(lines);
   planner.clear().show();
-  planner.node.innerHTML = toSvgPath(lines);
+  planner.node.innerHTML = toSvgPath(motions);
   const path = planner.first();
   const length = path.length();
   const circle = planner.circle(mm2px(5));
