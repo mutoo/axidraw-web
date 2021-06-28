@@ -10,3 +10,8 @@ planning['go-preview'].addEventListener('click', () => {
   const planner = SVG('#planner');
   planner.hide();
 });
+
+planning['go-plotting'].addEventListener('click', async () => {
+  await window.plotter.connect();
+  await window.plotter.plot();
+});

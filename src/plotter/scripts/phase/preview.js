@@ -60,6 +60,7 @@ preview['go-planning'].addEventListener('click', () => {
   const planner = SVG('#planner');
   // eslint-disable-next-line no-console
   console.log('lines: ', lines.length);
+  window.plotter.upload(lines);
   const motions = plan(lines);
   planner.clear().show();
   planner.node.innerHTML = toSvgPath(motions);

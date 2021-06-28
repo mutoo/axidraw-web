@@ -18,6 +18,8 @@ export function* walkLines(lines, opt) {
     // eslint-disable-next-line prefer-destructuring
     context.y = line[3];
   }
+  // return to home
+  yield [context.x, context.y, 0, 0, MOTION_PEN_UP];
 }
 
 export default function plan(lines, opt = { connectedError: 0.2 }) {
