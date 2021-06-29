@@ -1,9 +1,8 @@
 /* eslint-disable no-await-in-loop,prefer-destructuring */
-import plan, { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner.js';
+import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner.js';
 import createDevice from '../../device/index.js';
 import * as commands from '../../ebb/index.js';
 import { xyDist2aaSteps } from '../../math/ebb.js';
-import { px2mm } from '../../math/svg.js';
 import { delay } from '../../utils/time.js';
 
 export default function createPlotter(type) {
@@ -19,8 +18,8 @@ export default function createPlotter(type) {
     await device.executeCommand(commands.sp, 1, 500);
   };
   return {
-    upload: (lines) => {
-      motions = plan(lines);
+    upload: (m) => {
+      motions = m;
     },
     connect: async () => {
       await device.connectDevice();
@@ -43,8 +42,8 @@ export default function createPlotter(type) {
           context.pen = motion[4];
         }
         const rate = context.pen === MOTION_PEN_DOWN ? ratePenDown : ratePenUp;
-        const dx = px2mm(motion[2] - context.x);
-        const dy = px2mm(motion[3] - context.y);
+        const dx = motion[2] - context.x;
+        const dy = motion[3] - context.y;
         const aa = xyDist2aaSteps({ x: dx, y: dy });
         const t = Math.max(
           1,

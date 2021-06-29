@@ -8,9 +8,10 @@ import {
 import { loadFromFile } from '../loader.js';
 import { activePhase, displayFileInfo } from '../utils.js';
 import { toSvgPath } from '../parser/svg-presentation.js';
-import { mm2px, px2mm } from '../../../math/svg.js';
+import { createScreenToPaperMatrix, mm2px } from '../../../math/svg.js';
 import svgToLines from '../parser/svg-to-lines.js';
 import plan from '../planner.js';
+import { transformPoint } from '../parser/svg-math.js';
 
 const { preview } = window;
 
@@ -60,20 +61,34 @@ preview['go-planning'].addEventListener('click', () => {
   const planner = SVG('#planner');
   // eslint-disable-next-line no-console
   console.log('lines: ', lines.length);
-  window.plotter.upload(lines);
-  const motions = plan(lines);
+  const pageSize = getPageSize(preview['page-size'].value) || defaultPageSize;
+  const screenToPaperMatrix = createScreenToPaperMatrix(
+    preview.orientation.value,
+    pageSize,
+  );
+  const screenToPaperMatrixInv = screenToPaperMatrix.inverse();
+  const motions = plan(lines, {
+    screenToPaperMatrix,
+    origin:
+      preview.orientation.value === 'landscape'
+        ? [0, 0]
+        : [mm2px(pageSize.height), 0],
+  });
+  window.plotter.upload(motions);
   planner.clear().show();
   planner.node.innerHTML = toSvgPath(motions);
   const path = planner.first();
+  path.transform(screenToPaperMatrixInv);
   const length = path.length();
   const circle = planner.circle(mm2px(5));
-  const distance = px2mm(length);
+  const distance = length;
   const speed = 100; // mmps
   circle
     .animate((distance / speed) * 1000)
     .during((pos) => {
       const p = path.pointAt(pos * length);
-      circle.center(p.x, p.y);
+      const tp = transformPoint(p.x, p.y, screenToPaperMatrixInv);
+      circle.center(tp.x, tp.y);
     })
     .loop(true);
 });
