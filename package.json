@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "@serialport/parser-regex": "^9.0.7",
+    "@svgdotjs/svg.filter.js": "^3.0.7",
+    "@svgdotjs/svg.js": "~3.0.1",
     "express": "^4.17.1",
+    "nearley": "^2.20.1",
     "serialport": "^9.1.0",
     "ws": "^7.4.6"
   },

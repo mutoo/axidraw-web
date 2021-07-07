@@ -8,6 +8,8 @@ const app = express();
 
 app.use(express.static('src'));
 
+app.use('/node_modules', express.static('node_modules'));
+
 app.use('/assets', express.static('assets'));
 
 app.use('/ca', express.static('scripts/ca.pem'));
