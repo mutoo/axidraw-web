@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "prepare": "husky install",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "test": "jest"
   },
   "engines": {
     "node": ">=12.22.1"
@@ -24,12 +25,14 @@
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
     "@babel/register": "^7.14.5",
+    "babel-jest": "^27.0.6",
     "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^6.0.0",
+    "jest": "^27.0.6",
     "lint-staged": ">=10",
     "prettier": "^2.3.1"
   },

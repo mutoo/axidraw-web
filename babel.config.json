@@ -4,6 +4,7 @@
       "@babel/preset-env",
       {
         "targets": {
+          "node": "current",
           "chrome": 61,
           "edge": 79,
           "android": 91,
