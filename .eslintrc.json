@@ -15,7 +15,7 @@
   "rules": {
     "import/no-extraneous-dependencies": [
       2, {
-        "devDependencies": ["webpack/**/*.js"]
+        "devDependencies": ["webpack/**/*.js", "*.config.js"]
       }
     ],
     "import/no-unresolved": [
