@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": 61,
+          "edge": 79,
+          "android": 91,
+          "opera": 48
+        }
+      }
+    ]
+  ]
+}
