@@ -13,9 +13,10 @@
   },
   "ignorePatterns": ["src/lib/**/*.js"],
   "rules": {
-    "import/extensions": [
-      1,
-      "always"
+    "import/no-extraneous-dependencies": [
+      2, {
+        "devDependencies": ["webpack/**/*.js"]
+      }
     ],
     "import/no-unresolved": [
       2,
