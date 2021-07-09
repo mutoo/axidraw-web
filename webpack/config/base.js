@@ -2,12 +2,22 @@
 // link: https://survivejs.com/webpack/foreword/
 
 import { merge } from 'webpack-merge';
-import * as path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import { loadCss, loadJavascript } from './parts';
 
 export default merge([
   {
-    entry: path.resolve(__dirname, '../../src/index.js'),
+    entry: './src/index.js',
+    plugins: [
+      new HtmlWebpackPlugin({
+        filename: 'index.html',
+        template: './src/pages/index.html',
+      }),
+      new HtmlWebpackPlugin({
+        filename: 'debugger.html',
+        template: './src/pages/debugger.html',
+      }),
+    ],
   },
   loadJavascript(),
   loadCss(),

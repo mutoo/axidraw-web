@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "main": "server/index.js",
   "license": "MIT",
+  "engines": {
+    "node": ">=12.22.1"
+  },
   "scriptsComment": [
     "start: run proxy mode and app in localhost",
     "dev: run webpack dev server with proxy and dev build",
@@ -14,9 +17,6 @@
     "dev": "cross-env NODE_ENV=development webpack server --config webpack/dev.config.babel.js",
     "build": "cross-env NODE_ENV=production webpack --config webpack/prod.config.babel.js",
     "test": "jest"
-  },
-  "engines": {
-    "node": ">=12.22.1"
   },
   "dependencies": {
     "@serialport/parser-regex": "^9.0.7",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
+    "@babel/preset-react": "^7.14.5",
     "@babel/register": "^7.14.5",
     "autoprefixer": "^10.2.6",
     "babel-jest": "^27.0.6",
@@ -42,6 +43,8 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.24.0",
+    "html-webpack-plugin": "^5.3.2",
     "husky": "^6.0.0",
     "jest": "^27.0.6",
     "lint-staged": ">=10",
@@ -49,6 +52,9 @@
     "postcss-loader": "^6.1.1",
     "postcss-nested": "^5.0.5",
     "prettier": "^2.3.1",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "style-loader": "^3.0.0",
     "stylelint": "^13.13.1",
     "stylelint-config-standard": "^22.0.0",
@@ -58,6 +64,7 @@
     "webpack-merge": "^5.8.0"
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix"
+    "*.js": "eslint --cache --fix",
+    "*.css": "stylelint --fix"
   }
 }
