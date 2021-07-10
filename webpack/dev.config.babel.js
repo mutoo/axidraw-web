@@ -2,6 +2,7 @@ import { merge } from 'webpack-merge';
 import fs from 'fs';
 import path from 'path';
 import base from './config/base';
+import setupWebSocket from '../server/ws';
 
 const key = fs.readFileSync(
   path.resolve(__dirname, '../server/cert/localhost.key'),
@@ -25,6 +26,13 @@ export default merge(base, {
     https: {
       key,
       cert,
+    },
+    transportMode: 'ws',
+    setup: (app, server) => {
+      // wait a frame so that the listeningApp is set up.
+      process.nextTick(() => {
+        setupWebSocket(app, server.listeningApp);
+      });
     },
   },
 });

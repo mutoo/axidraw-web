@@ -1,7 +1,7 @@
-import * as commands from '../ebb/index.js';
-import { delay } from '../utils/time.js';
-import createDevice from '../device/index.js';
-import { DEVICE_TYPE_USB, DEVICE_TYPE_WEBSOCKET } from '../device/consts.js';
+import * as commands from '../ebb/index';
+import { delay } from '../utils/time';
+import createDevice from '../device/index';
+import { DEVICE_TYPE_USB, DEVICE_TYPE_WEBSOCKET } from '../device/consts';
 
 let device = null;
 const paramsHistory = {};
@@ -32,7 +32,7 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 const wsAddress = document.getElementById('ws-address');
-wsAddress.value = `wss://${window.location.host}`;
+wsAddress.value = `wss://${window.location.host}/axidraw`;
 
 const pairBtn = document.getElementById('pair-btn');
 pairBtn.addEventListener('click', async () => {

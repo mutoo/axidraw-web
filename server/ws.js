@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { connectToDevice } from './sp';
 
 export default function setupWebSocket(app, server) {
-  const wss = new WebSocket.Server({ server });
+  const wss = new WebSocket.Server({ server, path: '/axidraw' });
 
   wss.on('connection', async (ws) => {
     try {
