@@ -17,6 +17,7 @@ export default merge(base, {
   mode: 'development',
   devServer: {
     hot: true,
+    injectClient: true,
     lazy: false,
     open: true,
     openPage: [`https://localhost:${port}`],
@@ -27,7 +28,7 @@ export default merge(base, {
       key,
       cert,
     },
-    transportMode: 'ws',
+    transportMode: 'sockjs',
     setup: (app, server) => {
       // wait a frame so that the listeningApp is set up.
       process.nextTick(() => {

@@ -1,5 +1,5 @@
 # ide
-.idea/
+.vs/
 
 # dependencies
 node_modules/

@@ -37,7 +37,7 @@ export const loadCss = () => ({
         exclude: /node_modules/,
         oneOf: [
           {
-            resourceQuery: /global/, // index.css?global
+            resourceQuery: /global/, // app.css?global
             use: [MiniCssExtractPlugin.loader, ...cssSharedLoaders()],
           },
           {

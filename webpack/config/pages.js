@@ -2,6 +2,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export const shareOptions = {
   meta: { viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no' },
+  inject: 'body',
 };
 
 // eslint-disable-next-line import/prefer-default-export
