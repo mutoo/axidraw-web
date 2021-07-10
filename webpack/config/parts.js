@@ -1,11 +1,11 @@
-import * as path from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 export const loadJavascript = () => ({
   module: {
     rules: [
       {
         test: /\.jsx?/,
-        include: path.resolve(__dirname, '../../src'),
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {},
@@ -15,24 +15,34 @@ export const loadJavascript = () => ({
   },
 });
 
+const cssSharedLoaders = ({ modules } = { modules: false }) => [
+  {
+    loader: 'css-loader',
+    options: {
+      importLoaders: 1,
+      modules,
+    },
+  },
+  {
+    loader: 'postcss-loader',
+  },
+];
+
 export const loadCss = () => ({
+  plugins: [new MiniCssExtractPlugin()],
   module: {
     rules: [
       {
         test: /\.css$/,
-        include: path.resolve(__dirname, '../../src'),
-        use: [
+        exclude: /node_modules/,
+        oneOf: [
           {
-            loader: 'style-loader',
+            resourceQuery: /global/, // index.css?global
+            use: [MiniCssExtractPlugin.loader, ...cssSharedLoaders()],
           },
           {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-            },
-          },
-          {
-            loader: 'postcss-loader',
+            // others
+            use: ['style-loader', ...cssSharedLoaders({ modules: true })],
           },
         ],
       },
