@@ -1,0 +1,22 @@
+.debugger {
+  @apply p-8 mx-auto my-8 shadow-xl bg-white;
+  @apply grid grid-cols-1 gap-6;
+
+  max-width: 600px;
+}
+
+.radioLabel {
+  @apply inline-flex items-center;
+
+  span {
+    @apply ml-2;
+  }
+}
+
+.inputLabel {
+  @apply inline-flex flex-col items-stretch;
+
+  span {
+    @apply mb-2;
+  }
+}

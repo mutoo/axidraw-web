@@ -1,7 +1,10 @@
-import * as commands from '../ebb/index';
+import * as commands from '../communication/ebb/index';
 import { delay } from '../utils/time';
-import createDevice from '../device/index';
-import { DEVICE_TYPE_USB, DEVICE_TYPE_WEBSOCKET } from '../device/consts';
+import createDevice from '../communication/device/index';
+import {
+  DEVICE_TYPE_USB,
+  DEVICE_TYPE_WEBSOCKET,
+} from '../communication/device/consts';
 
 let device = null;
 const paramsHistory = {};
@@ -21,7 +24,7 @@ const onDeviceTypeChange = async (type) => {
 
 onDeviceTypeChange('usb');
 
-const deviceType = document.getElementById('device-type');
+const deviceType = document.getElementById('communication.device-type');
 deviceType.addEventListener('change', (e) => {
   onDeviceTypeChange(e.target.value);
 });

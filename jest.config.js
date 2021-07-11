@@ -47,7 +47,7 @@ module.exports = {
   // A path to a custom dependency extractor
   // dependencyExtractor: undefined,
 
-  // Make calling deprecated APIs throw helpful error messages
+  // Make calling deprecated APIs throw helpful error communication.ebb.messages
   // errorOnDeprecated: false,
 
   // Force coverage collection from ignored files using an array of glob patterns

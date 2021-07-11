@@ -1,7 +1,7 @@
 const forms = require('@tailwindcss/forms');
 
 module.exports = {
-  mode: 'jit',
+  mode: process.env.NODE_ENV === 'production' ? 'jit' : undefined,
   purge: ['./src/**/*.html', './src/**/*.js'],
   darkMode: 'class',
   theme: {

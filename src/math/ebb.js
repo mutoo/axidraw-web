@@ -6,7 +6,7 @@
  * @param y
  * @returns {{a1: number, a2: number}}
  */
-import { HIGH_DPI_XY } from '../ebb/constants.js';
+import { HIGH_DPI_XY } from '../communication/ebb/constants';
 
 export const xy2aa = ({ x, y }) => ({
   a1: x + y,
