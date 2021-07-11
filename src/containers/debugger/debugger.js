@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import DeviceConnector from 'containers/debugger/components/device-connector';
+import DeviceConnector from './components/device-connector';
+import SimpleCommander from './components/simple-commander';
 import styles from './debugger.css';
 
 const Debugger = () => {
-  // eslint-disable-next-line no-unused-vars
   const [device, setDevice] = useState(null);
   return (
     <div className={styles.debugger}>
-      <DeviceConnector setDevice={setDevice} />
+      <DeviceConnector
+        onConnected={setDevice}
+        onDisconnected={() => setDevice(null)}
+      />
+      {device?.version && <SimpleCommander device={device} />}
+      <div>Build Mode: {process.env.NODE_ENV}</div>
     </div>
   );
 };

@@ -64,6 +64,7 @@ export const useDeviceConnector = () => {
   }, [device, deviceStatus]);
 
   return {
+    device,
     deviceType,
     setDeviceType,
     deviceStatus,

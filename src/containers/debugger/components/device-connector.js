@@ -13,7 +13,7 @@ import styles from '../debugger.css';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
-const DeviceConnector = ({ setDevice }) => {
+const DeviceConnector = ({ onConnected, onDisconnected }) => {
   const {
     deviceStatus,
     deviceType,
@@ -28,15 +28,19 @@ const DeviceConnector = ({ setDevice }) => {
   const [wsAuth, setWSAuth] = useState('axidraw-web');
 
   useEffect(() => {
-    setDevice(device);
-  }, [device]);
+    if (deviceStatus === DEVICE_STATUS_CONNECTED) {
+      onConnected(device);
+    } else {
+      onDisconnected(device);
+    }
+  }, [device, deviceStatus]);
 
   return (
     <>
       <h3>Device</h3>
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
-          <p>Please select device type:</p>
+          <p>Connect to axidraw via USB or WebSocket.</p>
           <label className={styles.radioLabel}>
             <input
               type="radio"
@@ -79,7 +83,7 @@ const DeviceConnector = ({ setDevice }) => {
           {deviceType === DEVICE_TYPE_WEBSOCKET && (
             <>
               <label className={styles.inputLabel}>
-                <span>URL</span>
+                <span>URL:</span>
                 <input
                   type="text"
                   value={wsAddress}
@@ -87,7 +91,7 @@ const DeviceConnector = ({ setDevice }) => {
                 />
               </label>
               <label className={styles.inputLabel}>
-                <span>Password</span>
+                <span>Password:</span>
                 <input
                   type="password"
                   value={wsAuth}
@@ -117,13 +121,13 @@ const DeviceConnector = ({ setDevice }) => {
           </button>
         </>
       )}
-      <div>Build Mode: {process.env.NODE_ENV}</div>
     </>
   );
 };
 
 DeviceConnector.propTypes = {
-  setDevice: PropTypes.func,
+  onConnected: PropTypes.func,
+  onDisconnected: PropTypes.func,
 };
 
 export default DeviceConnector;

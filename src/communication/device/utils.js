@@ -43,13 +43,14 @@ export const createDeviceBind = ({
   checkDevice,
 }) => {
   let device = null;
+  let version = '';
   const commandQueue = [];
   const sendToDeviceBind = (msg) => sendToDevice(device, msg);
   const checkDeviceBind = () => checkDevice(device);
   const executedCommandBind = async (cmd, ...params) => {
     await checkDeviceBind();
     return executeCommand(
-      device.version,
+      version,
       sendToDeviceBind,
       commandQueue,
       cmd,
@@ -61,7 +62,7 @@ export const createDeviceBind = ({
       device = await connectDevice(commandQueue, ...args);
       const ret = await executedCommandBind(v);
       // eslint-disable-next-line prefer-destructuring
-      device.version = ret.match(/\d\.\d\.\d/)[0];
+      version = ret.match(/\d\.\d\.\d/)[0];
     }
   };
   const disconnectDeviceBind = async () => {
@@ -70,6 +71,7 @@ export const createDeviceBind = ({
     }
     commandQueue.length = 0;
     device = null;
+    version = '';
   };
   return {
     type,
@@ -79,7 +81,7 @@ export const createDeviceBind = ({
     connectDevice: connectDeviceBind,
     disconnectDevice: disconnectDeviceBind,
     get version() {
-      return device?.version;
+      return version;
     },
   };
 };
