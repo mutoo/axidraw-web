@@ -47,7 +47,7 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
     proxyStatus = WEBSOCKET_STATUS_DISCONNECTED;
     switch (e.code) {
       case 3000:
-        emitter.emit('close', 'Forbidden');
+        emitter.emit('close', 'Forbidden: password is incorrect.');
         break;
       case 3001:
         emitter.emit('close', `Device is not available. ${e.reason}`);
@@ -57,6 +57,9 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
         break;
       case 3003:
         emitter.emit('close', 'Unknown message type.');
+        break;
+      case 1006:
+        emitter.emit('close', 'Host is not found.');
         break;
       default:
         emitter.emit('close', e.reason);
