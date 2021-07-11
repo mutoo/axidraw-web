@@ -1,18 +1,26 @@
 import SerialPort from 'serialport';
-import { delay } from '../src/utils/time';
+import { delay } from './utils';
 
-const waitForEBB = async (retry = 10) => {
+export const AXIDRAW_VENDOR_ID = '04d8';
+export const AXIDRAW_PRODUCT_ID = 'fd92';
+
+export const listDevices = async () => {
+  const ports = await SerialPort.list();
+  return ports.filter(
+    (port) =>
+      port.vendorId?.toLowerCase() === AXIDRAW_VENDOR_ID &&
+      port.productId?.toLowerCase() === AXIDRAW_PRODUCT_ID,
+  );
+};
+
+const waitForEBB = async (deviceId, retry = 10) => {
   let retried = 0;
   while (retried < retry) {
     // eslint-disable-next-line no-await-in-loop
-    const ports = await SerialPort.list();
-    const EBBs = ports.filter(
-      (port) =>
-        port.vendorId?.toLowerCase() === '04d8' &&
-        port.productId?.toLowerCase() === 'fd92',
-    );
-    if (EBBs.length) {
-      return EBBs[0].path;
+    const EBBs = await listDevices();
+    const device = EBBs.find((ebb) => ebb.path === deviceId);
+    if (device) {
+      return deviceId;
     }
     // eslint-disable-next-line no-console
     console.log('EBB not found, will retry in 3s...');
@@ -24,8 +32,8 @@ const waitForEBB = async (retry = 10) => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const connectToDevice = async (dataHandler) => {
-  const path = await waitForEBB(10);
+export const connectToDevice = async (deviceId, dataHandler) => {
+  const path = await waitForEBB(deviceId, 10);
   return new Promise((resolve, reject) => {
     const port = new SerialPort(path);
     port.on('open', () => {

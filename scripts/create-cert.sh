@@ -25,4 +25,4 @@ EOF
 # signed cert
 openssl x509 -req -in localhost.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out localhost.crt -days 365 -sha256 -extfile localhost.ext
 # done
-echo "cert is created! please add and trust the ca.pem to your browswer"
+echo "cert is created! please add and trust the ca.pem to your browser"

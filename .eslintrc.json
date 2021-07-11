@@ -13,10 +13,10 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "ignorePatterns": [
-    "src/lib/**/*.js"
-  ],
   "settings": {
+    "react": {
+      "version": "detect"
+    },
     "import/resolver": {
       "webpack": {
         "config": {
@@ -29,6 +29,16 @@
       }
     }
   },
+  "overrides": [
+    {
+      "files": [
+        "server/**/*.js"
+      ],
+      "settings": {
+        "import/resolver": "node"
+      }
+    }
+  ],
   "rules": {
     "import/no-extraneous-dependencies": [
       2,

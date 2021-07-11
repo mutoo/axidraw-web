@@ -3,6 +3,7 @@
 
 import path from 'path';
 import { merge } from 'webpack-merge';
+import { EnvironmentPlugin } from 'webpack';
 import { loadCss, loadJavascript } from './parts';
 import { generatePages } from './pages';
 
@@ -12,6 +13,12 @@ export default merge([
     resolve: {
       modules: [path.resolve(__dirname, '../../src'), 'node_modules'],
     },
+    plugins: [
+      new EnvironmentPlugin({
+        NODE_ENV: 'production',
+        DEBUG: false,
+      }),
+    ],
   },
   loadJavascript(),
   loadCss(),

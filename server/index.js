@@ -2,4 +2,4 @@
 require('@babel/register');
 
 // boot the local server
-require('./local');
+require('./server');

@@ -19,7 +19,7 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
   };
   ws.onopen = () => {
     proxyStatus = WEBSOCKET_STATUS_CONNECTED;
-    wsSend({ type: 'auth', password: auth });
+    wsSend({ type: 'auth', code: auth });
   };
   ws.onmessage = (event) => {
     const message = JSON.parse(event.data);
@@ -27,30 +27,50 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
       case 'devices':
         proxyStatus = WEBSOCKET_STATUS_AUTHORIZED;
         devicePicker(message.devices).then((device) => {
-          wsSend({ type: 'device_id', device });
+          wsSend({ type: 'device_id', device: device.path });
         });
         break;
       case 'ready':
         proxyStatus = WEBSOCKET_STATUS_STANDBY;
         emitter.emit('connected');
         break;
-      case 'message':
-        emitter.emit('message', message.data);
+      case 'ebb':
+        emitter.emit('message', Uint8Array.from(message.resp.data));
         break;
       default:
-        throw new Error(`Unknonw message type: ${message.type}`);
+        throw new Error(`Unknown message type: ${message.type}`);
     }
   };
   ws.onclose = (e) => {
     // eslint-disable-next-line no-console
     console.debug(`Device is closed: [${e.code}]${e.reason}`);
     proxyStatus = WEBSOCKET_STATUS_DISCONNECTED;
-    emitter.emit('close', e);
+    switch (e.code) {
+      case 3000:
+        emitter.emit('close', 'Forbidden');
+        break;
+      case 3001:
+        emitter.emit('close', `Device is not available. ${e.reason}`);
+        break;
+      case 3002:
+        emitter.emit('close', 'Device is not connected.');
+        break;
+      case 3003:
+        emitter.emit('close', 'Unknown message type.');
+        break;
+      default:
+        emitter.emit('close', e.reason);
+    }
   };
   return {
-    ws,
     on(...args) {
       emitter.on(...args);
+    },
+    send(message) {
+      wsSend({ type: 'command', command: message });
+    },
+    close() {
+      ws.close();
     },
     get status() {
       return proxyStatus;
@@ -62,7 +82,7 @@ export const checkDevice = (device) => {
   if (!device) {
     throw new Error('Device is not connected');
   }
-  if (device.readyState !== 1) {
+  if (device.status !== WEBSOCKET_STATUS_STANDBY) {
     throw new Error('Device is not ready.');
   }
 };

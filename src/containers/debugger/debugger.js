@@ -151,6 +151,7 @@ const Debugger = () => {
           </button>
         </>
       )}
+      <div>Build Mode: {process.env.NODE_ENV}</div>
     </div>
   );
 };
