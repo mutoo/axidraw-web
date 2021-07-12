@@ -13,12 +13,11 @@ app.use('/assets', express.static('assets'));
 // provide CA cert for client to download
 app.use('/ca', express.static('server/cert/ca.pem'));
 
-let options;
+const options = {};
+
 try {
-  options = {
-    key: fs.readFileSync('server/cert/localhost.key'),
-    cert: fs.readFileSync('server/cert/localhost.crt'),
-  };
+  options.key = fs.readFileSync('server/cert/localhost.key');
+  options.cert = fs.readFileSync('server/cert/localhost.crt');
 } catch (e) {
   // eslint-disable-next-line no-console
   console.error('Please create and install the SSL cert first.');

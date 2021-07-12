@@ -1,4 +1,5 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { isProduction } from './utils';
 
 export const loadJavascript = () => ({
   module: {
@@ -20,7 +21,11 @@ const cssSharedLoaders = ({ modules } = { modules: false }) => [
     loader: 'css-loader',
     options: {
       importLoaders: 1,
-      modules,
+      modules: modules && {
+        localIdentName: isProduction
+          ? '[hash:base64:5]'
+          : '[path][name]__[local]',
+      },
     },
   },
   {

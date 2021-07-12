@@ -18,7 +18,20 @@ export const generatePages = () => ({
     }),
     new HtmlWebpackPlugin({
       filename: 'debugger.html',
-      template: './src/pages/debugger.html',
+      template: './src/pages/sub.html',
+      templateParameters: {
+        title: 'Debugger',
+        module: 'debugger',
+      },
+      ...shareOptions,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'composer.html',
+      template: './src/pages/sub.html',
+      templateParameters: {
+        title: 'Composer',
+        module: 'composer',
+      },
       ...shareOptions,
     }),
   ],

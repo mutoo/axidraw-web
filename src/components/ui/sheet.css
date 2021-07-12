@@ -1,0 +1,8 @@
+.root {
+  @apply p-8 mx-auto mb-8 bg-white shadow-xl md:mt-8;
+  @apply grid grid-cols-1 gap-6;
+
+  @screen md {
+    max-width: 600px;
+  }
+}

@@ -13,7 +13,7 @@ export const listDevices = async () => {
   );
 };
 
-const waitForEBB = async (deviceId, retry = 10) => {
+export const waitForEBB = async (deviceId, retry = 10) => {
   let retried = 0;
   while (retried < retry) {
     // eslint-disable-next-line no-await-in-loop

@@ -9,7 +9,7 @@ import {
   DEVICE_TYPE_USB,
   DEVICE_TYPE_WEBSOCKET,
 } from 'communication/device/consts';
-import styles from '../debugger.css';
+import formStyles from 'components/ui/form.css';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
@@ -41,7 +41,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
           <p>Connect to axidraw via USB or WebSocket.</p>
-          <label className={styles.radioLabel}>
+          <label className={formStyles.radioLabel}>
             <input
               type="radio"
               value={DEVICE_TYPE_USB}
@@ -50,7 +50,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
             />{' '}
             <span>USB</span>
           </label>
-          <label className={styles.radioLabel}>
+          <label className={formStyles.radioLabel}>
             <input
               type="radio"
               value={DEVICE_TYPE_WEBSOCKET}
@@ -82,7 +82,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
           )}
           {deviceType === DEVICE_TYPE_WEBSOCKET && (
             <>
-              <label className={styles.inputLabel}>
+              <label className={formStyles.inputLabel}>
                 <span>URL:</span>
                 <input
                   type="text"
@@ -90,7 +90,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
                   onChange={(e) => setWSAddress(e.target.value)}
                 />
               </label>
-              <label className={styles.inputLabel}>
+              <label className={formStyles.inputLabel}>
                 <span>Password:</span>
                 <input
                   type="password"

@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import debuggerStyles from 'containers/debugger/debugger.css';
 import * as commands from 'communication/ebb';
-import styles from './simple-commander.css';
+import formStyles from 'components/ui/form.css';
 
 const commandList = Object.keys(commands);
 
@@ -17,26 +16,30 @@ const SimpleCommander = ({ device }) => {
   const sendCommand = useCallback(
     async (e) => {
       e.preventDefault();
-      const paramsStr = params.trim();
-      setParamsHistory({ ...paramsHistory, [cmd]: paramsStr });
-      const cmdParams = paramsStr === '' ? [] : paramsStr.split(',');
-      const cmdResult = await device.executeCommand(
-        commands[cmd],
-        ...cmdParams,
-      );
-      if (typeof cmdResult === 'object') {
-        setResult(JSON.stringify(cmdResult));
-      } else {
-        setResult(cmdResult);
+      try {
+        const paramsStr = params.trim();
+        setParamsHistory({ ...paramsHistory, [cmd]: paramsStr });
+        const cmdParams = paramsStr === '' ? [] : paramsStr.split(',');
+        const cmdResult = await device.executeCommand(
+          commands[cmd],
+          ...cmdParams,
+        );
+        if (typeof cmdResult === 'object') {
+          setResult(JSON.stringify(cmdResult));
+        } else {
+          setResult(cmdResult);
+        }
+      } catch (err) {
+        setResult(err.toString());
       }
     },
     [device, cmd, params, paramsHistory],
   );
   return (
-    <form className={styles.form} onSubmit={sendCommand}>
+    <form className={formStyles.root} onSubmit={sendCommand}>
       <h3>Simple Commander</h3>
       <p>Send simple command to device.</p>
-      <label className={debuggerStyles.inputLabel}>
+      <label className={formStyles.inputLabel}>
         <span>Command:</span>
         <select defaultValue={cmd} onChange={(e) => setCmd(e.target.value)}>
           {commandList.map((cmdKey) => (
@@ -46,7 +49,7 @@ const SimpleCommander = ({ device }) => {
           ))}
         </select>
       </label>
-      <label className={debuggerStyles.inputLabel}>
+      <label className={formStyles.inputLabel}>
         <span>Params:</span>
         <input
           type="text"
@@ -55,9 +58,9 @@ const SimpleCommander = ({ device }) => {
         />
       </label>
       <button type="submit">Send</button>
-      <label className={debuggerStyles.inputLabel}>
+      <label className={formStyles.inputLabel}>
         <span>Result:</span>
-        <textarea rows="3" defaultValue={result} />
+        <textarea rows="3" defaultValue={result} readOnly />
       </label>
     </form>
   );

@@ -83,5 +83,8 @@ export const createDeviceBind = ({
     get version() {
       return version;
     },
+    get isConnected() {
+      return !!version;
+    },
   };
 };
