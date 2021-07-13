@@ -2,7 +2,7 @@
 import { createSong, flat } from '../utils'
 
 export default createSong(
-  'Twinkle twinkle little start',
+  'Twinkle twinkle little star',
   flat([
     ['qC5', 'qC5', 'qG5', 'qG5', 'qA5', 'qA5', 'hG5'],
     ['qF5', 'qF5', 'qE5', 'qE5', 'qD5', 'qD5', 'hC5'],

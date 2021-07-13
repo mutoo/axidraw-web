@@ -52,6 +52,7 @@ export default function setupWebSocket(app, server) {
           break;
         case 'command':
           if (port) {
+            console.log(`Client: ${data.command}`);
             port.write(data.command);
           } else {
             ws.close(3002, 'Device is not connected');

@@ -21,14 +21,17 @@ export const notes = [
   'B',
 ];
 
-// convert note to frequency (A-440)
+// convert note to frequency (A-440) using patch-space transform
+// p = 69 + 12 * ln(f / 440) / ln(2)
+// f = 55 * 2 ^ ((p - 33) / 12)
+// where C4{level: 4, offset: 0} = 60;
 export const noteToPitch = (note, level) => {
   const offset = notes.indexOf(note);
-  const base = 440 * 2 ** (level - 4);
-  return base * (1 + (offset - 9) / 12);
+  const p = 60 + (level - 4) * 12 + offset;
+  return 55 * 2 ** ((p - 33) / 12);
 };
 
-export const durationMap = {
+export const beatsMap = {
   w: 4,
   h: 2,
   q: 1,
@@ -38,17 +41,16 @@ export const durationMap = {
 
 export const parseNote = (note) => {
   // eslint-disable-next-line no-unused-vars
-  const [_, durations, nodeName, nodeLevel] = note.match(
+  const [_, beatsSymbol, nodeName, nodeLevel] = note.match(
     /^([whqes]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/,
   );
-  const duration = durations
-    .split('')
-    .reduce((sum, d) => sum + durationMap[d], 0);
-  return { duration, nodeName, nodeLevel: parseInt(nodeLevel, 10) };
+  const beats = beatsSymbol.split('').reduce((sum, d) => sum + beatsMap[d], 0);
+  return { beats, frequency: noteToPitch(nodeName, parseInt(nodeLevel, 10)) };
 };
 
-export const durationOrMax = (note) => note?.duration ?? Number.MAX_VALUE;
-export const durationOrMin = (note) => note?.duration ?? Number.MIN_VALUE;
+export const beatsOrMax = (note) => note?.beats ?? Number.MAX_VALUE;
+export const beatsOrMin = (note) => note?.beats ?? Number.MIN_VALUE;
+
 /**
  * Compose a song into one mix channel.
  *
@@ -59,7 +61,7 @@ export const composeSong = (song) => {
   // each channels contains a branch of notes.
   const mixChannel = [];
   const context = {
-    duration: 0,
+    beats: 0,
     i: 0,
     j: 0,
   };
@@ -71,34 +73,46 @@ export const composeSong = (song) => {
     if (!note1 && !note2) {
       break;
     }
-    const min = Math.min(durationOrMax(note1), durationOrMax(note2));
-    const max = Math.max(durationOrMin(note1), durationOrMin(note2));
+    const min = Math.min(beatsOrMax(note1), beatsOrMax(note2));
+    const max = Math.max(beatsOrMin(note1), beatsOrMin(note2));
     if (max === min && !context.ii && !context.jj) {
-      context.duration = min;
+      context.beats = min;
       mixChannel.push({ ...context });
       context.i += 1;
       context.j += 1;
     } else if (!note2) {
-      context.duration = note1.duration;
+      context.j = null;
+      if (context.ii) {
+        context.beats = context.ii;
+        context.ii = 0;
+      } else {
+        context.beats = note1.beats;
+      }
       mixChannel.push({ ...context });
       context.i += 1;
     } else if (!note1) {
-      context.duration = note2.duration;
+      context.i = null;
+      if (context.jj) {
+        context.beats = context.jj;
+        context.jj = 0;
+      } else {
+        context.beats = note2.beats;
+      }
       mixChannel.push({ ...context });
       context.j += 1;
     } else {
       // min !== max
       if (!context.ii) {
-        context.ii = note1.duration - min;
+        context.ii = note1.beats - min;
       } else {
         context.ii -= min;
       }
       if (!context.jj) {
-        context.jj = note2.duration - min;
+        context.jj = note2.beats - min;
       } else {
         context.jj -= min;
       }
-      context.duration = min;
+      context.beats = min;
       mixChannel.push({ ...context });
       if (context.ii === 0) {
         context.i += 1;
@@ -118,62 +132,38 @@ export const composeSong = (song) => {
  *
  * @param song
  * @param beatPerMinute
- * @returns {Generator<{time: number, step2: number, step1: number}, void, *>}
+ * @returns {{duration: number, step1: number, step2: number, continue1: boolean, continue2: boolean}[]}
  */
-export function* songToSteps(song, beatPerMinute) {
+export function songToSteps(song, beatPerMinute) {
   const secondPerBeat = 60 / beatPerMinute;
-  const msPerBeat = ((60 / beatPerMinute) * 1000) | 0;
+  const mixChannel = composeSong(song);
+  return mixChannel.map((note, idx) => {
+    const { beats, i, j } = note;
+    const { frequency: freq1 } = song.channel1[i];
+    const dist1 = freq1 * secondPerBeat;
+    const step1 = (dist1 * beats) | 0;
+    const { frequency: freq2 } = song.channel2[j];
+    const dist2 = freq2 * secondPerBeat;
+    const step2 = (dist2 * beats) | 0;
+    const duration = (secondPerBeat * 1000 * beats) | 0;
+    const prevNote = mixChannel[idx - 1];
+    const continue1 = prevNote?.i === i;
+    const continue2 = prevNote?.j === j;
+    return { duration, step1, step2, continue1, continue2 };
+  });
+}
+
+export const planSteps = (steps) => {
   let dir1 = 1;
   let dir2 = 1;
-  let i = 0;
-  let j = 0;
-  while (song.channel1[i] || song.channel2[j]) {
-    let beats;
-    let beats1 = 1;
-    let beats2 = 1;
-    let p1 = 0;
-    let p2 = 0;
-    do {
-      if (p1 >= beats1) {
-        i += 1;
-        p1 -= beats1;
-        dir1 *= -1;
-      }
-      let dist1 = 0;
-      const note1 = parseNote(song.channel1[i]);
-      if (note1) {
-        beats1 = durationMap[note1.duration];
-        const frequency = noteToPitch(note1.nodeName, note1.nodeLevel);
-        dist1 = Math.floor(frequency * secondPerBeat);
-      }
-
-      if (p2 >= beats2) {
-        j += 1;
-        p2 -= beats2;
-        dir2 *= -1;
-      }
-
-      let dist2 = 0;
-      const note2 = parseNote(song.channel2[i]);
-      if (note2) {
-        beats2 = durationMap[note2.duration];
-        const frequency = noteToPitch(note2.nodeName, note2.nodeLevel);
-        dist2 = Math.floor(frequency * secondPerBeat);
-      }
-
-      beats = Math.min(beats1, beats2);
-      const step1 = (dist1 * dir1 * beats) | 0;
-      const step2 = (dist2 * dir2 * beats) | 0;
-      const time = msPerBeat * beats;
-      // eslint-disable-next-line no-await-in-loop
-      yield { time, step1, step2 };
-
-      p1 += beats;
-      p2 += beats;
-    } while (p1 < beats1 || p2 < beats2);
-    i += 1;
-    dir1 *= -1;
-    j += 1;
-    dir2 *= -1;
-  }
-}
+  return steps.map((step) => {
+    const { step1, step2, duration } = step;
+    if (!step.continue1) {
+      dir1 *= -1;
+    }
+    if (!step.continue2) {
+      dir2 *= -1;
+    }
+    return { step1: step1 * dir1, step2: step2 * dir2, duration };
+  });
+};
