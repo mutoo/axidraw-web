@@ -27,6 +27,7 @@ export const notes = [
 // where C4{level: 4, offset: 0} = 60;
 export const noteToPitch = (note, level) => {
   const offset = notes.indexOf(note);
+  if (offset === -1) return 0;
   const p = 60 + (level - 4) * 12 + offset;
   return 55 * 2 ** ((p - 33) / 12);
 };
@@ -40,10 +41,10 @@ export const beatsMap = {
 };
 
 export const parseNote = (note) => {
+  const parsed = note.match(/^([whqes]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/);
+  if (!parsed) throw new Error(`Can not parse note: ${note}`);
   // eslint-disable-next-line no-unused-vars
-  const [_, beatsSymbol, nodeName, nodeLevel] = note.match(
-    /^([whqes]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/,
-  );
+  const [_, beatsSymbol, nodeName, nodeLevel] = parsed;
   const beats = beatsSymbol.split('').reduce((sum, d) => sum + beatsMap[d], 0);
   return { beats, frequency: noteToPitch(nodeName, parseInt(nodeLevel, 10)) };
 };
@@ -139,10 +140,10 @@ export function songToSteps(song, beatPerMinute) {
   const mixChannel = composeSong(song);
   return mixChannel.map((note, idx) => {
     const { beats, i, j } = note;
-    const { frequency: freq1 } = song.channel1[i];
+    const { frequency: freq1 } = song.channel1[i] || { frequency: 0 };
     const dist1 = freq1 * secondPerBeat;
     const step1 = (dist1 * beats) | 0;
-    const { frequency: freq2 } = song.channel2[j];
+    const { frequency: freq2 } = song.channel2[j] || { frequency: 0 };
     const dist2 = freq2 * secondPerBeat;
     const step2 = (dist2 * beats) | 0;
     const duration = (secondPerBeat * 1000 * beats) | 0;

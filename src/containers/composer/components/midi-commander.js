@@ -31,26 +31,22 @@ const MidiCommander = ({ device }) => {
         // eslint-disable-next-line no-unused-vars
         const steps = songToSteps(
           {
-            channel1: channel1.split(', ').map(parseNote),
-            channel2: channel2.split(', ').map(parseNote),
+            channel1: channel1.split(', ').filter(Boolean).map(parseNote),
+            channel2: channel2.split(', ').filter(Boolean).map(parseNote),
           },
           BPM,
         );
         setPlaying(true);
         // set home
         await device.executeCommand(commands.r);
-        if (penDown) {
-          await device.executeCommand(commands.sp, 0, 500);
-        }
+        await device.executeCommand(commands.sp, penDown ? 0 : 1, 500);
         /* eslint-disable no-await-in-loop */
         for (const step of planSteps(steps, { model: 'v3' })) {
           const shouldStop = await device.executeCommand(commands.qb);
           if (shouldStop || vPRG.current) {
             // eslint-disable-next-line no-await-in-loop
             await device.executeCommand(commands.r);
-            if (penDown) {
-              await device.executeCommand(commands.sp, 1, 500);
-            }
+            await device.executeCommand(commands.sp, 1, 500);
             vPRG.current = false;
             return;
           }
@@ -62,11 +58,9 @@ const MidiCommander = ({ device }) => {
           );
         }
         /* eslint-enable no-await-in-loop */
+        await device.executeCommand(commands.sp, 1, 500);
         await delay(2000);
-        if (penDown) {
-          await device.executeCommand(commands.sp, 1, 500);
-        }
-        const st = await device.executeCommand(commands.qs, 1000);
+        const st = await device.executeCommand(commands.qs);
         const dist = Math.sqrt(st.a1 ** 2 + st.a2 ** 2);
         const homeStepFreq = 1000;
         const homeDuration = (dist / homeStepFreq) * 1000;
@@ -105,7 +99,7 @@ const MidiCommander = ({ device }) => {
         <textarea
           rows="3"
           disabled={playing}
-          defaultValue={channel1}
+          value={channel1}
           onChange={(e) => setChannel1(e.target.value)}
         />
       </label>
@@ -114,7 +108,7 @@ const MidiCommander = ({ device }) => {
         <textarea
           rows="3"
           disabled={playing}
-          defaultValue={channel2}
+          value={channel2}
           onChange={(e) => setChannel2(e.target.value)}
         />
       </label>
