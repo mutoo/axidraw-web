@@ -13,24 +13,25 @@ export const generatePages = () => ({
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
+      chunks: ['plotter'],
       template: './src/pages/index.html',
       ...shareOptions,
     }),
     new HtmlWebpackPlugin({
-      filename: 'debugger.html',
+      filename: 'composer.html',
+      chunks: ['composer'],
       template: './src/pages/sub.html',
       templateParameters: {
-        title: 'Debugger',
-        module: 'debugger',
+        title: 'Composer',
       },
       ...shareOptions,
     }),
     new HtmlWebpackPlugin({
-      filename: 'composer.html',
+      filename: 'debugger.html',
+      chunks: ['debugger'],
       template: './src/pages/sub.html',
       templateParameters: {
-        title: 'Composer',
-        module: 'composer',
+        title: 'Debugger',
       },
       ...shareOptions,
     }),

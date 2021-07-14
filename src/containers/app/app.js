@@ -1,23 +1,13 @@
-import React, { lazy, Suspense } from 'react';
+import React, { Suspense } from 'react';
+import PropTypes from 'prop-types';
 import Loading from 'components/loading/loading';
 
-const Debugger = lazy(() => {
-  switch (global.module) {
-    case 'debugger':
-      return import('containers/debugger/debugger');
-    case 'composer':
-      return import('containers/composer/composer');
-    default:
-      return import('containers/plotter/plotter');
-  }
-});
+const App = ({ children }) => {
+  return <Suspense fallback={<Loading />}>{children}</Suspense>;
+};
 
-const App = () => {
-  return (
-    <Suspense fallback={<Loading />}>
-      <Debugger />
-    </Suspense>
-  );
+App.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default App;

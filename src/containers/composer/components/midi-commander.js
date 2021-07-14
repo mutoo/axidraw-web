@@ -13,6 +13,7 @@ const MidiCommander = ({ device }) => {
   const [channel1, setChannel1] = useState('');
   const [channel2, setChannel2] = useState('');
   const [BPM, setBPM] = useState(88);
+  const [motorMode, setMotorMode] = useState(1);
   const [penDown, setPenDown] = useState(false);
   const [playing, setPlaying] = useState(false);
   const vPRG = useRef(false);
@@ -39,6 +40,7 @@ const MidiCommander = ({ device }) => {
         setPlaying(true);
         // set home
         await device.executeCommand(commands.r);
+        await device.executeCommand(commands.em, motorMode, motorMode);
         await device.executeCommand(commands.sp, penDown ? 0 : 1, 500);
         /* eslint-disable no-await-in-loop */
         for (const step of planSteps(steps, { model: 'v3' })) {
@@ -73,7 +75,7 @@ const MidiCommander = ({ device }) => {
         setPlaying(false);
       }
     },
-    [device, BPM, penDown, channel1, channel2],
+    [device, motorMode, BPM, penDown, channel1, channel2],
   );
   return (
     <form className={formStyles.root} onSubmit={sendCommands}>
@@ -112,17 +114,30 @@ const MidiCommander = ({ device }) => {
           onChange={(e) => setChannel2(e.target.value)}
         />
       </label>
-      <label className={formStyles.inputLabel}>
-        <span>Beats Per Minute:</span>
-        <input
-          type="number"
-          min={10}
-          max={200}
-          value={BPM}
-          disabled={playing}
-          onChange={(e) => setBPM(e.target.value)}
-        />
-      </label>
+      <div className="grid grid-cols-2 gap-6">
+        <label className={formStyles.inputLabel}>
+          <span>Beats Per Minute:</span>
+          <input
+            type="number"
+            min={10}
+            max={200}
+            value={BPM}
+            disabled={playing}
+            onChange={(e) => setBPM(e.target.value)}
+          />
+        </label>
+        <label className={formStyles.inputLabel}>
+          <span>Motor Mode:</span>
+          <input
+            type="number"
+            min={1}
+            max={5}
+            value={motorMode}
+            disabled={playing}
+            onChange={(e) => setMotorMode(e.target.value)}
+          />
+        </label>
+      </div>
       <label className={formStyles.checkboxLabel}>
         <input
           type="checkbox"

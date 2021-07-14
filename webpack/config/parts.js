@@ -34,7 +34,11 @@ const cssSharedLoaders = ({ modules } = { modules: false }) => [
 ];
 
 export const loadCss = () => ({
-  plugins: [new MiniCssExtractPlugin()],
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'styles.css',
+    }),
+  ],
   module: {
     rules: [
       {

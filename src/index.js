@@ -1,8 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from 'containers/app/app';
+import { lazy } from 'react';
+import shell from 'shell';
 
-// eslint-disable-next-line import/no-unresolved
-import './css/index.css?global';
-
-ReactDOM.render(<App />, document.getElementById('app'));
+shell(lazy(() => import('containers/plotter/plotter')));

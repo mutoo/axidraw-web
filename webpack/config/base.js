@@ -9,7 +9,11 @@ import { generatePages } from './pages';
 
 export default merge([
   {
-    entry: './src/index.js',
+    entry: {
+      plotter: './src/index.js',
+      debugger: './src/debugger.js',
+      composer: './src/composer.js',
+    },
     resolve: {
       modules: [path.resolve(__dirname, '../../src'), 'node_modules'],
     },
@@ -19,6 +23,17 @@ export default merge([
         DEBUG: false,
       }),
     ],
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          commons: {
+            name: 'vendors',
+            test: /[\\/]node_modules[\\/]/,
+          },
+        },
+      },
+    },
   },
   loadJavascript(),
   loadCss(),
