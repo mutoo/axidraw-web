@@ -1,0 +1,9 @@
+.root {
+  @apply fixed inset-0;
+
+  right: 450px;
+}
+
+.canvas {
+  @apply w-full h-full;
+}
