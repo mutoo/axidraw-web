@@ -2,10 +2,11 @@ import React from 'react';
 import Workspace from './components/workspace';
 import { defaultPageSize } from './consts/page-sizes';
 // import PropTypes from 'prop-types';
+import styles from './plotter.css';
 
 const Plotter = () => {
   return (
-    <div>
+    <div className={styles.workspace}>
       <Workspace
         pageSize={defaultPageSize}
         margin={20}

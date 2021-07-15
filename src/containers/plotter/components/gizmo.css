@@ -1,0 +1,19 @@
+.root {
+  fill: none;
+}
+
+.axis {
+  stroke-width: 1mm;
+}
+
+.x {
+  stroke: #f00;
+}
+
+.y {
+  stroke: #0f0;
+}
+
+.z {
+  fill: #00f;
+}

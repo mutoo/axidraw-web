@@ -1,0 +1,14 @@
+.shadow {
+  fill: rgba(0, 0, 0, 0.25);
+}
+
+.paper {
+  fill: white;
+}
+
+.printable {
+  fill: none;
+  stroke: #b8b8b8;
+  stroke-width: 0.4mm;
+  stroke-dasharray: 5 5;
+}

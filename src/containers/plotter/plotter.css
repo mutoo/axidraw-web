@@ -1,0 +1,5 @@
+.workspace {
+  @apply fixed inset-0;
+
+  right: 450px;
+}

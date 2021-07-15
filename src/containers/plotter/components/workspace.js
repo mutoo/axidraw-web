@@ -6,6 +6,37 @@ import styles from './workspace.css';
 import { mm2px } from '../../../math/svg';
 import { getHeight, getWidth } from '../utils/page';
 
+export const ShadowDef = ({ margin }) => {
+  const marginPx = mm2px(margin);
+  return (
+    <filter id="svgShadow">
+      <feOffset
+        id="svgOffset0"
+        result="svgOffset0"
+        in="SourceAlpha"
+        dy="0"
+        dx="0"
+      />
+      <feGaussianBlur
+        id="svgBlur0"
+        result="svgBlur0"
+        in="svgOffset0"
+        stdDeviation={`${marginPx / 4} ${marginPx / 4}`}
+      />
+      <feBlend
+        id="svgBlend0"
+        result="svgBlend0"
+        in="SourceGraphic"
+        in2="svgBlur0"
+      />
+    </filter>
+  );
+};
+
+ShadowDef.propTypes = {
+  margin: PropTypes.number,
+};
+
 const Workspace = ({
   pageSize,
   orientation,
@@ -22,41 +53,19 @@ const Workspace = ({
     heightPx + marginPx * 2
   }`;
   return (
-    <div className={styles.root}>
-      <svg
-        className={styles.canvas}
-        xmlns="http://www.w3.org/2000/svg"
-        version="1.1"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-        preserveAspectRatio="xMidYMid meet"
-        viewBox={viewBox}
-      >
-        <defs>
-          <filter id="svgShadow">
-            <feOffset
-              id="svgOffset0"
-              result="svgOffset0"
-              in="SourceAlpha"
-              dy="0"
-              dx="0"
-            />
-            <feGaussianBlur
-              id="svgBlur0"
-              result="svgBlur0"
-              in="svgOffset0"
-              stdDeviation={`${marginPx / 4} ${marginPx / 4}`}
-            />
-            <feBlend
-              id="svgBlend0"
-              result="svgBlend0"
-              in="SourceGraphic"
-              in2="svgBlur0"
-            />
-          </filter>
-        </defs>
-        <Page pageSize={pageSize} padding={padding} orientation={orientation} />
-      </svg>
-    </div>
+    <svg
+      className={styles.root}
+      viewBox={viewBox}
+      preserveAspectRatio="xMidYMid meet"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      version="1.1"
+    >
+      <defs>
+        <ShadowDef margin={margin} />
+      </defs>
+      <Page pageSize={pageSize} padding={padding} orientation={orientation} />
+    </svg>
   );
 };
 
