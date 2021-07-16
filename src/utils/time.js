@@ -4,3 +4,11 @@ export const delay = (ms) => {
     setTimeout(resolve, ms);
   });
 };
+
+export const timeout = (ms, message) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(message));
+    }, ms);
+  });
+};

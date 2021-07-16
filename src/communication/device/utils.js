@@ -3,6 +3,7 @@ import { checkVersion } from '../ebb/utils';
 import v from '../ebb/commands/v';
 import r from '../ebb/commands/r';
 import { DEVICE_EVENT_CONNECTED, DEVICE_EVENT_DISCONNECTED } from './consts';
+import { timeout } from '../../utils/time';
 
 export const executeCommand = async (
   deviceVersion,
@@ -12,12 +13,12 @@ export const executeCommand = async (
   ...params
 ) => {
   if (!command) {
-    throw new Error(`Invalid command`);
+    throw new Error(`Invalid command.`);
   }
   if (command.version) {
     if (!checkVersion(deviceVersion, command.version)) {
       throw new Error(
-        `${command.name} Command expects higher firmware version: ${command.version}`,
+        `${command.name} Command expects higher firmware version: ${command.version}.`,
       );
     }
   }
@@ -28,10 +29,13 @@ export const executeCommand = async (
   if (cmdStatus.done) return Promise.resolve();
   commandQueue.push(cmd);
   // otherwise queues this command and waiting msg from communication.device.
-  return new Promise((resolve, reject) => {
-    cmd.resolve = resolve;
-    cmd.reject = reject;
-  });
+  return Promise.race([
+    new Promise((resolve, reject) => {
+      cmd.resolve = resolve;
+      cmd.reject = reject;
+    }),
+    timeout(1000, 'EBB Command timeout.'),
+  ]);
 };
 
 export const selectFirstDevice = async (devices) => {

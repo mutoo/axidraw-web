@@ -48,6 +48,9 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
         throw new Error(`Unknown message type: ${message.type}`);
     }
   };
+  ws.onerror = () => {
+    emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Host is not available.');
+  };
   ws.onclose = (e) => {
     // eslint-disable-next-line no-console
     console.debug(`Device is closed: [${e.code}]${e.reason}`);
@@ -71,8 +74,11 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
       case 3003:
         emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Unknown message type.');
         break;
+      case 3004:
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Disconnect from client.');
+        break;
       case 1006:
-        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Host is not found.');
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Disconnect from server.');
         break;
       default:
         emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, e.reason);
@@ -92,7 +98,7 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
       wsSend({ type: 'command', command: message });
     },
     close() {
-      ws.close();
+      ws.close(3004);
     },
     get status() {
       return proxyStatus;

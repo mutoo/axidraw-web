@@ -20,7 +20,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
     setDeviceType,
     deviceVersion,
     device,
-    connectError,
+    connectionError,
     connectDevice,
     disconnectDevice,
   } = useDeviceConnector();
@@ -59,7 +59,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
             />{' '}
             <span>WebSocket</span>
           </label>
-          {connectError && <p>{connectError}</p>}
+          {connectionError && <p>{connectionError}</p>}
           {deviceType === DEVICE_TYPE_USB && (
             <>
               <button

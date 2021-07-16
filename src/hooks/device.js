@@ -18,7 +18,7 @@ export const useDeviceConnector = () => {
   const [deviceType, setDeviceType] = useState(DEVICE_TYPE_USB);
   const [deviceVersion, setDeviceVersion] = useState(null);
   const [device, setDevice] = useState(null);
-  const [connectError, setConnectError] = useState(null);
+  const [connectionError, setConnectionError] = useState(null);
 
   // switch device as per device type
   useEffect(() => {
@@ -28,7 +28,7 @@ export const useDeviceConnector = () => {
 
   // clear connection error
   useEffect(() => {
-    setConnectError(null);
+    setConnectionError(null);
   }, [device, deviceType, setDeviceStatus]);
 
   // auto disconnect previous device
@@ -49,7 +49,7 @@ export const useDeviceConnector = () => {
       setDeviceStatus(DEVICE_STATUS_DISCONNECTED);
       setDeviceVersion('');
       if (e) {
-        setConnectError(e);
+        setConnectionError(e);
       }
     };
     device?.on(DEVICE_EVENT_CONNECTED, onConnect);
@@ -67,12 +67,13 @@ export const useDeviceConnector = () => {
         try {
           await device.connectDevice(...args);
         } catch (e) {
-          setConnectError(e.toString());
+          setConnectionError(e.toString());
+          await device.disconnectDevice();
         }
       } else if (!device) {
-        setConnectError('Device is not created yet.');
+        setConnectionError('Device is not created yet.');
       } else {
-        setConnectError('Device is already connected yet.');
+        setConnectionError('Device is already connected yet.');
       }
     },
     [device],
@@ -85,10 +86,10 @@ export const useDeviceConnector = () => {
         await device.executeCommand(commands.r);
         await device.disconnectDevice();
       } catch (e) {
-        setConnectError(e.toString());
+        setConnectionError(e.toString());
       }
     } else {
-      setConnectError('Device is not connected yet.');
+      setConnectionError('Device is not connected yet.');
     }
   }, [device, deviceStatus]);
 
@@ -98,7 +99,7 @@ export const useDeviceConnector = () => {
     setDeviceType,
     deviceStatus,
     deviceVersion,
-    connectError,
+    connectionError,
     connectDevice,
     disconnectDevice,
   };

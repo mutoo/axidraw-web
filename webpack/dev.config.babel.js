@@ -23,6 +23,7 @@ export default merge(base, {
     open: true,
     openPage: [`https://localhost:${port}`],
     // allow public access in LAN
+    disableHostCheck: true,
     host: '0.0.0.0',
     port,
     https: {
