@@ -14,8 +14,8 @@ const Debugger = () => {
         onConnected={setDevice}
         onDisconnected={() => setDevice(null)}
       />
-      {device?.isConnected && <SimpleCommander device={device} />}
-      {device?.isConnected && <BatchCommander device={device} />}
+      {device && <SimpleCommander device={device} />}
+      {device && <BatchCommander device={device} />}
       <div>Build Mode: {process.env.NODE_ENV}</div>
     </div>
   );

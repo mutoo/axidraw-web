@@ -13,7 +13,7 @@ const Composer = () => {
         onConnected={setDevice}
         onDisconnected={() => setDevice(null)}
       />
-      {device?.isConnected && <MidiCommander device={device} />}
+      {device && <MidiCommander device={device} />}
       <div>Build Mode: {process.env.NODE_ENV}</div>
     </div>
   );

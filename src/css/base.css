@@ -1,4 +1,5 @@
 body {
+  @apply overscroll-none min-h-screen;
+
   background: linear-gradient(to left, #fff, #ece9e6);
-  overscroll-behavior: none;
 }

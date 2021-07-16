@@ -1,5 +1,8 @@
+import EventEmitter from 'events';
 import { checkVersion } from '../ebb/utils';
 import v from '../ebb/commands/v';
+import r from '../ebb/commands/r';
+import { DEVICE_EVENT_CONNECTED, DEVICE_EVENT_DISCONNECTED } from './consts';
 
 export const executeCommand = async (
   deviceVersion,
@@ -35,56 +38,78 @@ export const selectFirstDevice = async (devices) => {
   return devices[0];
 };
 
-export const createDeviceBind = ({
-  type,
-  connectDevice,
-  disconnectDevice,
-  sendToDevice,
-  checkDevice,
+export const createDeviceImpl = ({
+  isReady,
+  checkStatus,
+  send,
+  disconnect,
+  onDisconnected,
 }) => {
+  return {
+    isReady,
+    checkStatus,
+    send,
+    disconnect,
+    onDisconnected,
+  };
+};
+
+export const createDeviceBind = ({ type, connectDevice }) => {
   let device = null;
   let version = '';
+  const emitter = new EventEmitter();
   const commandQueue = [];
-  const sendToDeviceBind = (msg) => sendToDevice(device, msg);
-  const checkDeviceBind = () => checkDevice(device);
   const executedCommandBind = async (cmd, ...params) => {
-    await checkDeviceBind();
+    if (!device) throw new Error('Device is not connected yet');
+    device.checkStatus();
     return executeCommand(
       version,
-      sendToDeviceBind,
+      (msg) => device.send(msg),
       commandQueue,
       cmd,
       ...params,
     );
   };
   const connectDeviceBind = async (...args) => {
-    if (!device) {
+    if (!device?.isReady) {
+      // this will create a new device instance
       device = await connectDevice(commandQueue, ...args);
-      const ret = await executedCommandBind(v);
+      device.onDisconnected((e) => {
+        commandQueue.length = 0;
+        device = null;
+        version = '';
+        emitter.emit(DEVICE_EVENT_DISCONNECTED, e);
+      });
+      await executedCommandBind(r);
+      const versionResp = await executedCommandBind(v);
       // eslint-disable-next-line prefer-destructuring
-      version = ret.match(/\d\.\d\.\d/)[0];
+      version = versionResp.match(/\d\.\d\.\d/)[0];
+      emitter.emit(DEVICE_EVENT_CONNECTED);
     }
   };
   const disconnectDeviceBind = async () => {
-    if (device) {
-      await disconnectDevice(device);
+    if (device?.isReady) {
+      await device.disconnect();
     }
-    commandQueue.length = 0;
-    device = null;
-    version = '';
   };
   return {
-    type,
-    sendToDevice: sendToDeviceBind,
-    checkDevice: checkDeviceBind,
-    executeCommand: executedCommandBind,
     connectDevice: connectDeviceBind,
     disconnectDevice: disconnectDeviceBind,
+    executeCommand: executedCommandBind,
+    on(event, listener) {
+      emitter.on(event, listener);
+    },
+    off(event, listener) {
+      emitter.off(event, listener);
+    },
+    get type() {
+      return type;
+    },
     get version() {
       return version;
     },
     get isConnected() {
-      return !!version;
+      return device?.isReady();
     },
   };
 };

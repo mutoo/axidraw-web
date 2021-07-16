@@ -1,8 +1,12 @@
 import EventEmitter from 'events';
 import handleEBBMessages from '../ebb/messages/ebb';
-import { createDeviceBind } from './utils';
+import { createDeviceBind, createDeviceImpl } from './utils';
 import {
+  DEVICE_EVENT_DISCONNECTED,
   DEVICE_TYPE_WEBSOCKET,
+  WEBSOCKET_EVENT_CONNECTED,
+  WEBSOCKET_EVENT_DISCONNECTED,
+  WEBSOCKET_EVENT_MESSAGE,
   WEBSOCKET_STATUS_AUTHORIZED,
   WEBSOCKET_STATUS_CONNECTED,
   WEBSOCKET_STATUS_DISCONNECTED,
@@ -32,10 +36,13 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
         break;
       case 'ready':
         proxyStatus = WEBSOCKET_STATUS_STANDBY;
-        emitter.emit('connected');
+        emitter.emit(WEBSOCKET_EVENT_CONNECTED);
         break;
       case 'ebb':
-        emitter.emit('message', Uint8Array.from(message.resp.data));
+        emitter.emit(
+          WEBSOCKET_EVENT_MESSAGE,
+          Uint8Array.from(message.resp.data),
+        );
         break;
       default:
         throw new Error(`Unknown message type: ${message.type}`);
@@ -47,27 +54,39 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
     proxyStatus = WEBSOCKET_STATUS_DISCONNECTED;
     switch (e.code) {
       case 3000:
-        emitter.emit('close', 'Forbidden: password is incorrect.');
+        emitter.emit(
+          WEBSOCKET_EVENT_DISCONNECTED,
+          'Forbidden: password is incorrect.',
+        );
         break;
       case 3001:
-        emitter.emit('close', `Device is not available. ${e.reason}`);
+        emitter.emit(
+          WEBSOCKET_EVENT_DISCONNECTED,
+          `Device is not available. ${e.reason}`,
+        );
         break;
       case 3002:
-        emitter.emit('close', 'Device is not connected.');
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Device is not connected.');
         break;
       case 3003:
-        emitter.emit('close', 'Unknown message type.');
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Unknown message type.');
         break;
       case 1006:
-        emitter.emit('close', 'Host is not found.');
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Host is not found.');
         break;
       default:
-        emitter.emit('close', e.reason);
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, e.reason);
     }
   };
   return {
-    on(...args) {
-      emitter.on(...args);
+    onConnected(listener) {
+      emitter.on(WEBSOCKET_EVENT_CONNECTED, listener);
+    },
+    onMessage(listener) {
+      emitter.on(WEBSOCKET_EVENT_MESSAGE, listener);
+    },
+    onDisconnected(listener) {
+      emitter.on(WEBSOCKET_EVENT_DISCONNECTED, listener);
     },
     send(message) {
       wsSend({ type: 'command', command: message });
@@ -81,21 +100,6 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
   };
 };
 
-export const checkDevice = (device) => {
-  if (!device) {
-    throw new Error('Device is not connected');
-  }
-  if (device.status !== WEBSOCKET_STATUS_STANDBY) {
-    throw new Error('Device is not ready.');
-  }
-};
-
-export const sendToDevice = async (device, msg) => {
-  // eslint-disable-next-line no-console
-  console.debug('Send to communication.device: ', msg);
-  device.send(msg);
-};
-
 export const connectDevice =
   ({ devicePicker }) =>
   async (commandQueue, address, auth) => {
@@ -106,31 +110,48 @@ export const connectDevice =
       const messageHandler = handleEBBMessages(commandQueue);
       messageHandler.next();
       const proxy = createWSDeviceProxy(address, auth, devicePicker);
-      proxy.on('connected', () => {
-        resolve(proxy);
+      const emitter = new EventEmitter();
+      proxy.onConnected(() => {
+        resolve(
+          createDeviceImpl({
+            get isReady() {
+              return proxy.status === WEBSOCKET_STATUS_STANDBY;
+            },
+            checkStatus() {
+              if (proxy.status !== WEBSOCKET_STATUS_STANDBY) {
+                throw new Error('Device is not ready.');
+              }
+            },
+            send(message) {
+              // eslint-disable-next-line no-console
+              console.debug('Send to communication.device: ', message);
+              proxy.send(message);
+            },
+            disconnect() {
+              proxy.close();
+            },
+            onDisconnected(listener) {
+              emitter.on(DEVICE_EVENT_DISCONNECTED, listener);
+            },
+          }),
+        );
       });
-      proxy.on('message', (message) => {
+      proxy.onMessage((message) => {
         messageHandler.next(message);
       });
-      proxy.on('close', (e) => {
+      proxy.onDisconnected((e) => {
         messageHandler.return();
+        emitter.emit(DEVICE_EVENT_DISCONNECTED, e);
+        // eslint-disable-next-line no-console
+        console.debug('Device is closed', e);
         reject(e);
       });
     });
   };
 
-export const disconnectDevice = async (device) => {
-  device.close();
-  // eslint-disable-next-line no-console
-  console.debug('Device is closed');
-};
-
 export default function createWSDevice({ devicePicker }) {
   return createDeviceBind({
     type: DEVICE_TYPE_WEBSOCKET,
     connectDevice: connectDevice({ devicePicker }),
-    disconnectDevice,
-    checkDevice,
-    sendToDevice,
   });
 }

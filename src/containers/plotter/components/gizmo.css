@@ -4,6 +4,8 @@
 
 .axis {
   stroke-width: 1mm;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
 .x {

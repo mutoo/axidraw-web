@@ -1,25 +1,11 @@
+import EventEmitter from 'events';
 import { encode } from '../ebb/utils';
 import handleEBBMessages from '../ebb/messages/ebb';
-import { createDeviceBind } from './utils';
-import { DEVICE_TYPE_USB } from './consts';
+import { createDeviceBind, createDeviceImpl } from './utils';
+import { DEVICE_EVENT_DISCONNECTED, DEVICE_TYPE_USB } from './consts';
 
 export const TRANSFER_ENDPOINT = 2;
 export const TRANSFER_PACKET_SIZE = 64;
-
-export const checkDevice = (device) => {
-  if (!device) {
-    throw new Error('Device is not connected');
-  }
-  if (!device.opened) {
-    throw new Error('Device is not opened');
-  }
-  const claimedInterface = device.configuration.interfaces.find(
-    (i) => i.claimed,
-  );
-  if (claimedInterface?.interfaceNumber !== 1) {
-    throw new Error('Device interface is not claimed');
-  }
-};
 
 export const connectDevice =
   ({ devicePicker }) =>
@@ -28,6 +14,7 @@ export const connectDevice =
       throw new Error('WebUSB feature is not supported in this browser!');
     }
     let device;
+    const emitter = new EventEmitter();
     const devices = await navigator.usb.getDevices();
     devices.forEach((p) => {
       // eslint-disable-next-line no-console
@@ -81,38 +68,55 @@ export const connectDevice =
           messageHandler.next(response.data.buffer);
         }
       } catch (e) {
+        messageHandler.return();
         // eslint-disable-next-line no-console
         console.debug(e.message);
-        messageHandler.return();
+        emitter.emit(DEVICE_EVENT_DISCONNECTED, e.message);
       }
     });
-    return device;
+    return createDeviceImpl({
+      get isReady() {
+        return (
+          device?.configuration.interfaces.findIndex((i) => i.claimed) >= 0
+        );
+      },
+      checkStatus() {
+        if (!device.opened) {
+          throw new Error('Device is not opened');
+        }
+        const claimedInterface = device.configuration.interfaces.find(
+          (i) => i.claimed,
+        );
+        if (!claimedInterface) {
+          throw new Error('Device interface is not claimed');
+        }
+      },
+      async send(message) {
+        // eslint-disable-next-line no-console
+        console.debug('Send to communication.device: ', message);
+        const data = encode(message);
+        const result = await device.transferOut(TRANSFER_ENDPOINT, data);
+        if (result.status !== 'ok') {
+          throw new Error('Can not sent command to communication.device.');
+        }
+      },
+      async disconnect() {
+        // eslint-disable-next-line no-console
+        console.debug('Closing communication.device...');
+        await device.close();
+        // eslint-disable-next-line no-console
+        console.debug('Device is closed');
+        // the disconnected event will be trigger from the message handler
+      },
+      onDisconnected(listener) {
+        emitter.on(DEVICE_EVENT_DISCONNECTED, listener);
+      },
+    });
   };
-
-export const sendToDevice = async (device, msg) => {
-  // eslint-disable-next-line no-console
-  console.debug('Send to communication.device: ', msg);
-  const data = encode(msg);
-  const result = await device.transferOut(TRANSFER_ENDPOINT, data);
-  if (result.status !== 'ok') {
-    throw new Error('Can not sent command to communication.device.');
-  }
-};
-
-export const disconnectDevice = async (device) => {
-  // eslint-disable-next-line no-console
-  console.debug('Closing communication.device...');
-  await device.close();
-  // eslint-disable-next-line no-console
-  console.debug('Device is closed');
-};
 
 export default function createUSBDevice({ devicePicker }) {
   return createDeviceBind({
     type: DEVICE_TYPE_USB,
     connectDevice: connectDevice({ devicePicker }),
-    disconnectDevice,
-    checkDevice,
-    sendToDevice,
   });
 }
