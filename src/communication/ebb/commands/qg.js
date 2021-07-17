@@ -1,7 +1,10 @@
 import { createCommand, readUntil, toInt, transformResult } from '../utils';
 import { ENDING_CR_NL } from '../constants';
 
+export const cmd = 'QG';
+
 export default createCommand(
+  cmd,
   'Query general',
   function* () {
     const dataIn = yield `QG\r`;

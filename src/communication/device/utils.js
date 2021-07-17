@@ -27,12 +27,10 @@ export const executeCommand = async (
   await sendToDevice(cmdStatus.value);
   // if that command is done without taking any response, resolve it immediately.
   if (cmdStatus.done) return Promise.resolve();
-  commandQueue.push(cmd);
   // otherwise queues this command and waiting msg from communication.device.
   return Promise.race([
     new Promise((resolve, reject) => {
-      cmd.resolve = resolve;
-      cmd.reject = reject;
+      commandQueue.push({ resolve, reject, parser: cmd });
     }),
     timeout(1000, 'EBB Command timeout.'),
   ]);

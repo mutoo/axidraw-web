@@ -50,7 +50,17 @@ const SimpleCommander = ({ device }) => {
         </select>
       </label>
       <label className={formStyles.inputLabel}>
-        <span>Params:</span>
+        <span>
+          Params
+          <a
+            href={`http://evil-mad.github.io/EggBot/ebb.html#${commands[cmd].cmd}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            [?]
+          </a>
+          :
+        </span>
         <input
           type="text"
           value={params}

@@ -2,11 +2,14 @@ import { cmdWithOptionalParams, createCommand } from '../utils';
 import { EXECUTION_FIFO } from '../constants';
 import handleOKMessage from '../messages/ok';
 
+export const cmd = 'S2';
+
 export default createCommand(
+  cmd,
   'General RC Servo output',
   function* (position, outputPin, rate, delay) {
     const dataIn = yield cmdWithOptionalParams(
-      `S2,${position},${outputPin}`,
+      `${cmd},${position},${outputPin}`,
       rate,
       delay,
     );

@@ -1,10 +1,13 @@
 import { createCommand } from '../utils';
 import handleOKMessage from '../messages/ok';
 
+export const cmd = 'BL';
+
 export default createCommand(
+  cmd,
   'Enter bootloader',
   function* () {
-    const dataIn = yield 'BL\r';
+    const dataIn = yield `${cmd}\r`;
     return yield* handleOKMessage(dataIn);
   },
   {

@@ -1,7 +1,8 @@
 export const toInt = (i) => parseInt(i, 10);
 
-export const createCommand = (title, create, options) => {
+export const createCommand = (cmd, title, create, options) => {
   return {
+    cmd,
     title,
     create,
     ...options,

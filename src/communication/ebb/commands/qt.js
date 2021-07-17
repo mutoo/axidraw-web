@@ -1,10 +1,13 @@
 import { createCommand, readUntil, transformResult } from '../utils';
 import { ENDING_OK_CR_NL } from '../constants';
 
+export const cmd = 'QT';
+
 export default createCommand(
+  cmd,
   'Query EBB nickname tag',
   function* () {
-    const dataIn = yield 'QT\r';
+    const dataIn = yield `${cmd}\r`;
     // example response: "East EBB\r\nOK\r\n"
     const parsed = yield* readUntil(ENDING_OK_CR_NL, dataIn);
     return transformResult(parsed, (result) =>

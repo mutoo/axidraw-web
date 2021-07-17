@@ -1,10 +1,13 @@
 import { createCommand, readUntil, toInt, transformResult } from '../utils';
 import { ENDING_NL_CR } from '../constants';
 
+export const cmd = 'QM';
+
 export default createCommand(
+  cmd,
   'Query motors',
   function* () {
-    const dataIn = yield 'QM\r';
+    const dataIn = yield `${cmd}\r`;
     // example response: "QM,0,0,0,0\n\r"
     const parsed = yield* readUntil(ENDING_NL_CR, dataIn);
     return transformResult(parsed, (result) => {

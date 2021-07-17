@@ -17,7 +17,7 @@ export default function* handleEBBMessages(commandQueue) {
           }
         }
         const cmd = commandQueue[0];
-        const handler = errorHandler || cmd;
+        const handler = errorHandler || cmd.parser;
         // pass the current buffer to cmd,
         // and let it consume what it needs.
         const cmdStatus = handler.next(buffer);

@@ -7,10 +7,13 @@ import {
 } from '../utils';
 import { ENDING_OK_CR_NL } from '../constants';
 
+export const cmd = 'ES';
+
 export default createCommand(
+  cmd,
   'E stop',
   function* (disableMotors) {
-    const dataIn = yield cmdWithOptionalParams('ES', disableMotors);
+    const dataIn = yield cmdWithOptionalParams(cmd, disableMotors);
     // example response: "0,0,0,0,0\n\rOK\r\n"
     const parsed = yield* readUntil(ENDING_OK_CR_NL, dataIn);
     return transformResult(parsed, (result) => {

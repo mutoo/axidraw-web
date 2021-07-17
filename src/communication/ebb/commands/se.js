@@ -2,11 +2,14 @@ import { cmdWithOptionalParams, createCommand } from '../utils';
 import { EXECUTION_FIFO } from '../constants';
 import handleOKMessage from '../messages/ok';
 
+export const cmd = 'SE';
+
 export default createCommand(
+  cmd,
   'Set engraver',
   function* (state, power, useMotionQueue) {
     const dataIn = yield cmdWithOptionalParams(
-      `SE,${state}`,
+      `${cmd},${state}`,
       power,
       useMotionQueue,
     );

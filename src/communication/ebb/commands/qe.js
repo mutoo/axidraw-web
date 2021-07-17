@@ -1,7 +1,10 @@
 import { createCommand, readUntil, toInt, transformResult } from '../utils';
 import { ENDING_OK_CR_NL } from '../constants';
 
+export const cmd = 'QE';
+
 export default createCommand(
+  cmd,
   'Query motor enable',
   function* () {
     const dataIn = yield `QE\r`;

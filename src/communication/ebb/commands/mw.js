@@ -1,7 +1,9 @@
 import { createCommand } from '../utils';
 import handleOKMessage from '../messages/ok';
 
-export default createCommand('Memory Write', function* (address, data) {
-  const dataIn = yield `MW,${address},${data}\r`;
+export const cmd = 'MW';
+
+export default createCommand(cmd, 'Memory Write', function* (address, data) {
+  const dataIn = yield `${cmd},${address},${data}\r`;
   return yield* handleOKMessage(dataIn);
 });

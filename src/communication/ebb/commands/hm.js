@@ -2,11 +2,14 @@ import { cmdWithOptionalParams, createCommand } from '../utils';
 import { EXECUTION_FIFO } from '../constants';
 import handleOKMessage from '../messages/ok';
 
+export const cmd = 'HM';
+
 export default createCommand(
+  cmd,
   'Home or absolute move',
   function* (stepFrequency, axis1, axis2) {
     const dataIn = yield cmdWithOptionalParams(
-      `HM,${stepFrequency}`,
+      `${cmd},${stepFrequency}`,
       axis1,
       axis2,
     );

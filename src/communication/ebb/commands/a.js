@@ -1,10 +1,13 @@
 import { createCommand, readUntil, toInt, transformResult } from '../utils';
 import { ENDING_CR_NL } from '../constants';
 
+export const cmd = 'A';
+
 export default createCommand(
+  cmd,
   'Get analog values',
   function* () {
-    const dataIn = yield 'A\r';
+    const dataIn = yield `${cmd}\r`;
     // example response: "A,00:0713,02:0241,05:0089:09:1004\r\n"
     const parsed = yield* readUntil(ENDING_CR_NL, dataIn);
     return transformResult(parsed, (result) => {

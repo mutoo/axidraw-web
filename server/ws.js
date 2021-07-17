@@ -1,13 +1,13 @@
 import WebSocket from 'ws';
 import { connectToDevice, listDevices } from './serial-port';
+import {
+  WEBSOCKET_STATUS_AUTHORIZED,
+  WEBSOCKET_STATUS_CONNECTED,
+  WEBSOCKET_STATUS_DISCONNECTED,
+  WEBSOCKET_STATUS_STANDBY,
+} from './consts';
 
 const authCode = process.env.AXIDRAW_AUTH || 'axidraw-web';
-
-export const WEBSOCKET_STATUS_DISCONNECTED =
-  'axidraw_web_ws_status_disconnected';
-export const WEBSOCKET_STATUS_CONNECTED = 'axidraw_web_ws_status_connected';
-export const WEBSOCKET_STATUS_AUTHORIZED = 'axidraw_web_ws_status_authorized';
-export const WEBSOCKET_STATUS_STANDBY = 'axidraw_web_ws_status_standby';
 
 export default function setupWebSocket(app, server) {
   const wss = new WebSocket.Server({ server, path: '/axidraw' });
@@ -52,6 +52,7 @@ export default function setupWebSocket(app, server) {
           break;
         case 'command':
           if (port) {
+            // eslint-disable-next-line no-console
             console.log(`Client: ${data.command}`);
             port.write(data.command);
           } else {
