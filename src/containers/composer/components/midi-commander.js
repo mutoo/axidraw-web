@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import formStyles from 'components/ui/form.css';
+import Button from 'components/ui/button/button';
+import Alert from 'components/ui/alert/alert';
 import * as commands from 'communication/ebb';
 import { delay } from 'utils/time';
 import { parseNote, planSteps, songToSteps } from '../utils';
@@ -81,7 +83,6 @@ const MidiCommander = ({ device }) => {
     <form className={formStyles.root} onSubmit={sendCommands}>
       <h3>Midi Commander</h3>
       <p>Compose notes and send commands to device.</p>
-      <p>Tip: press PRG button on device to stop playing.</p>
       <label className={formStyles.inputLabel}>
         <span>Song:</span>
         <select
@@ -147,17 +148,20 @@ const MidiCommander = ({ device }) => {
         />{' '}
         <span>PenDown</span>
       </label>
-      {!playing && <button type="submit">Play</button>}
-      {playing && (
-        <button
-          type="button"
-          onClick={() => {
+      <Button
+        variant="primary"
+        type={playing ? 'button' : 'submit'}
+        onClick={() => {
+          if (playing) {
             vPRG.current = true;
-          }}
-        >
-          Stop
-        </button>
-      )}
+          }
+        }}
+      >
+        {playing ? 'Stop' : 'Play'}
+      </Button>
+      <Alert type="info">
+        Tip: you could also press the PRG button on device to stop playing.
+      </Alert>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>
         <textarea rows="3" defaultValue={results} readOnly />

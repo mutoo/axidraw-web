@@ -10,6 +10,8 @@ import {
   DEVICE_TYPE_WEBSOCKET,
 } from 'communication/device/consts';
 import formStyles from 'components/ui/form.css';
+import Button from '../ui/button/button';
+import Alert from '../ui/alert/alert';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
@@ -59,26 +61,26 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
             />{' '}
             <span>WebSocket</span>
           </label>
-          {connectionError && <p>{connectionError}</p>}
+          {connectionError && <Alert type={'alert'}>{connectionError}</Alert>}
           {deviceType === DEVICE_TYPE_USB && (
-            <>
-              <button
+            <div className="grid grid-cols-2 gap-6">
+              <Button
                 type="button"
                 onClick={() => {
                   connectDevice(true);
                 }}
               >
                 Pair
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   connectDevice();
                 }}
               >
                 Connect
-              </button>
-            </>
+              </Button>
+            </div>
           )}
           {deviceType === DEVICE_TYPE_WEBSOCKET && (
             <>
@@ -98,27 +100,27 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
                   onChange={(e) => setWSAuth(e.target.value)}
                 />
               </label>
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   connectDevice(wsAddress, wsAuth);
                 }}
               >
                 Connect
-              </button>
+              </Button>
             </>
           )}
         </>
       )}
       {deviceStatus === DEVICE_STATUS_CONNECTED && (
         <>
-          <p>
-            Device Type: {deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}
-          </p>
-          <p>Device Version: {deviceVersion}</p>
-          <button type="button" onClick={() => disconnectDevice()}>
-            Disconnect
-          </button>
+          <div className="grid grid-flow-col items-center gap-4">
+            <p>Type: {deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}</p>
+            <p>Version: {deviceVersion}</p>
+            <Button type="button" onClick={() => disconnectDevice()}>
+              Disconnect
+            </Button>
+          </div>
         </>
       )}
     </>

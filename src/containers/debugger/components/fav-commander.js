@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
+import Button from 'components/ui/button/button';
 
 const frequentlyCommands = [
   {
@@ -63,7 +64,7 @@ const FavCommander = ({ device }) => {
         {frequentlyCommands.map((cmd) => {
           const title = cmd.title || cmd.cmd.title;
           return (
-            <button
+            <Button
               key={title}
               type="button"
               onClick={() => {
@@ -71,7 +72,7 @@ const FavCommander = ({ device }) => {
               }}
             >
               {title}
-            </button>
+            </Button>
           );
         })}
       </div>

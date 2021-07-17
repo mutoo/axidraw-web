@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
+import Button from 'components/ui/button/button';
 
 const BatchCommander = ({ device }) => {
   const [batch, setBatch] = useState('');
@@ -44,7 +45,7 @@ const BatchCommander = ({ device }) => {
           onChange={(e) => setBatch(e.target.value)}
         />
       </label>
-      <button type="submit">Send</button>
+      <Button type="submit">Send</Button>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>
         <textarea rows="3" defaultValue={results} readOnly />

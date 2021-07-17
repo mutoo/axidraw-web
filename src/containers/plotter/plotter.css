@@ -5,7 +5,7 @@
 }
 
 .panel {
-  @apply fixed inset-0 text-base px-8;
+  @apply fixed inset-0 text-base;
 
   left: auto;
   width: 450px;

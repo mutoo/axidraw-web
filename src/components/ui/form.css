@@ -9,6 +9,10 @@
   span {
     @apply ml-2;
   }
+
+  input[disabled] {
+    @apply bg-form-bg-disabled;
+  }
 }
 
 .inputLabel {
@@ -16,5 +20,11 @@
 
   span {
     @apply mb-2;
+  }
+
+  input[disabled],
+  select[disabled],
+  textarea[disabled] {
+    @apply bg-form-bg-disabled;
   }
 }

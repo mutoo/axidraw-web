@@ -1,5 +1,5 @@
 body {
-  @apply overscroll-none min-h-screen;
+  @apply overscroll-none min-h-screen font-roboto;
 
   background: linear-gradient(to left, #fff, #ece9e6);
 }

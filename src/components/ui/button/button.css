@@ -1,0 +1,22 @@
+.root {
+  @apply inline-block px-2 py-2 rounded;
+  @apply whitespace-nowrap leading-none text-black;
+  @apply bg-button-secondary-normal hover:bg-button-secondary-hover focus:bg-button-secondary-active;
+
+  &[disabled] {
+    @apply text-button-text-disabled;
+  }
+}
+
+.primary {
+  @apply bg-button-primary-normal hover:bg-button-primary-hover focus:bg-button-primary-active;
+  @apply text-button-text-primary;
+
+  &[disabled] {
+    @apply bg-button-secondary-normal text-button-text-disabled;
+  }
+}
+
+a.root {
+  @apply no-underline cursor-pointer;
+}

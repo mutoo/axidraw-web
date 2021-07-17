@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import formStyles from 'components/ui/form.css';
+import Button from 'components/ui/button/button';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import styles from './preview.css';
@@ -34,14 +35,16 @@ const Preview = observer(({ page, work }) => {
             work.loadFromFile(files[0]);
           }}
         />
-        <button
-          type="button"
-          onClick={() => {
-            fileInputRef.current?.click();
-          }}
-        >
-          Load SVG
-        </button>
+        <div className="flex my-4 justify-center">
+          <Button
+            variant="primary"
+            onClick={() => {
+              fileInputRef.current?.click();
+            }}
+          >
+            Load SVG
+          </Button>
+        </div>
       </div>
       <p>
         Or simply <b>Drag & Drop</b> your svg into the page area.
@@ -149,9 +152,7 @@ const Preview = observer(({ page, work }) => {
       </div>
       <div>
         <p>Plan the motion before sending it to the plotter.</p>
-        <button type="button" id="go-planning">
-          Go
-        </button>
+        <Button>Next</Button>
       </div>
     </div>
   );

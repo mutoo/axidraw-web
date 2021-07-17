@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
+import Button from 'components/ui/button/button';
 
 const commandList = Object.keys(commands);
 
@@ -67,7 +68,7 @@ const SimpleCommander = ({ device }) => {
           onChange={(e) => setParams(e.target.value)}
         />
       </label>
-      <button type="submit">Send</button>
+      <Button type="submit">Send</Button>
       <label className={formStyles.inputLabel}>
         <span>Result:</span>
         <textarea rows="3" defaultValue={result} readOnly />
