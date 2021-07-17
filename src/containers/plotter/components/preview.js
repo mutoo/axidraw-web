@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import formStyles from 'components/ui/form.css';
 import classNames from 'classnames';
@@ -16,14 +16,30 @@ import {
   pageSizes,
 } from '../presenters/page';
 
-const Preview = observer(({ page }) => {
+const Preview = observer(({ page, work }) => {
+  const fileInputRef = useRef(null);
   return (
     <div className={styles.root}>
       <h3>Preview</h3>
       <p>In this phase, you could load svg and set up the page.</p>
       <div>
-        <input type="file" accept="image/svg+xml" style={{ display: 'none' }} />
-        <button type="button" id="file-btn">
+        <input
+          className="hidden"
+          type="file"
+          accept="image/svg+xml"
+          ref={fileInputRef}
+          onChange={async (e) => {
+            const { files } = e.target;
+            if (!files.length) return;
+            work.loadFromFile(files[0]);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            fileInputRef.current?.click();
+          }}
+        >
           Load SVG
         </button>
       </div>
@@ -120,8 +136,16 @@ const Preview = observer(({ page }) => {
           <option value={PAGE_ALIGNMENT_VERTICAL_CENTER}>Center</option>
           <option value={PAGE_ALIGNMENT_VERTICAL_BOTTOM}>Bottom</option>
         </select>
-        <h4 className="col-span-2">File Information:</h4>
-        <textarea className="col-span-2">test</textarea>
+        {work.fileInfo && (
+          <>
+            <h4 className="col-span-2">File Information:</h4>
+            <textarea
+              className="col-span-2"
+              defaultValue={JSON.stringify(work.fileInfo, null, 2)}
+              readOnly
+            />
+          </>
+        )}
       </div>
       <div>
         <p>Plan the motion before sending it to the plotter.</p>
@@ -135,6 +159,7 @@ const Preview = observer(({ page }) => {
 
 Preview.propTypes = {
   page: PropTypes.object,
+  work: PropTypes.object,
 };
 
 export default Preview;

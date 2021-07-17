@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
-import svgToLines from '../../../plotter/parser/svg-to-lines';
-import { mm2px } from '../../../math/svg';
-import plan from '../../../plotter/planner';
+import { mm2px } from 'math/svg';
+import svgToLines from 'plotter/parser/svg-to-lines';
+import plan from 'plotter/planner';
 import { PAGE_ORIENTATION_LANDSCAPE } from './page';
 
 const createWork = () =>
@@ -9,8 +9,16 @@ const createWork = () =>
     svgContent: null,
     lines: null,
     motions: null,
-    loadSVGContent(svg) {
-      this.svgContent = svg;
+    fileInfo: null,
+    loadFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        this.svgContent = ev.target.result;
+      };
+      reader.readAsText(file);
+    },
+    updateFileInfo(info) {
+      this.fileInfo = info;
     },
     parseSVG(svgEl) {
       this.lines = svgToLines(svgEl);
@@ -29,4 +37,4 @@ const createWork = () =>
     },
   });
 
-export default createWork();
+export default createWork;

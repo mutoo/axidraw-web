@@ -50,8 +50,8 @@ export const pageSizes = [
 
 export const defaultPageSize = pageSizes[0];
 
-const createPageSetup = () => {
-  return makeAutoObservable({
+const createPageSetup = () =>
+  makeAutoObservable({
     size: defaultPageSize,
     padding: defaultPageSize.defaultPadding,
     orientation: PAGE_ORIENTATION_LANDSCAPE,
@@ -99,7 +99,7 @@ const createPageSetup = () => {
         [PAGE_ALIGNMENT_VERTICAL_TOP]: 'YMin',
         [PAGE_ALIGNMENT_VERTICAL_CENTER]: 'YMid',
         [PAGE_ALIGNMENT_VERTICAL_BOTTOM]: 'YMax',
-      }[this.alignment.horizontal];
+      }[this.alignment.vertical];
       return `${alignmentX}${alignmentY} meet`;
     },
     get screenToPageMatrix() {
@@ -116,6 +116,5 @@ const createPageSetup = () => {
       return rotateMatrix.multiply(translateMatrix).multiply(scaleMatrix);
     },
   });
-};
 
 export default createPageSetup;
