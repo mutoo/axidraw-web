@@ -1,7 +1,7 @@
-import L from './cmd-l.js';
-import { stepXY, storeXY } from './steppers.js';
-import { transformerXY } from './transformers.js';
-import { createPathCommand, normalize } from './utils.js';
+import L from './cmd-l';
+import { stepXY, storeXY } from './steppers';
+import { transformerXY } from './transformers';
+import { createPathCommand, normalize } from './utils';
 
 export default createPathCommand('M', function* (command, params, context) {
   const [x, y, ...rest] = params;

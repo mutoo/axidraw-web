@@ -1,8 +1,8 @@
 /* eslint-disable prefer-destructuring */
-import svgArcToLines from './svg-arc-to-lines.js';
-import svgBezierToLines from './svg-bezier-to-lines.js';
-import { quadToCubicBezierControlPoints, transformLine } from './svg-math.js';
-import svgPathParser from './svg-path-parser/index.js';
+import svgArcToLines from './svg-arc-to-lines';
+import svgBezierToLines from './svg-bezier-to-lines';
+import { quadToCubicBezierControlPoints, transformLine } from './svg-math';
+import svgPathParser from './svg-path-parser/index';
 
 export default function* svgPathToLines(svgPath, opt) {
   const pathDef = svgPath.getAttribute('d');

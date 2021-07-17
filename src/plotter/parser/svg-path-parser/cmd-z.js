@@ -1,5 +1,5 @@
-import { resetXY } from './steppers.js';
-import { createPathCommand } from './utils.js';
+import { resetXY } from './steppers';
+import { createPathCommand } from './utils';
 
 export default createPathCommand('Z', function* (command, params, context) {
   resetXY(params, context);

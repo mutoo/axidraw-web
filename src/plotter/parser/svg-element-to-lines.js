@@ -1,6 +1,6 @@
-import svgPathToLines from './svg-path-to-lines.js';
-import svgElementToPath from './svg-element-to-path.js';
-import svgPointsToLines from './svg-points-to-lines.js';
+import svgPathToLines from './svg-path-to-lines';
+import svgElementToPath from './svg-element-to-path';
+import svgPointsToLines from './svg-points-to-lines';
 
 export default function* svgElementToLines(svgEl, opt) {
   switch (svgEl.nodeName) {

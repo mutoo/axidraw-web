@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { observer } from 'mobx-react-lite';
 import Page from './page';
 import styles from './workspace.css';
 import { mm2px } from '../../../math/svg';
-import { getHeight, getWidth } from '../utils/page';
 
 export const ShadowDef = ({ margin }) => {
   const marginPx = mm2px(margin);
@@ -37,18 +37,10 @@ ShadowDef.propTypes = {
   margin: PropTypes.number,
 };
 
-const Workspace = ({
-  pageSize,
-  orientation,
-  padding,
-  margin,
-  fitPage,
-  alignmentHorizontal,
-  alignmentVertical,
-}) => {
+const Workspace = observer(({ margin, page }) => {
   const marginPx = mm2px(margin);
-  const widthPx = mm2px(getWidth(pageSize, orientation));
-  const heightPx = mm2px(getHeight(pageSize, orientation));
+  const widthPx = mm2px(page.width);
+  const heightPx = mm2px(page.height);
   const viewBox = `${-marginPx} ${-marginPx} ${widthPx + marginPx * 2} ${
     heightPx + marginPx * 2
   }`;
@@ -64,19 +56,14 @@ const Workspace = ({
       <defs>
         <ShadowDef margin={margin} />
       </defs>
-      <Page pageSize={pageSize} padding={padding} orientation={orientation} />
+      <Page page={page} />
     </svg>
   );
-};
+});
 
 Workspace.propTypes = {
-  pageSize: PropTypes.object,
-  orientation: PropTypes.oneOf(['landscape', 'portrait']),
-  padding: PropTypes.number,
   margin: PropTypes.number,
-  fitPage: PropTypes.bool,
-  alignmentHorizontal: PropTypes.oneOf(['left', 'center', 'right']),
-  alignmentVertical: PropTypes.oneOf(['top', 'center', 'bottom']),
+  page: PropTypes.object,
 };
 
 export default Workspace;

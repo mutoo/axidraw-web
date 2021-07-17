@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { mm2px } from 'math/svg';
-import { getHeight, getWidth } from '../utils/page';
+import { observer } from 'mobx-react-lite';
 import Gizmo from './gizmo';
 import styles from './page.css';
 
-const Page = ({ pageSize, orientation, padding }) => {
-  const widthPx = mm2px(getWidth(pageSize, orientation));
-  const heightPx = mm2px(getHeight(pageSize, orientation));
-  const paddingPx = mm2px(padding);
+const Page = observer(({ page }) => {
+  const widthPx = mm2px(page.width);
+  const heightPx = mm2px(page.height);
+  const paddingPx = mm2px(page.padding);
   return (
     <g>
       <rect
@@ -25,15 +25,13 @@ const Page = ({ pageSize, orientation, padding }) => {
         x={paddingPx}
         y={paddingPx}
       />
-      <Gizmo pageSize={pageSize} orientation={orientation} />
+      <Gizmo page={page} />
     </g>
   );
-};
+});
 
 Page.propTypes = {
-  pageSize: PropTypes.object,
-  orientation: PropTypes.oneOf(['landscape', 'portrait']),
-  padding: PropTypes.number,
+  page: PropTypes.object,
 };
 
 export default Page;

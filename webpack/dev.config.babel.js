@@ -1,6 +1,8 @@
 import { merge } from 'webpack-merge';
 import fs from 'fs';
 import path from 'path';
+import webpack from 'webpack';
+import ReactRefreshPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import base from './config/base';
 import setupWebSocket from '../server/ws';
 
@@ -38,4 +40,5 @@ export default merge(base, {
       });
     },
   },
+  plugins: [new webpack.HotModuleReplacementPlugin(), new ReactRefreshPlugin()],
 });

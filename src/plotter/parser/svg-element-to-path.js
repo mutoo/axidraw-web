@@ -1,5 +1,5 @@
-import svgPathToLines from './svg-path-to-lines.js';
-import { createSVGElement, getAttrVal } from './svg-utils.js';
+import svgPathToLines from './svg-path-to-lines';
+import { createSVGElement, getAttrVal } from './svg-utils';
 
 export default function* svgElementToPath(svgEl, opt) {
   let pathDef = '';

@@ -1,5 +1,5 @@
-import { transformLine } from './svg-math.js';
-import { getAttrVal } from './svg-utils.js';
+import { transformLine } from './svg-math';
+import { getAttrVal } from './svg-utils';
 
 // eslint-disable-next-line no-unused-vars
 export default function* svgPointsToLines(svgEl, opt) {

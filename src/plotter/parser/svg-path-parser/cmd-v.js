@@ -1,6 +1,6 @@
-import { createPathCommand, normalize } from './utils.js';
-import { transformerY } from './transformers.js';
-import { stepY } from './steppers.js';
+import { createPathCommand, normalize } from './utils';
+import { transformerY } from './transformers';
+import { stepY } from './steppers';
 
 export default createPathCommand('V', function* (command, params, context) {
   if (params.length !== 1) {

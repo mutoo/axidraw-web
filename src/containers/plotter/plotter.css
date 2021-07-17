@@ -3,3 +3,11 @@
 
   right: 450px;
 }
+
+.panel {
+  @apply fixed inset-0 text-base px-8;
+
+  left: auto;
+  width: 450px;
+  background-color: #efefef;
+}

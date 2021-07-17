@@ -1,13 +1,13 @@
-import M from './cmd-m.js';
-import L from './cmd-l.js';
-import H from './cmd-h.js';
-import V from './cmd-v.js';
-import C from './cmd-c.js';
-import S from './cmd-s.js';
-import Q from './cmd-q.js';
-import T from './cmd-t.js';
-import A from './cmd-a.js';
-import Z from './cmd-z.js';
+import M from './cmd-m';
+import L from './cmd-l';
+import H from './cmd-h';
+import V from './cmd-v';
+import C from './cmd-c';
+import S from './cmd-s';
+import Q from './cmd-q';
+import T from './cmd-t';
+import A from './cmd-a';
+import Z from './cmd-z';
 
 export const pathCommands = {
   M,

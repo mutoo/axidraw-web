@@ -1,18 +1,17 @@
-import { distSQ } from '../../math/geom.js';
-import { defaultPageSize } from './paper.js';
-import { createScreenToPaperMatrix, mm2px } from '../../math/svg.js';
-import { transformLine } from './parser/svg-math.js';
+import { distSQ } from '../math/geom';
+import { mm2px } from '../math/svg';
+import { transformLine } from './parser/svg-math';
 
 export const MOTION_PEN_UP = 1;
 export const MOTION_PEN_DOWN = 0;
 
 export function* walkLines(lines, opt) {
   // assume the pen always start from HOME position with UP state
-  const { screenToPaperMatrix, origin } = opt;
+  const { screenToPageMatrix, origin } = opt;
   const context = { x: origin[0], y: origin[1], pen: MOTION_PEN_UP };
   const connectedErrorSq = mm2px(opt.connectedError ** 2);
   const toPaperLine = (line) =>
-    transformLine([line[0], line[1]], [line[2], line[3]], screenToPaperMatrix);
+    transformLine([line[0], line[1]], [line[2], line[3]], screenToPageMatrix);
 
   for (const line of lines) {
     const motion = [context.x, context.y, line[0], line[1]];
@@ -32,11 +31,10 @@ export function* walkLines(lines, opt) {
   ];
 }
 
-export const defaultPlanOption = {
-  connectedError: 0.2,
-  screenToPaperMatrix: createScreenToPaperMatrix('landscape', defaultPageSize),
-  origin: [0, 0],
+export const defaultPlanOptions = {
+  connectedError: 0.2, // unit mm
 };
+
 export default function plan(lines, opt = {}) {
-  return [...walkLines(lines, { ...defaultPlanOption, ...opt })];
+  return [...walkLines(lines, { ...defaultPlanOptions, ...opt })];
 }

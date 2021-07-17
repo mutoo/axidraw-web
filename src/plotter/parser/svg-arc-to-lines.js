@@ -4,7 +4,7 @@ import {
   calculateArcError,
   transformLine,
   transformPoint,
-} from './svg-math.js';
+} from './svg-math';
 
 // eslint-disable-next-line consistent-return
 export default function* svgArcToLines(arc, startPos, ctm, opt) {

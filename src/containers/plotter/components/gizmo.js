@@ -2,16 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { mm2px } from 'math/svg';
 import classNames from 'classnames';
-import { getWidth } from '../utils/page';
+import { observer } from 'mobx-react-lite';
 import styles from './gizmo.css';
+import { PAGE_ORIENTATION_PORTRAIT } from '../presenters/page';
 
-const Gizmo = ({ pageSize, orientation }) => {
+const Gizmo = observer(({ page }) => {
   return (
     <g
       className={styles.root}
       transform={
-        orientation === 'portrait'
-          ? `translate(${mm2px(getWidth(pageSize, orientation))},0) rotate(90) `
+        page.orientation === PAGE_ORIENTATION_PORTRAIT
+          ? `translate(${mm2px(page.width)},0) rotate(90) `
           : null
       }
     >
@@ -26,11 +27,10 @@ const Gizmo = ({ pageSize, orientation }) => {
       <circle className={styles.z} r={mm2px(2)} cx="0" cy="0" />
     </g>
   );
-};
+});
 
 Gizmo.propTypes = {
-  pageSize: PropTypes.object,
-  orientation: PropTypes.oneOf(['landscape', 'portrait']),
+  page: PropTypes.object,
 };
 
 export default Gizmo;

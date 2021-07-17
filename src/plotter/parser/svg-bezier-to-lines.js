@@ -4,7 +4,7 @@ import {
   isSufficientlyFlat,
   transformLine,
   transformPoint,
-} from './svg-math.js';
+} from './svg-math';
 
 export default function* svgBezierToLines(bezier, startPos, ctm, opt) {
   if (!bezier || bezier[0] !== 'C') {

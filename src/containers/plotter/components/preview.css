@@ -1,0 +1,9 @@
+.root {
+  @apply absolute w-full h-full;
+}
+
+.inputs {
+  @apply grid gap-4 items-center mb-4;
+
+  grid-template-columns: max-content max-content;
+}
