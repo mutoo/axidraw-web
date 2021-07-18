@@ -2,8 +2,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 export const shareOptions = {
   meta: {
-    viewport:
-      'width=communication.device-width, initial-scale=1, shrink-to-fit=no',
+    viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
   },
   inject: 'body',
 };

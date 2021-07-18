@@ -3,8 +3,8 @@ import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
 import { observer } from 'mobx-react-lite';
 import PlotterContext from '../../context';
-import Panel from './panel';
 import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
+import Panel from './panel';
 
 const Planning = observer(({ ...props }) => {
   const { work } = useContext(PlotterContext);
@@ -18,18 +18,25 @@ const Planning = observer(({ ...props }) => {
         </p>
         <Button
           onClick={() => {
-            work.phase = WORK_PHASE_PREVIEW;
+            work.setPhase(WORK_PHASE_PREVIEW);
           }}
         >
           Back to preview
         </Button>
+      </section>
+      <section>
+        <form>
+          <Button variant="primary" submit>
+            Plan
+          </Button>
+        </form>
       </section>
       <section className="space-y-4">
         <Alert type="info">
           You could adjust those parameter and redo the plan until you are
           satisfied. Or sent it to AxiDraw now:
         </Alert>
-        <Button variant="primary">
+        <Button>
           <span className="inline-block w-32">Plot</span>
         </Button>
       </section>

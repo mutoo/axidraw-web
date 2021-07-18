@@ -1,0 +1,11 @@
+:root {
+  --planning-stroke-width: 1;
+}
+
+.root {
+  * {
+    stroke-width: var(--planning-stroke-width);
+    stroke: #333;
+    fill: none;
+  }
+}

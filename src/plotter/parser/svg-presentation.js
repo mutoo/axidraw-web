@@ -3,8 +3,24 @@ export const toSvgLines = (lines) =>
     .map((l) => `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`)
     .join('');
 
-export const toSvgPath = (lines) =>
-  `<path d="${lines
-    .filter((l) => !Number.isNaN(l[0]))
-    .map((l) => `M${l[0]} ${l[1]} L${l[2]} ${l[3]}`)
-    .join(' ')}" />`;
+export const toSvgPathDef = (lines) => {
+  const context = { x: 0, y: 0 };
+  if (!lines) return 'M 0 0';
+  return lines
+    .reduce(
+      (defs, line) => {
+        if (line[0] === context.x && line[1] === context.y) {
+          defs.push(`${line[2]} ${line[3]}`);
+        } else {
+          defs.push(`M ${line[0]} ${line[1]} ${line[2]} ${line[3]}`);
+        }
+        context.x = line[2];
+        context.y = line[3];
+        return defs;
+      },
+      ['M 0 0'],
+    )
+    .join(' ');
+};
+
+export const toSvgPath = (lines) => `<path d="${toSvgPathDef(lines)}" />`;

@@ -80,6 +80,7 @@
         "generators": "never"
       }
     ],
-    "require-yield": 0
+    "require-yield": 0,
+    "prefer-destructuring": 0
   }
 }

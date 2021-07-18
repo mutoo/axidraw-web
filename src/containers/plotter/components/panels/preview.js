@@ -148,7 +148,7 @@ const Preview = observer(({ ...props }) => {
             <h4 className="col-span-2">File Information:</h4>
             <textarea
               className="col-span-2"
-              defaultValue={JSON.stringify(work.fileInfo, null, 2)}
+              value={JSON.stringify(work.fileInfo, null, 2)}
               readOnly
             />
           </>
@@ -165,7 +165,7 @@ const Preview = observer(({ ...props }) => {
         <Button
           disabled={!work.svgContent}
           onClick={() => {
-            work.phase = WORK_PHASE_PLANNING;
+            work.setPhase(WORK_PHASE_PLANNING);
           }}
         >
           <span className="inline-block w-32">Next</span>

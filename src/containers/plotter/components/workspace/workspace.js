@@ -3,11 +3,12 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
 import { mm2px } from 'math/svg';
+import PlotterContext from '../../context';
 import Page from './page';
 import styles from './workspace.css';
 import ShadowDef from './shadow-def';
 import Preview from './preview';
-import PlotterContext from '../../context';
+import Planning from './planning';
 
 const Workspace = observer(({ margin = 20 }) => {
   const { work, page } = useContext(PlotterContext);
@@ -34,6 +35,7 @@ const Workspace = observer(({ margin = 20 }) => {
       </defs>
       <Page />
       <Preview />
+      <Planning />
     </svg>
   );
 });

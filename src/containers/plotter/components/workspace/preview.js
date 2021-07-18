@@ -3,6 +3,7 @@ import clean from 'plotter/cleaner';
 import { mm2px } from 'math/svg';
 import { observer } from 'mobx-react-lite';
 import svgToLines from 'plotter/parser/svg-to-lines';
+import classNames from 'classnames';
 import styles from './preview.css';
 import PlotterContext from '../../context';
 import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
@@ -24,7 +25,7 @@ const Preview = observer(({ ...props }) => {
     /* remove unsupported elements */
     if (!imported.hasAttribute('data-cleaned')) {
       const response = clean(imported);
-      work.fileInfo = response.counts;
+      work.updateFileInfo(response.counts);
       imported.setAttribute('data-cleaned', true);
     }
     /* adjust svg dimension as per page setup */
@@ -61,20 +62,23 @@ const Preview = observer(({ ...props }) => {
     work.svgContent,
   ]);
   useLayoutEffect(() => {
-    if (work.phase === WORK_PHASE_PLANNING && !work.lines) {
+    // when switch to planning phase, extract svg to lines.
+    if (work.phase === WORK_PHASE_PLANNING) {
       const container = previewContainerRef.current;
       const imported = container?.children[0];
       if (!imported) {
         return;
       }
-      work.lines = svgToLines(imported);
+      work.updateLines(svgToLines(imported));
     }
   }, [work.phase]);
   return (
     <g
-      className={styles.root}
+      className={classNames(
+        styles.root,
+        work.phase === WORK_PHASE_PREVIEW ? 'block' : 'hidden',
+      )}
       style={{
-        display: work.phase === WORK_PHASE_PREVIEW ? 'block' : 'none',
         '--preview-stroke-width': strokeWidthPercent,
       }}
       dangerouslySetInnerHTML={{ __html: work.svgContent }}
