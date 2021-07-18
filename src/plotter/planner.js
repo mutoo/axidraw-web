@@ -16,19 +16,19 @@ export function* walkLines(lines, opt) {
   for (const line of lines) {
     const motion = [context.x, context.y, line[0], line[1]];
     if (distSQ(...motion) > connectedErrorSq) {
-      yield [...toPaperLine(motion), MOTION_PEN_UP];
+      yield { line: toPaperLine(motion), pen: MOTION_PEN_UP };
     }
-    yield [...toPaperLine(line), MOTION_PEN_DOWN];
+    yield { line: toPaperLine(line), pen: MOTION_PEN_DOWN };
     // eslint-disable-next-line prefer-destructuring
     context.x = line[2];
     // eslint-disable-next-line prefer-destructuring
     context.y = line[3];
   }
   // return to home
-  yield [
-    ...toPaperLine([context.x, context.y, origin[0], origin[1]]),
-    MOTION_PEN_UP,
-  ];
+  yield {
+    line: toPaperLine([context.x, context.y, origin[0], origin[1]]),
+    pen: MOTION_PEN_UP,
+  };
 }
 
 export const defaultPlanOptions = {

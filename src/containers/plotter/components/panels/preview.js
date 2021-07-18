@@ -55,7 +55,7 @@ const Preview = observer(({ ...props }) => {
       </section>
       <section className={styles.inputs}>
         <h4 className="col-span-2">Dimension</h4>
-        <label htmlFor="page-size">PageSize: </label>
+        <label htmlFor="page-size">Page Size: </label>
         <select
           id="page-size"
           value={page.size.type}

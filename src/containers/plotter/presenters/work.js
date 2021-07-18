@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, observable } from 'mobx';
 import { mm2px } from 'math/svg';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/parser/svg-presentation';
@@ -12,8 +12,9 @@ const createWork = () =>
   makeAutoObservable(
     {
       svgContent: null,
-      lines: null,
-      motions: null,
+      // optimize: don't watch the child elements of lines and motions
+      lines: observable.array([], { deep: false }),
+      motions: observable.array([], { deep: false }),
       fileInfo: null,
       phase: WORK_PHASE_PREVIEW,
       setPhase(phase) {
@@ -28,41 +29,49 @@ const createWork = () =>
       },
       loadSVGContent(content) {
         this.svgContent = content;
-        this.lines = null;
-        this.motions = null;
+        this.lines.clear();
+        this.motions.clear();
       },
       updateFileInfo(fileInfo) {
         this.fileInfo = fileInfo;
       },
       updateLines(lines) {
-        this.lines = lines;
+        this.lines.replace(lines);
+        this.motions.clear();
       },
-      get linesAsPathDef() {
-        return toSvgPathDef(this.lines);
-      },
-      planMotion({ page }) {
+      planMotion({ page, options }) {
         if (!this.lines?.length) {
           throw new Error('Lines are not ready');
         }
-        this.motions = plan(this.lines, {
-          screenToPageMatrix: page.screenToPageMatrix,
-          origin:
-            page.orientation === PAGE_ORIENTATION_LANDSCAPE
-              ? [0, 0]
-              : [mm2px(page.size.height), 0],
-        });
+        this.motions.replace(
+          plan(this.lines, {
+            screenToPageMatrix: page.screenToPageMatrix,
+            origin:
+              page.orientation === PAGE_ORIENTATION_LANDSCAPE
+                ? [0, 0]
+                : [mm2px(page.size.height), 0],
+            ...options,
+          }),
+        );
+      },
+      get linesAsPathDef() {
+        return toSvgPathDef(
+          this.motions
+            ?.filter((motion) => motion.pen === 0)
+            .map((motion) => motion.line),
+        );
       },
       get connectionsAsPathDef() {
         return toSvgPathDef(
-          this.motions?.filter((motion) => motion.penStatus === 1),
+          this.motions
+            ?.filter((motion) => motion.pen === 1)
+            .map((motion) => motion.line),
         );
       },
     },
-    {},
+    null,
     {
       name: 'axidraw-web-work',
-      // optimize: don't watch the child elements of lines and motions
-      deep: false,
     },
   );
 

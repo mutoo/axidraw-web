@@ -115,6 +115,9 @@ const createPageSetup = () =>
       rotateMatrix.rotateSelf(0, 0, -90);
       return rotateMatrix.multiply(translateMatrix).multiply(scaleMatrix);
     },
+    get pageToScreenMatrix() {
+      return this.screenToPageMatrix.inverse();
+    },
   });
 
 export default createPageSetup;
