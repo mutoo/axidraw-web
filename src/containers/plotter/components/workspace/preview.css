@@ -3,10 +3,6 @@
 }
 
 .root {
-  @apply w-full h-full;
-}
-
-.preview {
   * {
     stroke-width: var(--preview-stroke-width) !important;
   }

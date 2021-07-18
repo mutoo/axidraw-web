@@ -1,23 +1,24 @@
 import React from 'react';
-import Workspace from './components/workspace';
+import Workspace from './components/workspace/workspace';
 import styles from './plotter.css';
 import createPageSetup from './presenters/page';
 import createWork from './presenters/work';
-import Preview from './components/preview';
+import Preview from './components/panels/preview';
+import PlotterContext from './context';
 
-const pageSetup = createPageSetup();
+const page = createPageSetup();
 const work = createWork();
 
 const Plotter = () => {
   return (
-    <>
+    <PlotterContext.Provider value={{ work, page }}>
       <main className={styles.workspace}>
-        <Workspace page={pageSetup} work={work} />
+        <Workspace />
       </main>
       <aside className={styles.panel}>
-        <Preview page={pageSetup} work={work} />
+        <Preview />
       </aside>
-    </>
+    </PlotterContext.Provider>
   );
 };
 

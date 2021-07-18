@@ -1,24 +1,18 @@
-/* eslint-disable no-unused-vars */
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import { observer } from 'mobx-react-lite';
-import { mm2px } from 'math/svg';
+import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import clean from 'plotter/cleaner';
-import Page from './page';
-import styles from './workspace.css';
-import ShadowDef from './shadow-def';
+import { mm2px } from 'math/svg';
+import { observer } from 'mobx-react-lite';
+import styles from './preview.css';
+import PlotterContext from '../../context';
 
-const Workspace = observer(({ page, work, margin = 20 }) => {
-  const marginPx = mm2px(margin);
+const Preview = observer(({ ...props }) => {
+  const { work, page } = useContext(PlotterContext);
+  const previewContainerRef = useRef(null);
+  const [strokeWidthPercent, setStrokeWidthPercent] = useState(1);
   const paddingPx = mm2px(page.padding);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
   const { contentFitPage, contentPreserveAspectRatio } = page;
-  const viewBox = `${-marginPx} ${-marginPx} ${widthPx + marginPx * 2} ${
-    heightPx + marginPx * 2
-  }`;
-  const previewContainerRef = useRef(null);
-  const [strokeWidthPercent, setStrokeWidthPercent] = useState(1);
   useLayoutEffect(() => {
     const container = previewContainerRef.current;
     const imported = container?.children[0];
@@ -64,33 +58,18 @@ const Workspace = observer(({ page, work, margin = 20 }) => {
     work.svgContent,
   ]);
   return (
-    <svg
+    <g
       className={styles.root}
-      viewBox={viewBox}
-      preserveAspectRatio="xMidYMid meet"
-      xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      version="1.1"
-    >
-      <defs>
-        <ShadowDef margin={margin} />
-      </defs>
-      <Page page={page} />
-      <g
-        className={styles.preview}
-        style={{
-          '--preview-stroke-width': strokeWidthPercent,
-        }}
-        dangerouslySetInnerHTML={{ __html: work.svgContent }}
-        ref={previewContainerRef}
-      />
-    </svg>
+      style={{
+        '--preview-stroke-width': strokeWidthPercent,
+      }}
+      dangerouslySetInnerHTML={{ __html: work.svgContent }}
+      ref={previewContainerRef}
+      {...props}
+    />
   );
 });
 
-Workspace.propTypes = {
-  margin: PropTypes.number,
-  page: PropTypes.object,
-};
+Preview.propTypes = {};
 
-export default Workspace;
+export default Preview;

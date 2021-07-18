@@ -1,12 +1,13 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
 import { mm2px } from 'math/svg';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import styles from './gizmo.css';
-import { PAGE_ORIENTATION_PORTRAIT } from '../presenters/page';
+import { PAGE_ORIENTATION_PORTRAIT } from '../../presenters/page';
+import PlotterContext from '../../context';
 
-const Gizmo = observer(({ page }) => {
+const Gizmo = observer(({ ...props }) => {
+  const { page } = useContext(PlotterContext);
   return (
     <g
       className={styles.root}
@@ -15,6 +16,7 @@ const Gizmo = observer(({ page }) => {
           ? `translate(${mm2px(page.width)},0) rotate(90) `
           : null
       }
+      {...props}
     >
       <polyline
         className={classNames(styles.axis, styles.x)}
@@ -29,8 +31,6 @@ const Gizmo = observer(({ page }) => {
   );
 });
 
-Gizmo.propTypes = {
-  page: PropTypes.object,
-};
+Gizmo.propTypes = {};
 
 export default Gizmo;

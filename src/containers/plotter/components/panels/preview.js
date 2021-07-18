@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext, useRef } from 'react';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
+import Alert from 'components/ui/alert/alert';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import styles from './preview.css';
@@ -15,12 +15,14 @@ import {
   PAGE_ORIENTATION_LANDSCAPE,
   PAGE_ORIENTATION_PORTRAIT,
   pageSizes,
-} from '../presenters/page';
+} from '../../presenters/page';
+import PlotterContext from '../../context';
 
-const Preview = observer(({ page, work }) => {
+const Preview = observer(({ ...props }) => {
+  const { work, page } = useContext(PlotterContext);
   const fileInputRef = useRef(null);
   return (
-    <div className={styles.root}>
+    <div className={styles.root} {...props}>
       <section>
         <h3>Preview</h3>
         <p>In this phase, you could load svg and set up the page.</p>
@@ -150,17 +152,18 @@ const Preview = observer(({ page, work }) => {
           </>
         )}
       </section>
-      <section>
-        <p>Plan the motion before sending it to the plotter.</p>
-        <Button>Next</Button>
+      <section className="space-y-4">
+        <Alert type="info">
+          Plan the motion before sending it to the plotter.
+        </Alert>
+        <Button>
+          <span className="inline-block w-32">Next</span>
+        </Button>
       </section>
     </div>
   );
 });
 
-Preview.propTypes = {
-  page: PropTypes.object,
-  work: PropTypes.object,
-};
+Preview.propTypes = {};
 
 export default Preview;
