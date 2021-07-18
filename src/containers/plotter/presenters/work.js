@@ -1,8 +1,11 @@
 import { makeAutoObservable } from 'mobx';
 import { mm2px } from 'math/svg';
-import svgToLines from 'plotter/parser/svg-to-lines';
 import plan from 'plotter/planner';
 import { PAGE_ORIENTATION_LANDSCAPE } from './page';
+
+export const WORK_PHASE_PREVIEW = 'axidraw-web-work-phase-preview';
+export const WORK_PHASE_PLANNING = 'axidraw-web-work-phase-planning';
+export const WORK_PHASE_PLOTTING = 'axidraw-web-work-phase-plotting';
 
 const createWork = () =>
   makeAutoObservable({
@@ -10,18 +13,13 @@ const createWork = () =>
     lines: null,
     motions: null,
     fileInfo: null,
+    phase: WORK_PHASE_PREVIEW,
     loadFromFile(file) {
       const reader = new FileReader();
       reader.onload = (ev) => {
         this.svgContent = ev.target.result;
       };
       reader.readAsText(file);
-    },
-    updateFileInfo(info) {
-      this.fileInfo = info;
-    },
-    parseSVG(svgEl) {
-      this.lines = svgToLines(svgEl);
     },
     planMotion({ page }) {
       if (!this.lines?.length) {

@@ -4,7 +4,6 @@ import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import styles from './preview.css';
 import {
   PAGE_ALIGNMENT_HORIZONTAL_START,
   PAGE_ALIGNMENT_HORIZONTAL_CENTER,
@@ -17,12 +16,15 @@ import {
   pageSizes,
 } from '../../presenters/page';
 import PlotterContext from '../../context';
+import Panel from './panel';
+import styles from './preview.css';
+import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
 
 const Preview = observer(({ ...props }) => {
   const { work, page } = useContext(PlotterContext);
   const fileInputRef = useRef(null);
   return (
-    <div className={styles.root} {...props}>
+    <Panel active={work.phase === WORK_PHASE_PREVIEW} {...props}>
       <section>
         <h3>Preview</h3>
         <p>In this phase, you could load svg and set up the page.</p>
@@ -153,14 +155,23 @@ const Preview = observer(({ ...props }) => {
         )}
       </section>
       <section className="space-y-4">
-        <Alert type="info">
-          Plan the motion before sending it to the plotter.
-        </Alert>
-        <Button>
+        {work.svgContent ? (
+          <Alert type="info">
+            Plan the motion before sending it to the plotter.
+          </Alert>
+        ) : (
+          <Alert type="warn">Load SVG first.</Alert>
+        )}
+        <Button
+          disabled={!work.svgContent}
+          onClick={() => {
+            work.phase = WORK_PHASE_PLANNING;
+          }}
+        >
           <span className="inline-block w-32">Next</span>
         </Button>
       </section>
-    </div>
+    </Panel>
   );
 });
 

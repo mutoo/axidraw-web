@@ -4,6 +4,7 @@ import styles from './plotter.css';
 import createPageSetup from './presenters/page';
 import createWork from './presenters/work';
 import Preview from './components/panels/preview';
+import Planning from './components/panels/planning';
 import PlotterContext from './context';
 
 const page = createPageSetup();
@@ -17,6 +18,7 @@ const Plotter = () => {
       </main>
       <aside className={styles.panel}>
         <Preview />
+        <Planning />
       </aside>
     </PlotterContext.Provider>
   );

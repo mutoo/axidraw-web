@@ -1,0 +1,15 @@
+.root {
+  @apply absolute inset-0 px-8 space-y-8 overflow-y-scroll;
+  @apply hidden;
+
+  &::before,
+  &::after {
+    @apply block h-8;
+
+    content: '';
+  }
+}
+
+.active {
+  @apply block;
+}
