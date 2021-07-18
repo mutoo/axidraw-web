@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
 import { mm2px } from 'math/svg';
@@ -18,39 +18,51 @@ const Workspace = observer(({ page, work, margin = 20 }) => {
     heightPx + marginPx * 2
   }`;
   const previewContainerRef = useRef(null);
-  useLayoutEffect(
-    () => {
-      const container = previewContainerRef.current;
-      const imported = container?.children[0];
-      if (!imported) {
-        return;
-      }
-      /* adjust svg dimension as per page setup */
-      if (!imported.hasAttribute('data-original-viewBox')) {
-        const originalViewBox = imported.getAttribute('viewBox');
-        imported.setAttribute('data-original-viewBox', originalViewBox);
-      }
-      imported.setAttribute('width', widthPx - paddingPx * 2);
-      imported.setAttribute('height', heightPx - paddingPx * 2);
-      imported.setAttribute('x', paddingPx);
-      imported.setAttribute('y', paddingPx);
-      imported.setAttribute('preserveAspectRatio', contentPreserveAspectRatio);
-      const originalViewBox = imported.getAttribute('data-original-viewBox');
-      const bbox = imported.getBBox();
-      imported.setAttribute(
-        'viewBox',
-        contentFitPage
-          ? `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
-          : originalViewBox,
-      );
-      /* remove unsupported elements */
-      if (!imported.hasAttribute('data-cleaned')) {
-        const response = clean(imported);
-        work.updateFileInfo(response.counts);
-        imported.setAttribute('data-cleaned', true);
-      }
-    } /* no dependencies, would be triggered once the svg loads. */,
-  );
+  const [strokeWidthPercent, setStrokeWidthPercent] = useState(1);
+  useLayoutEffect(() => {
+    const container = previewContainerRef.current;
+    const imported = container?.children[0];
+    if (!imported) {
+      return;
+    }
+    /* remove unsupported elements */
+    if (!imported.hasAttribute('data-cleaned')) {
+      const response = clean(imported);
+      work.updateFileInfo(response.counts);
+      imported.setAttribute('data-cleaned', true);
+    }
+    /* adjust svg dimension as per page setup */
+    if (!imported.hasAttribute('data-original-viewBox')) {
+      const originalViewBox = imported.getAttribute('viewBox');
+      imported.setAttribute('data-original-viewBox', originalViewBox);
+    }
+    imported.setAttribute('width', widthPx - paddingPx * 2);
+    imported.setAttribute('height', heightPx - paddingPx * 2);
+    imported.setAttribute('x', paddingPx);
+    imported.setAttribute('y', paddingPx);
+    imported.setAttribute('preserveAspectRatio', contentPreserveAspectRatio);
+    const originalViewBox = imported.getAttribute('data-original-viewBox');
+    const bbox = imported.getBBox();
+    imported.setAttribute(
+      'viewBox',
+      contentFitPage
+        ? `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`
+        : originalViewBox,
+    );
+    /* update stroke width */
+    const viewWidth = imported.viewBox.baseVal.width;
+    const viewHeight = imported.viewBox.baseVal.height;
+    const rateX = (0.4 / page.width) * viewWidth;
+    const rateY = (0.4 / page.height) * viewHeight;
+    setStrokeWidthPercent(Math.max(rateX, rateY));
+  }, [
+    page.size,
+    page.contentFitPage,
+    page.alignment.vertical,
+    page.alignment.horizontal,
+    page.orientation,
+    work.svgContent,
+  ]);
   return (
     <svg
       className={styles.root}
@@ -65,6 +77,10 @@ const Workspace = observer(({ page, work, margin = 20 }) => {
       </defs>
       <Page page={page} />
       <g
+        className={styles.preview}
+        style={{
+          '--preview-stroke-width': strokeWidthPercent,
+        }}
         dangerouslySetInnerHTML={{ __html: work.svgContent }}
         ref={previewContainerRef}
       />

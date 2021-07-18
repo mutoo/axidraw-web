@@ -1,5 +1,5 @@
 .root {
-  @apply inline-block px-2 py-2 rounded;
+  @apply inline-block px-4 py-2 rounded;
   @apply whitespace-nowrap leading-none text-black;
   @apply bg-button-secondary-normal hover:bg-button-secondary-hover focus:bg-button-secondary-active;
 

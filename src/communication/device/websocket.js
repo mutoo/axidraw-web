@@ -77,6 +77,9 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
       case 3004:
         emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Disconnect from client.');
         break;
+      case 3005:
+        emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Server internal error.');
+        break;
       case 1006:
         emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Disconnect from server.');
         break;

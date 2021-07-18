@@ -8,6 +8,13 @@ module.exports = {
     colors: {
       black: '#333',
       white: '#FFF',
+      grey: {
+        de: '#dedede',
+        cc: '#ccc',
+        aa: '#aaa',
+        99: '#999',
+        66: '#666',
+      },
       form: {
         bg: {
           disabled: '#f1eded',

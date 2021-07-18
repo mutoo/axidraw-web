@@ -1,5 +1,5 @@
 .root {
-  @apply grid grid-cols-1 gap-6;
+  @apply grid grid-cols-1 gap-4 lg:gap-6;
 }
 
 .checkboxLabel,

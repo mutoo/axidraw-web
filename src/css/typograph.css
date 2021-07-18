@@ -1,39 +1,45 @@
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  @apply font-condensed font-bold uppercase leading-6 mt-4 mb-2;
-}
+@layer base {
+  h1 {
+    font-size: 2em;
+  }
 
-h1 {
-  font-size: 2em;
-}
+  h2 {
+    font-size: 1.5em;
+  }
 
-h2 {
-  font-size: 1.5em;
-}
+  h3 {
+    font-size: 1.25em;
+  }
 
-h3 {
-  font-size: 1.25em;
-}
+  h4,
+  h5,
+  h6 {
+    font-size: 1em;
+  }
 
-h4,
-h5,
-h6 {
-  font-size: 1em;
-}
+  h5,
+  h6 {
+    @apply font-normal;
+  }
 
-h5,
-h6 {
-  @apply font-normal;
-}
+  h6 {
+    @apply italic;
+  }
 
-h6 {
-  @apply italic;
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-condensed font-bold uppercase leading-6 mt-4 mb-2;
 
-p {
-  @apply leading-5;
+    &:first-child {
+      @apply mt-0;
+    }
+  }
+
+  p {
+    @apply leading-5;
+  }
 }

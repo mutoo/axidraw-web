@@ -60,7 +60,7 @@ const FavCommander = ({ device }) => {
     <form className={formStyles.root}>
       <h3>Fav Commander</h3>
       <p>Send frequently used command to device.</p>
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
         {frequentlyCommands.map((cmd) => {
           const title = cmd.title || cmd.cmd.title;
           return (

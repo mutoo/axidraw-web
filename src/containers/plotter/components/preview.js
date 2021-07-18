@@ -21,21 +21,21 @@ const Preview = observer(({ page, work }) => {
   const fileInputRef = useRef(null);
   return (
     <div className={styles.root}>
-      <h3>Preview</h3>
-      <p>In this phase, you could load svg and set up the page.</p>
-      <div>
-        <input
-          className="hidden"
-          type="file"
-          accept="image/svg+xml"
-          ref={fileInputRef}
-          onChange={async (e) => {
-            const { files } = e.target;
-            if (!files.length) return;
-            work.loadFromFile(files[0]);
-          }}
-        />
+      <section>
+        <h3>Preview</h3>
+        <p>In this phase, you could load svg and set up the page.</p>
         <div className="flex my-4 justify-center">
+          <input
+            className="hidden"
+            type="file"
+            accept="image/svg+xml"
+            ref={fileInputRef}
+            onChange={async (e) => {
+              const { files } = e.target;
+              if (!files.length) return;
+              work.loadFromFile(files[0]);
+            }}
+          />
           <Button
             variant="primary"
             onClick={() => {
@@ -45,11 +45,11 @@ const Preview = observer(({ page, work }) => {
             Load SVG
           </Button>
         </div>
-      </div>
-      <p>
-        Or simply <b>Drag & Drop</b> your svg into the page area.
-      </p>
-      <div className={styles.inputs}>
+        <p>
+          Or simply <b>Drag & Drop</b> your svg into the page area.
+        </p>
+      </section>
+      <section className={styles.inputs}>
         <h4 className="col-span-2">Dimension</h4>
         <label htmlFor="page-size">PageSize: </label>
         <select
@@ -149,11 +149,11 @@ const Preview = observer(({ page, work }) => {
             />
           </>
         )}
-      </div>
-      <div>
+      </section>
+      <section>
         <p>Plan the motion before sending it to the plotter.</p>
         <Button>Next</Button>
-      </div>
+      </section>
     </div>
   );
 });

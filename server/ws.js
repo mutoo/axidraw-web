@@ -65,7 +65,11 @@ export default function setupWebSocket(app, server) {
           ws.close(3003, 'Unknown message.');
       }
     });
-
+    ws.on('error', (e) => {
+      // eslint-disable-next-line no-console
+      console.error(e.toString());
+      ws.close(3005, `Internal Error: ${e.toString()}`);
+    });
     ws.on('close', () => {
       if (port) {
         // eslint-disable-next-line no-console

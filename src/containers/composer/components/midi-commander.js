@@ -160,7 +160,7 @@ const MidiCommander = ({ device }) => {
         {playing ? 'Stop' : 'Play'}
       </Button>
       <Alert type="info">
-        Tip: you could also press the PRG button on device to stop playing.
+        Tip: You could also press the PRG button on device to stop playing.
       </Alert>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>

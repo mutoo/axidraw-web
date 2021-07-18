@@ -5,7 +5,9 @@
       true,
       {
         "ignoreAtRules": [
-          "screen"
+          "screen",
+          "layer",
+          "apply"
         ]
       }
     ]

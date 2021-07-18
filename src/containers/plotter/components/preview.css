@@ -1,5 +1,12 @@
 .root {
-  @apply absolute inset-0 px-8;
+  @apply absolute inset-0 px-8 space-y-8 overflow-y-scroll;
+
+  &::before,
+  &::after {
+    @apply block h-8;
+
+    content: '';
+  }
 }
 
 .inputs {

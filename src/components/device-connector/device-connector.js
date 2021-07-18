@@ -42,7 +42,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       <h3>Device</h3>
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
-          <p>Connect to axidraw via USB or WebSocket.</p>
+          <p>Connect to AxiDraw via USB or WebSocket.</p>
           <label className={formStyles.radioLabel}>
             <input
               type="radio"
@@ -63,7 +63,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
           </label>
           {connectionError && <Alert type={'alert'}>{connectionError}</Alert>}
           {deviceType === DEVICE_TYPE_USB && (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4 lg:gap-6">
               <Button
                 type="button"
                 onClick={() => {
@@ -115,8 +115,8 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       {deviceStatus === DEVICE_STATUS_CONNECTED && (
         <>
           <div className="grid grid-flow-col items-center gap-4">
-            <p>Type: {deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}</p>
-            <p>Version: {deviceVersion}</p>
+            <p>{deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}</p>
+            <p>EBB v{deviceVersion}</p>
             <Button type="button" onClick={() => disconnectDevice()}>
               Disconnect
             </Button>

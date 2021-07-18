@@ -6,20 +6,23 @@ import formStyles from 'components/ui/form.css';
 import SimpleCommander from './components/simple-commander';
 import BatchCommander from './components/batch-commander';
 import FavCommander from './components/fav-commander';
+import Footer from '../../components/footer/footer';
 
 const Debugger = () => {
   const [device, setDevice] = useState(null);
   return (
-    <div className={classnames(formStyles.root, sheetsStyles.root)}>
-      <DeviceConnector
-        onConnected={setDevice}
-        onDisconnected={() => setDevice(null)}
-      />
-      {device && <FavCommander device={device} />}
-      {device && <SimpleCommander device={device} />}
-      {device && <BatchCommander device={device} />}
-      <div>Build Mode: {process.env.NODE_ENV}</div>
-    </div>
+    <>
+      <div className={classnames(formStyles.root, sheetsStyles.root)}>
+        <DeviceConnector
+          onConnected={setDevice}
+          onDisconnected={() => setDevice(null)}
+        />
+        {device && <FavCommander device={device} />}
+        {device && <SimpleCommander device={device} />}
+        {device && <BatchCommander device={device} />}
+      </div>
+      <Footer />
+    </>
   );
 };
 

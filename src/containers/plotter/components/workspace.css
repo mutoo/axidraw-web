@@ -1,3 +1,13 @@
+:root {
+  --preview-stroke-width: 1;
+}
+
 .root {
   @apply w-full h-full;
+}
+
+.preview {
+  * {
+    stroke-width: var(--preview-stroke-width) !important;
+  }
 }
