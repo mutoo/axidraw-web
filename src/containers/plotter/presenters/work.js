@@ -1,8 +1,6 @@
 import { makeAutoObservable, observable } from 'mobx';
-import { mm2px } from 'math/svg';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/parser/svg-presentation';
-import { PAGE_ORIENTATION_LANDSCAPE } from './page';
 
 export const WORK_PHASE_PREVIEW = 'axidraw-web-work-phase-preview';
 export const WORK_PHASE_PLANNING = 'axidraw-web-work-phase-planning';
@@ -39,20 +37,11 @@ const createWork = () =>
         this.lines.replace(lines);
         this.motions.clear();
       },
-      planMotion({ page, options }) {
+      planMotion(options) {
         if (!this.lines?.length) {
           throw new Error('Lines are not ready');
         }
-        this.motions.replace(
-          plan(this.lines, {
-            screenToPageMatrix: page.screenToPageMatrix,
-            origin:
-              page.orientation === PAGE_ORIENTATION_LANDSCAPE
-                ? [0, 0]
-                : [mm2px(page.size.height), 0],
-            ...options,
-          }),
-        );
+        this.motions.replace(plan(this.lines, options));
       },
       get linesAsPathDef() {
         return toSvgPathDef(

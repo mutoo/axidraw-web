@@ -19,13 +19,13 @@ const Planning = observer(({ ...props }) => {
       transform={page.pageToScreenMatrix.toString()}
       {...props}
     >
-      <path d={work.linesAsPathDef} />
       <path
         style={{
           stroke: '#aaaaaa',
         }}
         d={work.connectionsAsPathDef}
       />
+      <path d={work.linesAsPathDef} />
     </g>
   );
 });

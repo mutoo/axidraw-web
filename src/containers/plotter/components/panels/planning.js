@@ -2,10 +2,12 @@ import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
 import { observer } from 'mobx-react-lite';
+import { mm2px } from 'math/svg';
 import PlotterContext from '../../context';
 import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
 import Panel from './panel';
 import styles from './planning.css';
+import { PAGE_ORIENTATION_LANDSCAPE } from '../../presenters/page';
 
 const Planning = observer(({ ...props }) => {
   const { work, page } = useContext(PlotterContext);
@@ -40,10 +42,12 @@ const Planning = observer(({ ...props }) => {
           onSubmit={(e) => {
             e.preventDefault();
             work.planMotion({
-              page,
-              options: {
-                connectedError,
-              },
+              screenToPageMatrix: page.screenToPageMatrix,
+              origin:
+                page.orientation === PAGE_ORIENTATION_LANDSCAPE
+                  ? [0, 0]
+                  : [mm2px(page.size.height), 0],
+              connectedError,
             });
           }}
         >

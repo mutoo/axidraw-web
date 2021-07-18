@@ -3,7 +3,6 @@ import { mm2px } from 'math/svg';
 import { observer } from 'mobx-react-lite';
 import { preventDefault } from 'utils/dom-event';
 import classNames from 'classnames';
-import Gizmo from './gizmo';
 import styles from './page.css';
 import PlotterContext from '../../context';
 
@@ -53,7 +52,6 @@ const Page = observer(({ ...props }) => {
         x={paddingPx}
         y={paddingPx}
       />
-      <Gizmo />
     </g>
   );
 });

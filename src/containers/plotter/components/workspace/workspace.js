@@ -9,6 +9,7 @@ import styles from './workspace.css';
 import ShadowDef from './shadow-def';
 import Preview from './preview';
 import Planning from './planning';
+import Gizmo from './gizmo';
 
 const Workspace = observer(({ margin = 20 }) => {
   const { work, page } = useContext(PlotterContext);
@@ -36,6 +37,7 @@ const Workspace = observer(({ margin = 20 }) => {
       <Page />
       <Preview />
       <Planning />
+      <Gizmo />
     </svg>
   );
 });
