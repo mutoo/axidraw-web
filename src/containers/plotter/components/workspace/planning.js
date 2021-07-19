@@ -4,7 +4,10 @@ import classNames from 'classnames';
 import { px2mm } from 'math/svg';
 import styles from './planning.css';
 import PlotterContext from '../../context';
-import { PLANNING_PHASE_PLANNING } from '../../presenters/planning';
+import {
+  PLANNING_PHASE_PLANNING,
+  PLANNING_PHASE_PLOTTING,
+} from '../../presenters/planning';
 
 const Planning = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
@@ -13,7 +16,10 @@ const Planning = observer(({ ...props }) => {
     <g
       className={classNames(
         styles.root,
-        planning.phase === PLANNING_PHASE_PLANNING ? 'block' : 'hidden',
+        planning.phase === PLANNING_PHASE_PLANNING ||
+          planning.phase === PLANNING_PHASE_PLOTTING
+          ? 'block'
+          : 'hidden',
       )}
       style={{ strokeWidth: px2mm(1) }}
       transform={page.pageToScreenMatrix.toString()}

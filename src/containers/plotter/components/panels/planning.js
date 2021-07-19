@@ -6,6 +6,7 @@ import { mm2px } from 'math/svg';
 import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
+  PLANNING_PHASE_PLOTTING,
   PLANNING_PHASE_PREVIEW,
 } from '../../presenters/planning';
 import Panel from './panel';
@@ -73,10 +74,16 @@ const Planning = observer(({ ...props }) => {
       </section>
       <section className="space-y-4">
         <Alert type="info">
-          You could adjust those parameter and redo the plan until you are
-          satisfied. Or sent it to AxiDraw now:
+          You could adjust these parameters and redo the plan until you are
+          satisfied.
+          <br />
+          Or start drawing now.
         </Alert>
-        <Button>
+        <Button
+          onClick={() => {
+            planning.setPhase(PLANNING_PHASE_PLOTTING);
+          }}
+        >
           <span className="inline-block w-32">Plot</span>
         </Button>
       </section>

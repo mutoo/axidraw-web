@@ -32,7 +32,7 @@ export const executeCommand = async (
     new Promise((resolve, reject) => {
       commandQueue.push({ resolve, reject, parser: cmd });
     }),
-    timeout(1000, 'EBB Command timeout.'),
+    timeout(60000, `EBB Command timeout: ${command.cmd}`),
   ]);
 };
 

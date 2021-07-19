@@ -38,7 +38,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
   }, [device, deviceStatus]);
 
   return (
-    <>
+    <div className="grid grid-cols-1 gap-4">
       <h3>Device</h3>
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
@@ -123,7 +123,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
           </div>
         </>
       )}
-    </>
+    </div>
   );
 };
 
