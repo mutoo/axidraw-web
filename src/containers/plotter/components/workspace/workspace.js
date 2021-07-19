@@ -12,12 +12,10 @@ import Planning from './planning';
 import Gizmo from './gizmo';
 
 const Workspace = observer(({ margin = 20 }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { page } = useContext(PlotterContext);
   const marginPx = mm2px(margin);
-  const paddingPx = mm2px(page.padding);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
-  const { contentFitPage, contentPreserveAspectRatio } = page;
   const viewBox = `${-marginPx} ${-marginPx} ${widthPx + marginPx * 2} ${
     heightPx + marginPx * 2
   }`;

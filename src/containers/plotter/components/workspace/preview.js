@@ -6,10 +6,13 @@ import svgToLines from 'plotter/parser/svg-to-lines';
 import classNames from 'classnames';
 import styles from './preview.css';
 import PlotterContext from '../../context';
-import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
+import {
+  PLANNING_PHASE_PLANNING,
+  PLANNING_PHASE_PREVIEW,
+} from '../../presenters/planning';
 
 const Preview = observer(({ ...props }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { planning, page } = useContext(PlotterContext);
   const previewContainerRef = useRef(null);
   const [strokeWidthPercent, setStrokeWidthPercent] = useState(1);
   const paddingPx = mm2px(page.padding);
@@ -25,7 +28,7 @@ const Preview = observer(({ ...props }) => {
     /* remove unsupported elements */
     if (!imported.hasAttribute('data-cleaned')) {
       const response = clean(imported);
-      work.updateFileInfo(response.counts);
+      planning.updateFileInfo(response.counts);
       imported.setAttribute('data-cleaned', true);
     }
     /* adjust svg dimension as per page setup */
@@ -59,29 +62,29 @@ const Preview = observer(({ ...props }) => {
     page.alignment.vertical,
     page.alignment.horizontal,
     page.contentFitPage,
-    work.svgContent,
+    planning.svgContent,
   ]);
   useLayoutEffect(() => {
     // when switch to planning phase, extract svg to lines.
-    if (work.phase === WORK_PHASE_PLANNING) {
+    if (planning.phase === PLANNING_PHASE_PLANNING) {
       const container = previewContainerRef.current;
       const imported = container?.children[0];
       if (!imported) {
         return;
       }
-      work.updateLines(svgToLines(imported));
+      planning.updateLines(svgToLines(imported));
     }
-  }, [work.phase]);
+  }, [planning.phase]);
   return (
     <g
       className={classNames(
         styles.root,
-        work.phase === WORK_PHASE_PREVIEW ? 'block' : 'hidden',
+        planning.phase === PLANNING_PHASE_PREVIEW ? 'block' : 'hidden',
       )}
       style={{
         '--preview-stroke-width': strokeWidthPercent,
       }}
-      dangerouslySetInnerHTML={{ __html: work.svgContent }}
+      dangerouslySetInnerHTML={{ __html: planning.svgContent }}
       ref={previewContainerRef}
       {...props}
     />

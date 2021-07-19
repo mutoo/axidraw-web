@@ -4,16 +4,16 @@ import classNames from 'classnames';
 import { px2mm } from 'math/svg';
 import styles from './planning.css';
 import PlotterContext from '../../context';
-import { WORK_PHASE_PLANNING } from '../../presenters/work';
+import { PLANNING_PHASE_PLANNING } from '../../presenters/planning';
 
 const Planning = observer(({ ...props }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { planning, page } = useContext(PlotterContext);
 
   return (
     <g
       className={classNames(
         styles.root,
-        work.phase === WORK_PHASE_PLANNING ? 'block' : 'hidden',
+        planning.phase === PLANNING_PHASE_PLANNING ? 'block' : 'hidden',
       )}
       style={{ strokeWidth: px2mm(1) }}
       transform={page.pageToScreenMatrix.toString()}
@@ -23,9 +23,9 @@ const Planning = observer(({ ...props }) => {
         style={{
           stroke: '#aaaaaa',
         }}
-        d={work.connectionsAsPathDef}
+        d={planning.connectionsAsPathDef}
       />
-      <path d={work.linesAsPathDef} />
+      <path d={planning.linesAsPathDef} />
     </g>
   );
 });

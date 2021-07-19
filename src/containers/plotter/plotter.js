@@ -2,17 +2,17 @@ import React from 'react';
 import Workspace from './components/workspace/workspace';
 import styles from './plotter.css';
 import createPageSetup from './presenters/page';
-import createWork from './presenters/work';
+import createPlanning from './presenters/planning';
 import Preview from './components/panels/preview';
 import Planning from './components/panels/planning';
 import PlotterContext from './context';
 
 const page = createPageSetup();
-const work = createWork();
+const planning = createPlanning();
 
 const Plotter = () => {
   return (
-    <PlotterContext.Provider value={{ work, page }}>
+    <PlotterContext.Provider value={{ planning, page }}>
       <main className={styles.workspace}>
         <Workspace />
       </main>

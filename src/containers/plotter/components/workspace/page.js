@@ -7,7 +7,7 @@ import styles from './page.css';
 import PlotterContext from '../../context';
 
 const Page = observer(({ ...props }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { planning, page } = useContext(PlotterContext);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
   const paddingPx = mm2px(page.padding);
@@ -30,7 +30,7 @@ const Page = observer(({ ...props }) => {
           alert('Only SVG files are supported.');
           return;
         }
-        work.loadFromFile(svgFile);
+        planning.loadFromFile(svgFile);
       })}
       {...props}
     >

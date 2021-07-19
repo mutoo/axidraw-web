@@ -2,19 +2,19 @@ import { makeAutoObservable, observable } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/parser/svg-presentation';
 
-export const WORK_PHASE_PREVIEW = 'axidraw-web-work-phase-preview';
-export const WORK_PHASE_PLANNING = 'axidraw-web-work-phase-planning';
-export const WORK_PHASE_PLOTTING = 'axidraw-web-work-phase-plotting';
+export const PLANNING_PHASE_PREVIEW = 'axidraw-web-planning-phase-preview';
+export const PLANNING_PHASE_PLANNING = 'axidraw-web-planning-phase-planning';
+export const PLANNING_PHASE_PLOTTING = 'axidraw-web-planning-phase-plotting';
 
-const createWork = () =>
+const createPlanning = () =>
   makeAutoObservable(
     {
       svgContent: null,
       // optimize: don't watch the child elements of lines and motions
-      lines: observable.array([], { deep: false }),
-      motions: observable.array([], { deep: false }),
+      lines: observable.shallow([]),
+      motions: observable.shallow([]),
       fileInfo: null,
-      phase: WORK_PHASE_PREVIEW,
+      phase: PLANNING_PHASE_PREVIEW,
       setPhase(phase) {
         this.phase = phase;
       },
@@ -27,15 +27,15 @@ const createWork = () =>
       },
       loadSVGContent(content) {
         this.svgContent = content;
-        this.lines.clear();
-        this.motions.clear();
+        this.lines = [];
+        this.motions = [];
       },
       updateFileInfo(fileInfo) {
         this.fileInfo = fileInfo;
       },
       updateLines(lines) {
-        this.lines.replace(lines);
-        this.motions.clear();
+        this.lines = lines;
+        this.motions = [];
       },
       planMotion(options) {
         if (!this.lines?.length) {
@@ -64,4 +64,4 @@ const createWork = () =>
     },
   );
 
-export default createWork;
+export default createPlanning;

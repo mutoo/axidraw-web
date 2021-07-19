@@ -15,16 +15,19 @@ import {
   PAGE_ORIENTATION_PORTRAIT,
   pageSizes,
 } from '../../presenters/page';
+import {
+  PLANNING_PHASE_PLANNING,
+  PLANNING_PHASE_PREVIEW,
+} from '../../presenters/planning';
 import PlotterContext from '../../context';
 import Panel from './panel';
 import styles from './preview.css';
-import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
 
 const Preview = observer(({ ...props }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { planning, page } = useContext(PlotterContext);
   const fileInputRef = useRef(null);
   return (
-    <Panel active={work.phase === WORK_PHASE_PREVIEW} {...props}>
+    <Panel active={planning.phase === PLANNING_PHASE_PREVIEW} {...props}>
       <section>
         <h3>Preview</h3>
         <p>In this phase, you could load svg and set up the page.</p>
@@ -37,7 +40,7 @@ const Preview = observer(({ ...props }) => {
             onChange={async (e) => {
               const { files } = e.target;
               if (!files.length) return;
-              work.loadFromFile(files[0]);
+              planning.loadFromFile(files[0]);
             }}
           />
           <Button
@@ -143,19 +146,19 @@ const Preview = observer(({ ...props }) => {
           <option value={PAGE_ALIGNMENT_VERTICAL_CENTER}>Center</option>
           <option value={PAGE_ALIGNMENT_VERTICAL_BOTTOM}>Bottom</option>
         </select>
-        {work.fileInfo && (
+        {planning.fileInfo && (
           <>
             <h4 className="col-span-2">File Information:</h4>
             <textarea
               className="col-span-2"
-              value={JSON.stringify(work.fileInfo, null, 2)}
+              value={JSON.stringify(planning.fileInfo, null, 2)}
               readOnly
             />
           </>
         )}
       </section>
       <section className="space-y-4">
-        {work.svgContent ? (
+        {planning.svgContent ? (
           <Alert type="info">
             Plan the motion before sending it to the plotter.
           </Alert>
@@ -163,9 +166,9 @@ const Preview = observer(({ ...props }) => {
           <Alert type="warn">Load SVG first.</Alert>
         )}
         <Button
-          disabled={!work.svgContent}
+          disabled={!planning.svgContent}
           onClick={() => {
-            work.setPhase(WORK_PHASE_PLANNING);
+            planning.setPhase(PLANNING_PHASE_PLANNING);
           }}
         >
           <span className="inline-block w-32">Next</span>

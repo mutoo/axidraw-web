@@ -4,24 +4,27 @@ import Alert from 'components/ui/alert/alert';
 import { observer } from 'mobx-react-lite';
 import { mm2px } from 'math/svg';
 import PlotterContext from '../../context';
-import { WORK_PHASE_PLANNING, WORK_PHASE_PREVIEW } from '../../presenters/work';
+import {
+  PLANNING_PHASE_PLANNING,
+  PLANNING_PHASE_PREVIEW,
+} from '../../presenters/planning';
 import Panel from './panel';
 import styles from './planning.css';
 import { PAGE_ORIENTATION_LANDSCAPE } from '../../presenters/page';
 
 const Planning = observer(({ ...props }) => {
-  const { work, page } = useContext(PlotterContext);
+  const { planning, page } = useContext(PlotterContext);
   const [connectedError, setConnectedError] = useState(0.2);
   const planningButtonRef = useRef(null);
   useLayoutEffect(() => {
     // when switch to planning phase, extract svg to lines.
-    if (work.phase === WORK_PHASE_PLANNING) {
+    if (planning.phase === PLANNING_PHASE_PLANNING) {
       // manually trigger a planning
       planningButtonRef.current.click();
     }
-  }, [work.phase]);
+  }, [planning.phase]);
   return (
-    <Panel active={work.phase === WORK_PHASE_PLANNING} {...props}>
+    <Panel active={planning.phase === PLANNING_PHASE_PLANNING} {...props}>
       <section>
         <h3>Planning</h3>
         <p className="mb-4">
@@ -30,7 +33,7 @@ const Planning = observer(({ ...props }) => {
         </p>
         <Button
           onClick={() => {
-            work.setPhase(WORK_PHASE_PREVIEW);
+            planning.setPhase(PLANNING_PHASE_PREVIEW);
           }}
         >
           Back to preview
@@ -41,7 +44,7 @@ const Planning = observer(({ ...props }) => {
           className={styles.form}
           onSubmit={(e) => {
             e.preventDefault();
-            work.planMotion({
+            planning.planMotion({
               screenToPageMatrix: page.screenToPageMatrix,
               origin:
                 page.orientation === PAGE_ORIENTATION_LANDSCAPE
@@ -57,6 +60,7 @@ const Planning = observer(({ ...props }) => {
             type="number"
             min="0"
             step="0.1"
+            max="10"
             value={connectedError}
             onChange={(e) => setConnectedError(parseFloat(e.target.value))}
           />
