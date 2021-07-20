@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import * as commands from 'communication/ebb';
-import { MOTION_PEN_UP } from './planner';
+import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner';
 import { xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
 
@@ -13,7 +13,13 @@ export const PLOTTER_ACTION_STOP = 'axidraw-web-plotter-action-stop';
 
 export const initialContext = { x: 0, y: 0, a1: 0, a2: 0, pen: MOTION_PEN_UP };
 
-async function* plot({ device, speed, motions, control }) {
+async function* plot({
+  device,
+  penUpMoveSpeed,
+  penDownMoveSpeed,
+  motions,
+  control,
+}) {
   // this async generator would keep working-in-progress status
   // allow user to pause/resume to work.
   let context = null;
@@ -38,7 +44,10 @@ async function* plot({ device, speed, motions, control }) {
       await device.executeCommand(commands.sp, targetPen, 500);
       context.pen = targetPen;
     }
-    const rate = speed.get();
+    const rate =
+      targetPen === MOTION_PEN_DOWN
+        ? penDownMoveSpeed.get()
+        : penUpMoveSpeed.get();
     const targetAA = xyDist2aaSteps({ x: targetLine[2], y: targetLine[3] });
     const deltaA1 = targetAA.a1 - context.a1;
     const deltaA2 = targetAA.a2 - context.a2;

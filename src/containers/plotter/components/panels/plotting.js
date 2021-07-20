@@ -50,16 +50,29 @@ const Plotting = observer(({ ...props }) => {
               work.plot({ motions: planning.motions });
             }}
           >
-            <label htmlFor="speed">Speed:</label>
-
+            <label htmlFor="pen-down-speed">Speed(Pen-down):</label>
             <input
-              id="page-padding"
+              id="pen-down-speed"
               type="number"
               min="1000"
               step="100"
-              max="5000"
-              value={work.speed}
-              onChange={(e) => work.setSpeed(parseFloat(e.target.value))}
+              max="20000"
+              value={work.penDownMoveSpeed}
+              onChange={(e) =>
+                work.setPenDownMoveSpeed(parseFloat(e.target.value))
+              }
+            />
+            <label htmlFor="pen-up-speed">Speed(Pen-up):</label>
+            <input
+              id="pen-up-speed"
+              type="number"
+              min="1000"
+              step="100"
+              max="20000"
+              value={work.penUpMoveSpeed}
+              onChange={(e) =>
+                work.setPenUpMoveSpeed(parseFloat(e.target.value))
+              }
             />
             <div className="col-start-2">
               {work.plotterStatus === PLOTTER_STATUS_STANDBY && (

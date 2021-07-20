@@ -18,7 +18,7 @@ export const executeCommand = async (
   if (command.version) {
     if (!checkVersion(deviceVersion, command.version)) {
       throw new Error(
-        `${command.name} Command expects higher firmware version: ${command.version}.`,
+        `"${command.title}" command expects higher firmware version: ${command.version}.`,
       );
     }
   }

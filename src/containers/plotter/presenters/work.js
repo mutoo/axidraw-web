@@ -12,9 +12,13 @@ const createWork = () =>
     setDevice(device) {
       this.device.set(device);
     },
-    speed: observable.box(2000), // steps per seconds
-    setSpeed(speed) {
-      this.speed.set(speed);
+    penDownMoveSpeed: observable.box(2000), // steps per seconds
+    penUpMoveSpeed: observable.box(5000), // steps per seconds
+    setPenDownMoveSpeed(speed) {
+      this.penDownMoveSpeed.set(speed);
+    },
+    setPenUpMoveSpeed(speed) {
+      this.penUpMoveSpeed.set(speed);
     },
     control: observable.box(null),
     plotterStatus: PLOTTER_STATUS_STANDBY,
@@ -27,7 +31,8 @@ const createWork = () =>
       const plotting = plot({
         device,
         motions,
-        speed: this.speed,
+        penUpMoveSpeed: this.penUpMoveSpeed,
+        penDownMoveSpeed: this.penDownMoveSpeed,
         control: this.control,
       });
       this.plottingInProgress.set(plotting);
