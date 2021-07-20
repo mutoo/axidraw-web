@@ -16,6 +16,20 @@ export const loadJavascript = () => ({
   },
 });
 
+export const loadImages = () => ({
+  module: {
+    rules: [
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        exclude: /node_modules/,
+        use: {
+          loader: 'file-loader',
+        },
+      },
+    ],
+  },
+});
+
 const cssSharedLoaders = ({ modules } = { modules: false }) => [
   {
     loader: 'css-loader',

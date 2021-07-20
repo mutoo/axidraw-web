@@ -7,6 +7,8 @@ Logger.useDefaults({
   defaultLevel: defaultLogLevel,
 });
 
-Logger.get('device').setLevel(defaultLogLevel);
-Logger.get('ebb').setLevel(defaultLogLevel);
-Logger.get('plotter').setLevel(defaultLogLevel);
+if (process.env.NODE_ENV === 'development') {
+  Logger.get('device').setLevel(Logger.DEBUG);
+  Logger.get('ebb').setLevel(Logger.DEBUG);
+  Logger.get('plotter').setLevel(defaultLogLevel);
+}

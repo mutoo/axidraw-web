@@ -114,7 +114,7 @@ export const createDeviceBind = ({ type, connectDevice }) => {
       return version;
     },
     get isConnected() {
-      return device?.isReady();
+      return device?.isReady;
     },
   };
 };

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import DeviceConnector from 'components/device-connector/device-connector';
 import Alert from 'components/ui/alert/alert';
@@ -20,11 +20,19 @@ const Plotting = observer(({ ...props }) => {
   const { planning, work } = useContext(PlotterContext);
   const device = work.device.get();
   const plottingInProgress = work.plottingInProgress.get();
+  const [connectedDevice, setConnectedDevice] = useState(null);
+  useEffect(() => {
+    // the side effect ensure device disconnects when react was fast-refreshed
+    work.device.set(connectedDevice);
+    return () => {
+      connectedDevice?.disconnectDevice();
+    };
+  }, [connectedDevice]);
   return (
     <Panel active={planning.phase === PLANNING_PHASE_PLOTTING} {...props}>
       <DeviceConnector
-        onConnected={(d) => work.setDevice(d)}
-        onDisconnected={() => work.setDevice(null)}
+        onConnected={(d) => setConnectedDevice(d)}
+        onDisconnected={() => setConnectedDevice(null)}
       />
       {!device && (
         <section className="space-y-4">

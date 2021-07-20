@@ -18,6 +18,13 @@ const createPlanning = () =>
       setPhase(phase) {
         this.phase = phase;
       },
+      loadFromUrl(url) {
+        fetch(url)
+          .then((resp) => resp.text())
+          .then((svg) => {
+            this.loadSVGContent(svg);
+          });
+      },
       loadFromFile(file) {
         const reader = new FileReader();
         reader.onload = (ev) => {

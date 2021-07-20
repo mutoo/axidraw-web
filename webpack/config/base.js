@@ -4,7 +4,7 @@
 import path from 'path';
 import { merge } from 'webpack-merge';
 import { EnvironmentPlugin } from 'webpack';
-import { loadCss, loadJavascript } from './parts';
+import { loadCss, loadImages, loadJavascript } from './parts';
 import { generatePages } from './pages';
 
 export default merge([
@@ -37,5 +37,6 @@ export default merge([
   },
   loadJavascript(),
   loadCss(),
+  loadImages(),
   generatePages(),
 ]);
