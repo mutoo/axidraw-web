@@ -11,7 +11,7 @@ export const PLOTTER_STATUS_PLOTTING = 'axidraw-web-plotter-status-plotting';
 export const PLOTTER_ACTION_PAUSE = 'axidraw-web-plotter-action-pause';
 export const PLOTTER_ACTION_STOP = 'axidraw-web-plotter-action-stop';
 
-export const initialContext = { x: 0, y: 0, pen: MOTION_PEN_UP };
+export const initialContext = { x: 0, y: 0, a1: 0, a2: 0, pen: MOTION_PEN_UP };
 
 async function* plot({ device, speed, motions, control }) {
   // this async generator would keep working-in-progress status
@@ -39,17 +39,19 @@ async function* plot({ device, speed, motions, control }) {
       context.pen = targetPen;
     }
     const rate = speed.get();
-    const dx = targetLine[2] - context.x;
-    const dy = targetLine[3] - context.y;
-    const aa = xyDist2aaSteps({ x: dx, y: dy });
-    const t = Math.max(
-      1,
-      ((Math.sqrt(aa.a1 ** 2 + aa.a2 ** 2) / rate) * 1000) | 0,
-    );
-    console.debug(`to ${aa.a1}, ${aa.a2} in ${t}ms`);
-    await device.executeCommand(commands.sm, t, aa.a1, aa.a2);
+    const targetAA = xyDist2aaSteps({ x: targetLine[2], y: targetLine[3] });
+    const deltaA1 = targetAA.a1 - context.a1;
+    const deltaA2 = targetAA.a2 - context.a2;
+    const t = Math.ceil((Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2) / rate) * 1000);
+
+    // console.debug(`to ${deltaA1}, ${deltaA2} in ${t}ms`);
+    if (t > 0) {
+      await device.executeCommand(commands.sm, t, deltaA1, deltaA2);
+    }
     context.x = targetLine[2];
     context.y = targetLine[3];
+    context.a1 = targetAA.a1;
+    context.a2 = targetAA.a2;
 
     if (shouldStop) {
       break;

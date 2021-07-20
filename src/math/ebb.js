@@ -85,9 +85,9 @@ export const ira2s = ({ interval, rate, acc }) => {
  * @returns {{a1: number, a2: number}}
  */
 export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
-  const stepPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
-  const xSteps = (stepPerMm * x) | 0;
-  const ySteps = (stepPerMm * y) | 0;
+  const stepsPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
+  const xSteps = (stepsPerMm * x) | 0;
+  const ySteps = (stepsPerMm * y) | 0;
   return xy2aa({ x: xSteps, y: ySteps });
 };
 
