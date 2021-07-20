@@ -1,5 +1,6 @@
 import svgElementToLines from './svg-element-to-lines';
 import { mm2px } from '../../math/svg';
+import { logger } from '../utils';
 
 /**
  * Extract lines from svg container;
@@ -31,7 +32,7 @@ export function* svgContainerToLines(svg, opt) {
       default:
         // unsupported types, e.g. DEF,
         // we just discard them
-        console.debug(`unsupported type: ${svgEl.nodeName}`);
+        logger.info(`unsupported type: ${svgEl.nodeName}`);
     }
   }
 }

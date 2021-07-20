@@ -58,6 +58,7 @@
     "html-webpack-plugin": "^5.3.2",
     "husky": "^6.0.0",
     "jest": "^27.0.6",
+    "js-logger": "^1.6.1",
     "lint-staged": ">=10",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.1.0",

@@ -1,4 +1,4 @@
-import { decode } from '../utils';
+import { decode, logger } from '../utils';
 import handleErrorMessage from './error';
 
 export default function* handleEBBMessages(commandQueue) {
@@ -30,16 +30,14 @@ export default function* handleEBBMessages(commandQueue) {
             errorHandler = null;
             cmd.reject(result);
           } else {
-            // eslint-disable-next-line no-console
-            console.debug(`Received message: ${result}`);
+            logger.debug(`Received message: ${result}`);
             cmd.resolve(result);
           }
           commandQueue.shift();
         }
       } else {
         const garbage = decode(buffer);
-        // eslint-disable-next-line no-console
-        console.debug(`Discard garbage message: ${garbage}`);
+        logger.debug(`Discard garbage message: ${garbage}`);
         buffer.length = 0;
       }
     }

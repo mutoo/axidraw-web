@@ -1,3 +1,7 @@
+import Logger from 'js-logger';
+
+export const logger = Logger.get('ebb');
+
 export const toInt = (i) => parseInt(i, 10);
 
 export const createCommand = (cmd, title, create, options) => {

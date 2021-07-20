@@ -3,6 +3,7 @@ import * as commands from 'communication/ebb';
 import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner';
 import { xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
+import { logger } from './utils';
 
 export const PLOTTER_STATUS_STANDBY = 'axidraw-web-plotter-status-standby';
 export const PLOTTER_STATUS_PAUSED = 'axidraw-web-plotter-status-paused';
@@ -33,14 +34,19 @@ async function* plot({
     const shouldPause = await device.executeCommand(commands.qb);
     const action = control.get();
     if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
+      logger.debug(`action: pause`);
       await device.executeCommand(commands.sp, 1, 500);
       yield PLOTTER_STATUS_PAUSED;
       await device.executeCommand(commands.sp, 0, 500);
     }
     const shouldStop = action === PLOTTER_ACTION_STOP;
+    if (shouldStop) {
+      logger.debug(`action: stop`);
+    }
     const targetPen = shouldStop ? MOTION_PEN_UP : pen;
     const targetLine = shouldStop ? [context.x, context.y, 0, 0] : line;
     if (context.pen !== targetPen) {
+      logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
       await device.executeCommand(commands.sp, targetPen, 500);
       context.pen = targetPen;
     }
@@ -53,8 +59,8 @@ async function* plot({
     const deltaA2 = targetAA.a2 - context.a2;
     const t = Math.ceil((Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2) / rate) * 1000);
 
-    // console.debug(`to ${deltaA1}, ${deltaA2} in ${t}ms`);
     if (t > 0) {
+      logger.debug(`step-move: ${deltaA1}, ${deltaA2} in ${t}ms`);
       await device.executeCommand(commands.sm, t, deltaA1, deltaA2);
     }
     context.x = targetLine[2];
@@ -63,11 +69,14 @@ async function* plot({
     context.a2 = targetAA.a2;
 
     if (shouldStop) {
+      logger.debug(`stop plotting`);
       break;
     }
   }
+  logger.debug(`pen is homing`);
   await delay(1e4);
   await reset();
+  logger.debug(`finished plotting`);
   return PLOTTER_STATUS_STANDBY;
 }
 

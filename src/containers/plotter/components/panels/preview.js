@@ -146,18 +146,8 @@ const Preview = observer(({ ...props }) => {
           <option value={PAGE_ALIGNMENT_VERTICAL_CENTER}>Center</option>
           <option value={PAGE_ALIGNMENT_VERTICAL_BOTTOM}>Bottom</option>
         </select>
-        {planning.fileInfo && (
-          <>
-            <h4 className="col-span-2">File Information:</h4>
-            <textarea
-              className="col-span-2"
-              value={JSON.stringify(planning.fileInfo, null, 2)}
-              readOnly
-            />
-          </>
-        )}
       </section>
-      <section className="space-y-4">
+      <section className="grid grid-cols-1 gap-4">
         {planning.svgContent ? (
           <Alert type="info">
             Plan the motion before sending it to the plotter.
@@ -173,6 +163,15 @@ const Preview = observer(({ ...props }) => {
         >
           <span className="inline-block w-32">Next</span>
         </Button>
+        {planning.fileInfo && (
+          <>
+            <h4>Svg Counts:</h4>
+            <textarea
+              value={JSON.stringify(planning.fileInfo, null, 2)}
+              readOnly
+            />
+          </>
+        )}
       </section>
     </Panel>
   );

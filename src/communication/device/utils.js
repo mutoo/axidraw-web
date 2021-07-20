@@ -1,9 +1,12 @@
 import EventEmitter from 'events';
+import Logger from 'js-logger';
 import { checkVersion } from '../ebb/utils';
 import v from '../ebb/commands/v';
 import r from '../ebb/commands/r';
 import { DEVICE_EVENT_CONNECTED, DEVICE_EVENT_DISCONNECTED } from './consts';
 import { timeout } from '../../utils/time';
+
+export const logger = Logger.get('device');
 
 export const executeCommand = async (
   deviceVersion,

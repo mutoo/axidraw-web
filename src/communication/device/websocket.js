@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import handleEBBMessages from '../ebb/messages/ebb';
-import { createDeviceBind, createDeviceImpl } from './utils';
+import { createDeviceBind, createDeviceImpl, logger } from './utils';
 import {
   DEVICE_EVENT_DISCONNECTED,
   DEVICE_TYPE_WEBSOCKET,
@@ -52,8 +52,7 @@ export const createWSDeviceProxy = (address, auth, devicePicker) => {
     emitter.emit(WEBSOCKET_EVENT_DISCONNECTED, 'Host is not available.');
   };
   ws.onclose = (e) => {
-    // eslint-disable-next-line no-console
-    console.debug(`Device is closed: [${e.code}]${e.reason}`);
+    logger.debug(`Device is closed: [${e.code}]${e.reason}`);
     proxyStatus = WEBSOCKET_STATUS_DISCONNECTED;
     switch (e.code) {
       case 3000:
@@ -132,8 +131,7 @@ export const connectDevice =
               }
             },
             send(message) {
-              // eslint-disable-next-line no-console
-              console.debug('Send to communication.device: ', message);
+              logger.debug('Send to communication.device: ', message);
               proxy.send(message);
             },
             disconnect() {
@@ -151,8 +149,7 @@ export const connectDevice =
       proxy.onDisconnected((e) => {
         messageHandler.return();
         emitter.emit(DEVICE_EVENT_DISCONNECTED, e);
-        // eslint-disable-next-line no-console
-        console.debug('Device is closed', e);
+        logger.debug('Device is closed', e);
         reject(e);
       });
     });

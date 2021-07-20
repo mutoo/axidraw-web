@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { encode } from '../ebb/utils';
 import handleEBBMessages from '../ebb/messages/ebb';
-import { createDeviceBind, createDeviceImpl } from './utils';
+import { createDeviceBind, createDeviceImpl, logger } from './utils';
 import { DEVICE_EVENT_DISCONNECTED, DEVICE_TYPE_USB } from './consts';
 
 export const TRANSFER_ENDPOINT = 2;
@@ -17,8 +17,7 @@ export const connectDevice =
     const emitter = new EventEmitter();
     const devices = await navigator.usb.getDevices();
     devices.forEach((p) => {
-      // eslint-disable-next-line no-console
-      console.log(`Found device: ${p.productName}`);
+      logger.debug(`Found device: ${p.productName}`);
     });
     if (pair || !devices.length) {
       // select or pair device from native device picker
@@ -33,28 +32,23 @@ export const connectDevice =
       device = await devicePicker(devices);
     }
     if (!device.opened) {
-      // eslint-disable-next-line no-console
-      console.debug('Opening communication.device...');
+      logger.debug('Opening communication.device...');
       await device.open();
     }
-    // eslint-disable-next-line no-console
-    console.debug('Selecting configuration..');
+    logger.debug('Selecting configuration..');
     await device.selectConfiguration(1);
-    // eslint-disable-next-line no-console
-    console.debug('Claiming interface...');
+    logger.debug('Claiming interface...');
     await device.claimInterface(1);
     // start listening the data transferred in
     setTimeout(async () => {
-      // eslint-disable-next-line no-console
-      console.debug('Start listening data.');
+      logger.debug('Start listening data.');
       const messageHandler = handleEBBMessages(commandQueue);
       messageHandler.next();
       try {
         // eslint-disable-next-line no-constant-condition
         while (true) {
           if (!device?.opened) {
-            // eslint-disable-next-line no-console
-            console.debug('Stop listening data.');
+            logger.debug('Stop listening data.');
             break;
           }
           // eslint-disable-next-line no-await-in-loop
@@ -69,8 +63,7 @@ export const connectDevice =
         }
       } catch (e) {
         messageHandler.return();
-        // eslint-disable-next-line no-console
-        console.debug(e.message);
+        logger.debug(e.message);
         emitter.emit(DEVICE_EVENT_DISCONNECTED, e.message);
       }
     });
@@ -92,8 +85,7 @@ export const connectDevice =
         }
       },
       async send(message) {
-        // eslint-disable-next-line no-console
-        console.debug('Send to communication.device: ', message);
+        logger.debug('Send to communication.device: ', message);
         const data = encode(message);
         const result = await device.transferOut(TRANSFER_ENDPOINT, data);
         if (result.status !== 'ok') {
@@ -101,11 +93,9 @@ export const connectDevice =
         }
       },
       async disconnect() {
-        // eslint-disable-next-line no-console
-        console.debug('Closing communication.device...');
+        logger.debug('Closing communication.device...');
         await device.close();
-        // eslint-disable-next-line no-console
-        console.debug('Device is closed');
+        logger.debug('Device is closed');
         // the disconnected event will be trigger from the message handler
       },
       onDisconnected(listener) {

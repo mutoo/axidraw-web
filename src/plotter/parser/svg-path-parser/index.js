@@ -8,6 +8,7 @@ import Q from './cmd-q';
 import T from './cmd-t';
 import A from './cmd-a';
 import Z from './cmd-z';
+import { logger } from '../../utils';
 
 export const pathCommands = {
   M,
@@ -40,7 +41,7 @@ export default function svgPathParser(pathDef = 'M 0 0', toAbsolute = true) {
     // get the command parser
     const cmdParser = pathCommands[command.toUpperCase()];
     if (!cmdParser) {
-      console.debug(`Invalid path command: ${command}`);
+      logger.warn(`Invalid path command: ${command}`);
       return [];
     }
     // we assume all the parameters are float numbers

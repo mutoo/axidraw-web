@@ -64,15 +64,7 @@
         "int32Hint": true
       }
     ],
-    "no-console": [
-      1,
-      {
-        "allow": [
-          "warn",
-          "debug"
-        ]
-      }
-    ],
+    "no-console": 1,
     "func-names": [
       1,
       "as-needed",

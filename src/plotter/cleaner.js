@@ -1,3 +1,5 @@
+import { logger } from './utils';
+
 export function* walkSvg(svg) {
   for (const svgEl of svg.children) {
     const type = svgEl.nodeName;
@@ -34,7 +36,7 @@ export default function clean(svg) {
       case 'discard':
       default:
         counts[node.action] = (counts[node.action] || 0) + 1;
-        console.debug(`Unsupported element type: ${node.type}`);
+        logger.debug(`Unsupported element type: ${node.type}`);
         toDiscard.push(node.el);
     }
   }
