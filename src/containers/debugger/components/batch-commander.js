@@ -14,6 +14,8 @@ const BatchCommander = ({ device }) => {
         const CMDs = batch.trim().split(/\s+/);
         let resultStr = '';
         for (const cmdWithParams of CMDs) {
+          // eslint-disable-next-line no-continue
+          if (cmdWithParams.startsWith('#')) continue;
           const parts = cmdWithParams.split(',');
           const cmd = parts.shift().toLowerCase();
           // there commands or not concurrent, their are executed one-by-one.
