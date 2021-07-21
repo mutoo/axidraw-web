@@ -1,2 +1,5 @@
-// eslint-disable-next-line import/prefer-default-export
-export const distSQ = (x0, y0, x1, y1) => (x0 - x1) ** 2 + (y0 - y1) ** 2;
+export const lineLengthSQ = (line) =>
+  (line[0] - line[2]) ** 2 + (line[1] - line[3]) ** 2;
+
+export const lineLength = (line) =>
+  Math.sqrt((line[0] - line[2]) ** 2 + (line[1] - line[3]) ** 2);
