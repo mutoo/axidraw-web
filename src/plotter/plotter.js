@@ -30,14 +30,15 @@ async function* plot({
     await device.executeCommand(commands.sp, 1, 500);
   };
   await reset();
+  let bufferTime = 0;
   for (const { line, pen } of motions) {
     const shouldPause = await device.executeCommand(commands.qb);
-    const action = control.get();
+    let action = control.get();
     if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
       logger.debug(`action: pause`);
       await device.executeCommand(commands.sp, 1, 500);
-      yield PLOTTER_STATUS_PAUSED;
-      await device.executeCommand(commands.sp, 0, 500);
+      context.pen = MOTION_PEN_UP;
+      action = yield PLOTTER_STATUS_PAUSED;
     }
     const shouldStop = action === PLOTTER_ACTION_STOP;
     if (shouldStop) {
@@ -68,13 +69,16 @@ async function* plot({
     context.a1 = targetAA.a1;
     context.a2 = targetAA.a2;
 
+    bufferTime = t;
+
     if (shouldStop) {
       logger.debug(`stop plotting`);
       break;
     }
   }
-  logger.debug(`pen is homing`);
-  await delay(1e4);
+  bufferTime += 3e3;
+  logger.debug(`pen is homing: ${bufferTime}`);
+  await delay(bufferTime);
   await reset();
   logger.debug(`finished plotting`);
   return PLOTTER_STATUS_STANDBY;

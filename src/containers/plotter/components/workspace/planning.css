@@ -4,6 +4,13 @@
 
 .root {
   stroke-width: var(--planning-stroke-width);
-  stroke: #333;
   fill: none;
+}
+
+.motionPenUp {
+  stroke: #e2e2e2;
+}
+
+.motionPenDown {
+  stroke: #333;
 }

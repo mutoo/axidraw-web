@@ -23,7 +23,7 @@ const Plotting = observer(({ ...props }) => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   useEffect(() => {
     // the side effect ensure device disconnects when react was fast-refreshed
-    work.device.set(connectedDevice);
+    work.setDevice(connectedDevice);
     return () => {
       connectedDevice?.disconnectDevice();
     };
@@ -88,8 +88,8 @@ const Plotting = observer(({ ...props }) => {
                   Start
                 </Button>
               )}
-              {work.plotterStatus === PLOTTER_STATUS_PLOTTING && (
-                <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                {work.plotterStatus === PLOTTER_STATUS_PLOTTING && (
                   <Button
                     onClick={() => {
                       work.pause();
@@ -98,6 +98,17 @@ const Plotting = observer(({ ...props }) => {
                   >
                     Pause
                   </Button>
+                )}
+                {work.plotterStatus === PLOTTER_STATUS_PAUSED && (
+                  <Button
+                    onClick={() => {
+                      work.resume();
+                    }}
+                  >
+                    Resume
+                  </Button>
+                )}
+                {work.plotterStatus !== PLOTTER_STATUS_STANDBY && (
                   <Button
                     onClick={() => {
                       work.stop();
@@ -106,17 +117,8 @@ const Plotting = observer(({ ...props }) => {
                   >
                     Stop
                   </Button>
-                </div>
-              )}
-              {work.plotterStatus === PLOTTER_STATUS_PAUSED && (
-                <Button
-                  onClick={() => {
-                    work.resume();
-                  }}
-                >
-                  Resume
-                </Button>
-              )}
+                )}
+              </div>
             </div>
           </form>
         </section>

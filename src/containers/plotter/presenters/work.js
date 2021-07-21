@@ -2,6 +2,7 @@ import { makeAutoObservable, observable } from 'mobx';
 import plot, {
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
+  PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
   PLOTTER_STATUS_STANDBY,
 } from 'plotter/plotter';
@@ -11,6 +12,11 @@ const createWork = () =>
     device: observable.box(null, { deep: false }),
     setDevice(device) {
       this.device.set(device);
+      const pit = this.plottingInProgress.get();
+      if (!device && pit) {
+        pit.return();
+        this.plottingInProgress.set(null);
+      }
     },
     penDownMoveSpeed: observable.box(2000), // steps per seconds
     penUpMoveSpeed: observable.box(5000), // steps per seconds
@@ -38,18 +44,17 @@ const createWork = () =>
       this.plottingInProgress.set(plotting);
       await this.resume();
     },
-    async resume() {
+    async resume({ action } = {}) {
       const plotting = this.plottingInProgress.get();
       if (!plotting) {
         return;
       }
-      this.control.set(null);
       this.plotterStatus = PLOTTER_STATUS_PLOTTING;
-      const status = await plotting.next();
+      const status = await plotting.next(action);
       this.plotterStatus = status.value;
+      this.control.set(null);
       if (status.done) {
         this.plottingInProgress.set(null);
-        this.control.set(null);
         const device = this.device.get();
         device.disconnectDevice();
       }
@@ -58,7 +63,11 @@ const createWork = () =>
       this.control.set(PLOTTER_ACTION_PAUSE);
     },
     async stop() {
-      this.control.set(PLOTTER_ACTION_STOP);
+      if (this.plotterStatus === PLOTTER_STATUS_PAUSED) {
+        this.resume({ action: PLOTTER_ACTION_STOP });
+      } else {
+        this.control.set(PLOTTER_ACTION_STOP);
+      }
     },
   });
 

@@ -1,5 +1,6 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { isProduction } from './utils';
+import { plugins } from '../../babel.config.json';
 
 export const loadJavascript = () => ({
   module: {
@@ -9,7 +10,12 @@ export const loadJavascript = () => ({
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {},
+          options: {
+            plugins: [
+              ...plugins,
+              isProduction ? null : 'react-refresh/babel',
+            ].filter(Boolean),
+          },
         },
       },
     ],

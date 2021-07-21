@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { observer } from 'mobx-react-lite';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 import { px2mm } from 'math/svg';
 import styles from './planning.css';
 import PlotterContext from '../../context';
@@ -9,9 +10,9 @@ import {
   PLANNING_PHASE_PLOTTING,
 } from '../../presenters/planning';
 
-const Planning = observer(({ ...props }) => {
+const Planning = observer(({ strokeWidth, ...props }) => {
   const { planning, page } = useContext(PlotterContext);
-
+  const scale = px2mm(1);
   return (
     <g
       className={classNames(
@@ -21,21 +22,18 @@ const Planning = observer(({ ...props }) => {
           ? 'block'
           : 'hidden',
       )}
-      style={{ strokeWidth: px2mm(1) }}
+      style={{ '--planning-stroke-width': `${strokeWidth * scale}%` }}
       transform={page.pageToScreenMatrix.toString()}
       {...props}
     >
-      <path
-        style={{
-          stroke: '#aaaaaa',
-        }}
-        d={planning.connectionsAsPathDef}
-      />
-      <path d={planning.linesAsPathDef} />
+      <path className={styles.motionPenUp} d={planning.connectionsAsPathDef} />
+      <path className={styles.motionPenDown} d={planning.linesAsPathDef} />
     </g>
   );
 });
 
-Planning.propTypes = {};
+Planning.propTypes = {
+  strokeWidth: PropTypes.number,
+};
 
 export default Planning;

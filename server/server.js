@@ -8,8 +8,6 @@ const app = express();
 
 app.use(express.static('dist'));
 
-app.use('/assets', express.static('assets'));
-
 // provide CA cert for client to download
 app.use('/ca', express.static('server/cert/ca.pem'));
 

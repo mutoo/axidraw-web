@@ -1,10 +1,5 @@
-:root {
-  --preview-stroke-width: 1;
-}
-
 .root {
   * {
-    stroke-width: var(--preview-stroke-width) !important;
     stroke: #333 !important;
   }
 }

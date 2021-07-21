@@ -15,10 +15,14 @@ export function* walkLines(lines, opt) {
 
   for (const line of lines) {
     const motion = [context.x, context.y, line[0], line[1]];
+    const modifiedLine = [...line];
     if (distSQ(...motion) > connectedErrorSq) {
       yield { line: toPaperLine(motion), pen: MOTION_PEN_UP };
+    } else {
+      modifiedLine[0] = motion[0];
+      modifiedLine[1] = motion[1];
     }
-    yield { line: toPaperLine(line), pen: MOTION_PEN_DOWN };
+    yield { line: toPaperLine(modifiedLine), pen: MOTION_PEN_DOWN };
     // eslint-disable-next-line prefer-destructuring
     context.x = line[2];
     // eslint-disable-next-line prefer-destructuring

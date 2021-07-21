@@ -48,7 +48,7 @@ const createPlanning = () =>
         if (!this.lines?.length) {
           throw new Error('Lines are not ready');
         }
-        this.motions.replace(plan(this.lines, options));
+        this.motions = plan(this.lines, options);
       },
       get linesAsPathDef() {
         return toSvgPathDef(

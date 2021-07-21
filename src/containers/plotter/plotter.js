@@ -17,7 +17,9 @@ const planning = createPlanning();
 const work = createWork();
 
 if (process.env.NODE_ENV === 'development') {
-  planning.loadFromUrl(svgPlaceholder);
+  setTimeout(() => {
+    planning.loadFromUrl(svgPlaceholder);
+  });
 }
 
 const Plotter = () => {
