@@ -1,4 +1,4 @@
-import { makeAutoObservable, observable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/parser/svg-presentation';
 
@@ -10,9 +10,8 @@ const createPlanning = () =>
   makeAutoObservable(
     {
       svgContent: null,
-      // optimize: don't watch the child elements of lines and motions
-      lines: observable.shallow([]),
-      motions: observable.shallow([]),
+      lines: null,
+      motions: null,
       fileInfo: null,
       phase: PLANNING_PHASE_PREVIEW,
       setPhase(phase) {
@@ -34,15 +33,15 @@ const createPlanning = () =>
       },
       loadSVGContent(content) {
         this.svgContent = content;
-        this.lines = [];
-        this.motions = [];
+        this.lines = null;
+        this.motions = null;
       },
       updateFileInfo(fileInfo) {
         this.fileInfo = fileInfo;
       },
       updateLines(lines) {
         this.lines = lines;
-        this.motions = [];
+        this.motions = null;
       },
       planMotion(options) {
         if (!this.lines?.length) {
@@ -68,6 +67,7 @@ const createPlanning = () =>
     null,
     {
       name: 'axidraw-web-work',
+      deep: false,
     },
   );
 

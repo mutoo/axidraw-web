@@ -30,23 +30,25 @@ const Plotting = observer(({ ...props }) => {
   }, [connectedDevice]);
   return (
     <Panel active={planning.phase === PLANNING_PHASE_PLOTTING} {...props}>
-      <DeviceConnector
-        onConnected={(d) => setConnectedDevice(d)}
-        onDisconnected={() => setConnectedDevice(null)}
-      />
       {!device && (
         <section className="space-y-4">
           <h3>Plotting</h3>
           <Alert type="warn">Please connect to device before plotting.</Alert>
-          <Button
-            onClick={() => {
-              planning.setPhase(PLANNING_PHASE_PLANNING);
-            }}
-          >
-            Back to planning
-          </Button>
+          <div className="grid grid-cols-2 gap-6">
+            <Button
+              onClick={() => {
+                planning.setPhase(PLANNING_PHASE_PLANNING);
+              }}
+            >
+              Back to planning
+            </Button>
+          </div>
         </section>
       )}
+      <DeviceConnector
+        onConnected={(d) => setConnectedDevice(d)}
+        onDisconnected={() => setConnectedDevice(null)}
+      />
       {device && (
         <section className="space-y-4">
           <h3>Plotting</h3>

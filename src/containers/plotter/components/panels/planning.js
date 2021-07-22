@@ -16,6 +16,7 @@ import { PAGE_ORIENTATION_LANDSCAPE } from '../../presenters/page';
 const Planning = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
   const [connectedError, setConnectedError] = useState(0.2);
+  const [flatLineError, setFlatLineError] = useState(0.1);
   const planningButtonRef = useRef(null);
   useLayoutEffect(() => {
     // when switch to planning phase, extract svg to lines.
@@ -52,18 +53,29 @@ const Planning = observer(({ ...props }) => {
                   ? [0, 0]
                   : [mm2px(page.size.height), 0],
               connectedError,
+              flatLineError,
             });
           }}
         >
-          <label htmlFor="page-padding">Connected Error: </label>
+          <label htmlFor="connected-error">Connected: </label>
           <input
-            id="page-padding"
+            id="connected-error"
+            type="number"
+            min="0"
+            step="0.05"
+            max="10"
+            value={connectedError}
+            onChange={(e) => setConnectedError(parseFloat(e.target.value))}
+          />
+          <label htmlFor="flatten-error">Flatten: </label>
+          <input
+            id="flatten-error"
             type="number"
             min="0"
             step="0.1"
             max="10"
-            value={connectedError}
-            onChange={(e) => setConnectedError(parseFloat(e.target.value))}
+            value={flatLineError}
+            onChange={(e) => setFlatLineError(parseFloat(e.target.value))}
           />
           <div className="col-start-2">
             <Button variant="primary" submit ref={planningButtonRef}>
@@ -72,7 +84,7 @@ const Planning = observer(({ ...props }) => {
           </div>
         </form>
       </section>
-      <section className="space-y-4">
+      <section className="grid grid-cols-1 gap-4">
         <Alert type="info">
           You could adjust these parameters and redo the plan until you are
           satisfied.
@@ -84,7 +96,7 @@ const Planning = observer(({ ...props }) => {
             planning.setPhase(PLANNING_PHASE_PLOTTING);
           }}
         >
-          <span className="inline-block w-32">Plot</span>
+          <span className="inline-block w-32">Next</span>
         </Button>
       </section>
     </Panel>

@@ -11,12 +11,13 @@ export const distPointToLine = ([xm, ym], [x1, y1], [x2, y2]) =>
   Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
 export const simplifyLines = (lines, opt) => {
-  if (!lines?.length) return [];
-  if (lines.length === 1) return lines;
+  if (!lines?.length) return { lines: [] };
+  if (lines.length === 1) return { lines };
+  const maxError = mm2px(opt.flatLineError);
+  if (!maxError) return { lines };
   const points = lines.map((l) => [l[0], l[1]]);
   const lastLine = lines[lines.length - 1];
   points.push([lastLine[2], lastLine[3]]);
-  const maxError = mm2px(opt.flatLineError);
   const len = points.length;
 
   // https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
@@ -40,21 +41,31 @@ export const simplifyLines = (lines, opt) => {
       yield* douglasPeucker(startIdx, maxDistancePointIdx);
       yield* douglasPeucker(maxDistancePointIdx, endIdx);
     } else {
-      yield [...startPoint, ...endPoint];
+      const reduced = endIdx - startIdx - 1;
+      const line = [...startPoint, ...endPoint];
+      yield { reduced, line };
     }
   }
 
-  return [...douglasPeucker(0, len - 1)];
+  return [...douglasPeucker(0, len - 1)].reduce(
+    (result, entry) => {
+      result.lines.push(entry.line);
+      // eslint-disable-next-line no-param-reassign
+      result.reduced += entry.reduced ?? 0;
+      return result;
+    },
+    { lines: [], reduced: 0 },
+  );
 };
 
-export function* planAhead(lines, toPaperLine, context, opt) {
-  if (!lines || lines.length === 0) return 0;
+export function* planAhead(lines, toPaperLine, opt) {
+  if (!lines || lines.length === 0) return { skip: 0 };
 
   const { connectedError } = opt;
 
   if (lines.length === 1) {
     yield { line: toPaperLine(lines[0]), pen: MOTION_PEN_DOWN };
-    return 1;
+    return { skip: 1 };
   }
 
   // more than one line
@@ -77,23 +88,18 @@ export function* planAhead(lines, toPaperLine, context, opt) {
     gap = null;
   }
 
-  const simplifiedLines = simplifyLines(toFlatten, opt);
-  for (const line of simplifiedLines) {
+  const simplified = simplifyLines(toFlatten, opt);
+  for (const line of simplified.lines) {
     yield { line: toPaperLine(line), pen: MOTION_PEN_DOWN };
   }
 
   if (gap) {
     yield { line: toPaperLine(gap), pen: MOTION_PEN_UP };
-    context.x = gap[2];
-    context.y = gap[3];
-    return i + 1;
+    return { skip: i + 1, reduced: simplified.reduced };
   }
 
   // all n - 1 lines are consumed
-  const lastLine = lines[i];
-  context.x = lastLine[0];
-  context.y = lastLine[1];
-  return i;
+  return { skip: i, reduced: simplified.reduced };
 }
 
 export function* walkLines(lines, opt) {
@@ -110,29 +116,30 @@ export function* walkLines(lines, opt) {
     line: toPaperLine([context.x, context.y, firstLine[0], firstLine[1]]),
     pen: MOTION_PEN_UP,
   };
-  context.x = firstLine[0];
-  context.y = firstLine[1];
   const planAheadPx = mm2px(opt.planAhead);
   let reduced = 0;
   for (let i = 0, len = lines.length; i < len; ) {
     const line = lines[i];
-    // ensure at least two lines in the slide window unless last line
     const planWindow = [line];
     let accumulatePx = 0;
     let j = 1;
     while (accumulatePx < planAheadPx) {
       const lineAhead = lines[i + j];
+      // ensure at least two lines in the slide window unless last line
       if (!lineAhead) break;
       accumulatePx += lineLength(lineAhead);
       planWindow.push(lineAhead);
       j += 1;
     }
     // planAhead and set down how many lines are consumed
-    const skipCount = yield* planAhead(planWindow, toPaperLine, context, opt);
-    i += skipCount;
-    reduced += skipCount - 1;
+    const result = yield* planAhead(planWindow, toPaperLine, opt);
+    i += result.skip;
+    reduced += result.reduced ?? 0;
   }
   logger.info(`Reduced lines ${reduced}`);
+  const lastLine = lines[lines.length - 1];
+  context.x = lastLine[2];
+  context.y = lastLine[3];
   // homing
   yield {
     line: toPaperLine([context.x, context.y, origin[0], origin[1]]),
