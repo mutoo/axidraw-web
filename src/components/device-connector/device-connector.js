@@ -65,7 +65,6 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
           {deviceType === DEVICE_TYPE_USB && (
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
               <Button
-                type="button"
                 onClick={() => {
                   connectDevice(true);
                 }}
@@ -73,7 +72,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
                 Pair
               </Button>
               <Button
-                type="button"
+                variant="primary"
                 onClick={() => {
                   connectDevice();
                 }}
@@ -101,7 +100,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
                 />
               </label>
               <Button
-                type="button"
+                variant="primary"
                 onClick={() => {
                   connectDevice(wsAddress, wsAuth);
                 }}
@@ -117,9 +116,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
           <div className="grid grid-flow-col items-center gap-4">
             <p>{deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}</p>
             <p>EBB v{deviceVersion}</p>
-            <Button type="button" onClick={() => disconnectDevice()}>
-              Disconnect
-            </Button>
+            <Button onClick={() => disconnectDevice()}>Disconnect</Button>
           </div>
         </>
       )}

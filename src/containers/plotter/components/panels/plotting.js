@@ -13,6 +13,7 @@ import {
   PLANNING_PHASE_PLANNING,
   PLANNING_PHASE_PLOTTING,
 } from '../../presenters/planning';
+import SimpleDebugger from './simple-debugger';
 import Panel from './panel';
 import styles from './plotting.css';
 
@@ -124,6 +125,9 @@ const Plotting = observer(({ ...props }) => {
             </div>
           </form>
         </section>
+      )}
+      {device && work.plotterStatus === PLOTTER_STATUS_STANDBY && (
+        <SimpleDebugger device={device} />
       )}
     </Panel>
   );

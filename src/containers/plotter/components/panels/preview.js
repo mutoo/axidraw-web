@@ -44,7 +44,7 @@ const Preview = observer(({ ...props }) => {
             }}
           />
           <Button
-            variant="primary"
+            variant={planning.svgContent ? 'secondary' : 'primary'}
             onClick={() => {
               fileInputRef.current?.click();
             }}
@@ -156,6 +156,7 @@ const Preview = observer(({ ...props }) => {
           <Alert type="warn">Load SVG first.</Alert>
         )}
         <Button
+          variant={planning.svgContent ? 'primary' : 'secondary'}
           disabled={!planning.svgContent}
           onClick={() => {
             planning.setPhase(PLANNING_PHASE_PLANNING);

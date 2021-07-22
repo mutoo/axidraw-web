@@ -3,43 +3,33 @@ import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
+import Alert from 'components/ui/alert/alert';
 
 const frequentlyCommands = [
   {
     cmd: commands.r,
   },
   {
-    cmd: commands.v,
-  },
-  {
-    cmd: commands.qb,
+    cmd: commands.em,
+    title: 'Disable Motor',
+    params: [0, 0],
   },
   {
     cmd: commands.tp,
   },
   {
     cmd: commands.sp,
-    title: 'Pen up',
+    title: 'Pen Up',
     params: [1],
   },
   {
     cmd: commands.sp,
-    title: 'Pen down',
+    title: 'Pen Down',
     params: [0],
-  },
-  {
-    cmd: commands.em,
-    title: 'Enable motor',
-    params: [1, 1],
-  },
-  {
-    cmd: commands.em,
-    title: 'Disable motor',
-    params: [0, 0],
   },
 ];
 
-const FavCommander = ({ device }) => {
+const SimpleDebugger = ({ device }) => {
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
     async (cmd, params = []) => {
@@ -58,9 +48,9 @@ const FavCommander = ({ device }) => {
   );
   return (
     <form className={formStyles.root}>
-      <h3>Fav Commander</h3>
-      <p>Send frequently used command to device.</p>
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <h3>Simple Debugger</h3>
+      <Alert type="info">Debug AxiDraw before plotting.</Alert>
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
         {frequentlyCommands.map((cmd) => {
           const title = cmd.title || cmd.cmd.title;
           return (
@@ -83,8 +73,8 @@ const FavCommander = ({ device }) => {
   );
 };
 
-FavCommander.propTypes = {
+SimpleDebugger.propTypes = {
   device: PropTypes.object.isRequired,
 };
 
-export default FavCommander;
+export default SimpleDebugger;

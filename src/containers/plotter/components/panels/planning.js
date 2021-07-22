@@ -78,20 +78,18 @@ const Planning = observer(({ ...props }) => {
             onChange={(e) => setFlatLineError(parseFloat(e.target.value))}
           />
           <div className="col-start-2">
-            <Button variant="primary" submit ref={planningButtonRef}>
-              Plan
+            <Button submit ref={planningButtonRef}>
+              Re-plan
             </Button>
           </div>
         </form>
       </section>
       <section className="grid grid-cols-1 gap-4">
         <Alert type="info">
-          You could adjust these parameters and redo the plan until you are
-          satisfied.
-          <br />
-          Or start drawing now.
+          Adjust parameters above and redo the planning until you are satisfied.
         </Alert>
         <Button
+          variant="primary"
           onClick={() => {
             planning.setPhase(PLANNING_PHASE_PLOTTING);
           }}
