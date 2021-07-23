@@ -7,7 +7,7 @@ import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
   PLANNING_PHASE_PLOTTING,
-  PLANNING_PHASE_PREVIEW,
+  PLANNING_PHASE_SETUP,
 } from '../../presenters/planning';
 import Panel from './panel';
 import styles from './planning.css';
@@ -35,10 +35,10 @@ const Planning = observer(({ ...props }) => {
         </p>
         <Button
           onClick={() => {
-            planning.setPhase(PLANNING_PHASE_PREVIEW);
+            planning.setPhase(PLANNING_PHASE_SETUP);
           }}
         >
-          Back to preview
+          Back to Setup
         </Button>
       </section>
       <section>

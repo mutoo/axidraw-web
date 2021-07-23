@@ -4,6 +4,8 @@
 
 .root {
   stroke-width: var(--planning-stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
   fill: none;
 }
 

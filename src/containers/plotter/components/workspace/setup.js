@@ -4,22 +4,22 @@ import { mm2px } from 'math/svg';
 import { observer } from 'mobx-react-lite';
 import svgToLines from 'plotter/parser/svg-to-lines';
 import classNames from 'classnames';
-import styles from './preview.css';
+import styles from './setup.css';
 import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
-  PLANNING_PHASE_PREVIEW,
+  PLANNING_PHASE_SETUP,
 } from '../../presenters/planning';
 
-const Preview = observer(({ ...props }) => {
+const Setup = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
-  const previewContainerRef = useRef(null);
+  const setupContainerRef = useRef(null);
   const paddingPx = mm2px(page.padding);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
   const { contentFitPage, contentPreserveAspectRatio } = page;
   useLayoutEffect(() => {
-    const container = previewContainerRef.current;
+    const container = setupContainerRef.current;
     const imported = container?.children[0];
     if (!imported) {
       return;
@@ -60,7 +60,7 @@ const Preview = observer(({ ...props }) => {
   useLayoutEffect(() => {
     // when switch to planning phase, extract svg to lines.
     if (planning.phase === PLANNING_PHASE_PLANNING) {
-      const container = previewContainerRef.current;
+      const container = setupContainerRef.current;
       const imported = container?.children[0];
       if (!imported) {
         return;
@@ -72,15 +72,15 @@ const Preview = observer(({ ...props }) => {
     <g
       className={classNames(
         styles.root,
-        planning.phase === PLANNING_PHASE_PREVIEW ? 'block' : 'hidden',
+        planning.phase === PLANNING_PHASE_SETUP ? 'block' : 'hidden',
       )}
       dangerouslySetInnerHTML={{ __html: planning.svgContent }}
-      ref={previewContainerRef}
+      ref={setupContainerRef}
       {...props}
     />
   );
 });
 
-Preview.propTypes = {};
+Setup.propTypes = {};
 
-export default Preview;
+export default Setup;

@@ -17,19 +17,19 @@ import {
 } from '../../presenters/page';
 import {
   PLANNING_PHASE_PLANNING,
-  PLANNING_PHASE_PREVIEW,
+  PLANNING_PHASE_SETUP,
 } from '../../presenters/planning';
 import PlotterContext from '../../context';
 import Panel from './panel';
-import styles from './preview.css';
+import styles from './setup.css';
 
-const Preview = observer(({ ...props }) => {
+const Setup = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
   const fileInputRef = useRef(null);
   return (
-    <Panel active={planning.phase === PLANNING_PHASE_PREVIEW} {...props}>
+    <Panel active={planning.phase === PLANNING_PHASE_SETUP} {...props}>
       <section>
-        <h3>Preview</h3>
+        <h3>Setup</h3>
         <p>In this phase, you could load svg and set up the page.</p>
         <div className="flex my-4 justify-center">
           <input
@@ -178,6 +178,6 @@ const Preview = observer(({ ...props }) => {
   );
 });
 
-Preview.propTypes = {};
+Setup.propTypes = {};
 
-export default Preview;
+export default Setup;

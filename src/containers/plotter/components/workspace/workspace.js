@@ -7,7 +7,7 @@ import PlotterContext from '../../context';
 import Page from './page';
 import styles from './workspace.css';
 import ShadowDef from './shadow-def';
-import Preview from './preview';
+import Setup from './setup';
 import Planning from './planning';
 import Gizmo from './gizmo';
 
@@ -40,7 +40,7 @@ const Workspace = observer(({ margin = 20 }) => {
         <ShadowDef margin={margin} />
       </defs>
       <Page />
-      <Preview />
+      <Setup />
       <Planning strokeWidth={strokeWidth} />
       <Gizmo />
     </svg>

@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/parser/svg-presentation';
 
-export const PLANNING_PHASE_PREVIEW = 'axidraw-web-planning-phase-preview';
+export const PLANNING_PHASE_SETUP = 'axidraw-web-planning-phase-setup';
 export const PLANNING_PHASE_PLANNING = 'axidraw-web-planning-phase-planning';
 export const PLANNING_PHASE_PLOTTING = 'axidraw-web-planning-phase-plotting';
 
@@ -13,7 +13,7 @@ const createPlanning = () =>
       lines: null,
       motions: null,
       fileInfo: null,
-      phase: PLANNING_PHASE_PREVIEW,
+      phase: PLANNING_PHASE_SETUP,
       setPhase(phase) {
         this.phase = phase;
       },

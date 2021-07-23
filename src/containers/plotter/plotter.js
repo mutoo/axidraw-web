@@ -5,7 +5,7 @@ import styles from './plotter.css';
 import createPageSetup from './presenters/page';
 import createPlanning from './presenters/planning';
 import createWork from './presenters/work';
-import Preview from './components/panels/preview';
+import Setup from './components/panels/setup';
 import Planning from './components/panels/planning';
 import Plotting from './components/panels/plotting';
 import PlotterContext from './context';
@@ -29,7 +29,7 @@ const Plotter = () => {
         <Workspace />
       </main>
       <aside className={styles.panel}>
-        <Preview />
+        <Setup />
         <Planning />
         <Plotting />
       </aside>
