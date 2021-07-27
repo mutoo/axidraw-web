@@ -131,7 +131,7 @@ export const connectDevice =
               }
             },
             send(message) {
-              logger.debug('Send to communication.device: ', message);
+              logger.debug(`Send to communication.device: ${message}`);
               proxy.send(message);
             },
             disconnect() {

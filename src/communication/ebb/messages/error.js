@@ -1,4 +1,4 @@
-import { ENDING_CR_NL } from '../constants';
+import { ENDING_CR } from '../constants';
 import { readUntil } from '../utils';
 
 export default function* handleErrorMessage() {
@@ -6,7 +6,8 @@ export default function* handleErrorMessage() {
   let result = '';
   do {
     const dataIn = yield parsed;
-    parsed = yield* readUntil(ENDING_CR_NL, dataIn);
+    // The error message may ends with \r\n or \n\r
+    parsed = yield* readUntil(ENDING_CR, dataIn);
     result += parsed.result;
   } while (parsed.remain[0] === '!');
   return {

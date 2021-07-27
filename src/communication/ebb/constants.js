@@ -1,3 +1,4 @@
+export const ENDING_CR = '\r';
 export const ENDING_CR_NL = '\r\n';
 export const ENDING_NL_CR = '\n\r';
 export const ENDING_OK_CR_NL = 'OK\r\n';

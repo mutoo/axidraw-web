@@ -46,7 +46,8 @@ export const readUntil = function* (ending, dataIn) {
     consumed += fragment.length;
   } while (foundEnding === -1);
   return {
-    result: buffer.substring(0, foundEnding),
+    // discard any space at the beginning
+    result: buffer.substring(0, foundEnding).trimStart(),
     consumed: foundEnding - consumed,
     remain: buffer.substring(foundEnding),
   };

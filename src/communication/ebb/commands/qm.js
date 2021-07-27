@@ -9,6 +9,8 @@ export default createCommand(
   function* () {
     const dataIn = yield `${cmd}\r`;
     // example response: "QM,0,0,0,0\n\r"
+    // N.B. QM is the only command returning \n\r
+    // https://github.com/evil-mad/EggBot/issues/159
     const parsed = yield* readUntil(ENDING_NL_CR, dataIn);
     return transformResult(parsed, (result) => {
       const results = result.trim().substr(3).split(',').map(toInt);
