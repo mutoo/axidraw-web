@@ -12,7 +12,7 @@ import Planning from './planning';
 import Gizmo from './gizmo';
 
 const Workspace = observer(({ margin = 20 }) => {
-  const { page } = useContext(PlotterContext);
+  const { page, planning } = useContext(PlotterContext);
   const marginPx = mm2px(margin);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
@@ -23,9 +23,11 @@ const Workspace = observer(({ margin = 20 }) => {
   const [strokeWidth, setStrokeWidth] = useState(1);
   useLayoutEffect(() => {
     setStrokeWidth(
-      (mm2px(0.4) / normalizedDiagonalLength(svgRef.current.viewBox)) * 100,
+      (mm2px(planning.previewStrokeWidth) /
+        normalizedDiagonalLength(svgRef.current.viewBox)) *
+        100,
     );
-  }, [viewBox]);
+  }, [viewBox, planning.previewStrokeWidth]);
   return (
     <svg
       className={styles.root}

@@ -13,6 +13,10 @@ const createPlanning = () =>
       lines: null,
       motions: null,
       fileInfo: null,
+      previewStrokeWidth: 0.4, // mm
+      setPreviewStrokeWidth(width) {
+        this.previewStrokeWidth = width;
+      },
       phase: PLANNING_PHASE_SETUP,
       setPhase(phase) {
         this.phase = phase;
