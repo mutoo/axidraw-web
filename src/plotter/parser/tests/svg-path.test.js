@@ -3,6 +3,7 @@ import {
   coordinatePair,
   coordinatePairSequence,
   floatConst,
+  horizontalLineto,
   intConst,
   lineto,
   moveto,
@@ -10,6 +11,7 @@ import {
   number,
   parsePath,
   svgPath,
+  verticalLineto,
 } from '../svg-path';
 
 describe('svg-path', () => {
@@ -192,6 +194,60 @@ describe('svg-path', () => {
     });
   });
 
+  describe('horizontal lineto', () => {
+    it('parse valid horizontal lineto command', () => {
+      expect(horizontalLineto('h1')).toEqual({ value: ['h', 1], remain: '' });
+      expect(horizontalLineto('H1')).toEqual({ value: ['H', 1], remain: '' });
+      expect(horizontalLineto('H1 2')).toEqual({
+        value: ['H', 1, 2],
+        remain: '',
+      });
+      expect(horizontalLineto('H1,2')).toEqual({
+        value: ['H', 1, 2],
+        remain: '',
+      });
+      expect(horizontalLineto('H1 2 3')).toEqual({
+        value: ['H', 1, 2, 3],
+        remain: '',
+      });
+      expect(horizontalLineto('H1 2,3')).toEqual({
+        value: ['H', 1, 2, 3],
+        remain: '',
+      });
+    });
+    it('throw invalid horizontal lineto command', () => {
+      expect(() => horizontalLineto('')).toThrow();
+      expect(() => horizontalLineto('H')).toThrow();
+    });
+  });
+
+  describe('vertical lineto', () => {
+    it('parse valid vertical lineto command', () => {
+      expect(verticalLineto('v1')).toEqual({ value: ['v', 1], remain: '' });
+      expect(verticalLineto('V1')).toEqual({ value: ['V', 1], remain: '' });
+      expect(verticalLineto('V1 2')).toEqual({
+        value: ['V', 1, 2],
+        remain: '',
+      });
+      expect(verticalLineto('V1,2')).toEqual({
+        value: ['V', 1, 2],
+        remain: '',
+      });
+      expect(verticalLineto('V1 2 3')).toEqual({
+        value: ['V', 1, 2, 3],
+        remain: '',
+      });
+      expect(verticalLineto('V1 2,3')).toEqual({
+        value: ['V', 1, 2, 3],
+        remain: '',
+      });
+    });
+    it('throw invalid vertical lineto command', () => {
+      expect(() => verticalLineto('')).toThrow();
+      expect(() => verticalLineto('V')).toThrow();
+    });
+  });
+
   describe('close-path', () => {
     it('parse valid close-path command', () => {
       expect(closePath('z')).toEqual({ value: ['z'], remain: '' });
@@ -215,6 +271,94 @@ describe('svg-path', () => {
     it('parse svg path', () => {
       expect(parsePath('')).toEqual([]);
       expect(parsePath('M0 0')).toEqual([['M', [0, 0]]]);
+      expect(parsePath('M0 1L2 3Z')).toEqual([
+        ['M', [0, 1]],
+        ['L', [2, 3]],
+        ['Z'],
+      ]);
+      expect(
+        parsePath(
+          'M0 1L2 3H4V5C0,1 2,3 4,5S0,1 2,3Q0,1 2,3T0,1A10,10,2,1,0,1,2Z',
+        ),
+      ).toEqual([
+        ['M', [0, 1]],
+        ['L', [2, 3]],
+        ['H', 4],
+        ['V', 5],
+        [
+          'C',
+          [
+            [0, 1],
+            [2, 3],
+            [4, 5],
+          ],
+        ],
+        [
+          'S',
+          [
+            [0, 1],
+            [2, 3],
+          ],
+        ],
+        [
+          'Q',
+          [
+            [0, 1],
+            [2, 3],
+          ],
+        ],
+        ['T', [0, 1]],
+        ['A', [10, 10, 2, 1, 0, [1, 2]]],
+        ['Z'],
+      ]);
+      expect(
+        parsePath(
+          'M0,1 2,3L2 3,4,5H4 5V5 6C0,1 2,3 4,5 0,1 2,3 4,5S0,1 2,3 0,1 2,3Q0,1 2,3 0,1 2,3T0,1 0,1A10,10,2,1,0,1,2 10,10,2,1,0,1,2Z',
+        ),
+      ).toEqual([
+        ['M', [0, 1], [2, 3]],
+        ['L', [2, 3], [4, 5]],
+        ['H', 4, 5],
+        ['V', 5, 6],
+        [
+          'C',
+          [
+            [0, 1],
+            [2, 3],
+            [4, 5],
+          ],
+          [
+            [0, 1],
+            [2, 3],
+            [4, 5],
+          ],
+        ],
+        [
+          'S',
+          [
+            [0, 1],
+            [2, 3],
+          ],
+          [
+            [0, 1],
+            [2, 3],
+          ],
+        ],
+        [
+          'Q',
+          [
+            [0, 1],
+            [2, 3],
+          ],
+          [
+            [0, 1],
+            [2, 3],
+          ],
+        ],
+        ['T', [0, 1], [0, 1]],
+        ['A', [10, 10, 2, 1, 0, [1, 2]], [10, 10, 2, 1, 0, [1, 2]]],
+        ['Z'],
+      ]);
     });
     it('throw invalid svg path', () => {
       expect(() => parsePath('L')).toThrow();

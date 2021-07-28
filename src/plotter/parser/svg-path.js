@@ -163,7 +163,7 @@ export const optCommaWsp = optional(commaWsp);
 
 // flag:
 //     "0" | "1"
-export const flag = consume(/^[01]/);
+export const flag = rule((f) => parseInt(f, 10), consume(/^[01]/));
 
 // nonnegative-number:
 //     integer-constant
@@ -245,7 +245,7 @@ export const coordinateSequence = sequence(coordinate);
 // horizontal-lineto-argument-sequence:
 //     coordinate
 //     | coordinate comma-wsp? horizontal-lineto-argument-sequence
-export const horizontalLineto = command(consume(/^H/i));
+export const horizontalLineto = command(consume(/^H/i), coordinateSequence);
 
 // vertical-lineto:
 //     ( "V" | "v" ) wsp* vertical-lineto-argument-sequence
@@ -324,7 +324,14 @@ export const smoothQuadBezierCurveTo = command(
 //     nonnegative-number comma-wsp? nonnegative-number comma-wsp?
 //         number comma-wsp flag comma-wsp? flag comma-wsp? coordinate-pair
 export const ellipticalArcArg = rule(
-  (cp0, _, cp1, __, cp2) => [cp0, cp1, cp2],
+  (rx, _, ry, __, rotate, ___, largeArc, ____, sweep, _____, cp) => [
+    rx,
+    ry,
+    rotate,
+    largeArc,
+    sweep,
+    cp,
+  ],
   nonNegNumber,
   optCommaWsp,
   nonNegNumber,
