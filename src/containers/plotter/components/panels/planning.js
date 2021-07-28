@@ -72,8 +72,8 @@ const Planning = observer(({ ...props }) => {
             id="flatten-error"
             type="number"
             min="0"
-            step="0.1"
-            max="10"
+            step="0.01"
+            max="2"
             value={flatLineError}
             onChange={(e) => setFlatLineError(parseFloat(e.target.value))}
           />
