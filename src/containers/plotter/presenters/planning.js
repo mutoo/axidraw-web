@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import plan from 'plotter/planner';
-import { toSvgPathDef } from 'plotter/parser/svg-presentation';
+import { toSvgPathDef } from 'plotter/svg/presentation';
 
 export const PLANNING_PHASE_SETUP = 'axidraw-web-planning-phase-setup';
 export const PLANNING_PHASE_PLANNING = 'axidraw-web-planning-phase-planning';

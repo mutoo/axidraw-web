@@ -4,10 +4,10 @@ import {
   calculateArcError,
   transformLine,
   transformPoint,
-} from './svg-math';
+} from './math';
 
 // eslint-disable-next-line consistent-return
-export default function* svgArcToLines(arc, startPos, ctm, opt) {
+export default function* arcToLines(arc, startPos, ctm, opt) {
   if (!arc || arc[0] !== 'A') {
     throw new Error(`invalid arc: ${arc}`);
   }

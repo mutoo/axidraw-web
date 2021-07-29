@@ -2,7 +2,7 @@ import React, { useContext, useLayoutEffect, useRef } from 'react';
 import clean from 'plotter/cleaner';
 import { mm2px } from 'math/svg';
 import { observer } from 'mobx-react-lite';
-import svgToLines from 'plotter/parser/svg-to-lines';
+import toLines from 'plotter/svg/to-lines';
 import classNames from 'classnames';
 import styles from './setup.css';
 import PlotterContext from '../../context';
@@ -65,7 +65,7 @@ const Setup = observer(({ ...props }) => {
       if (!imported) {
         return;
       }
-      planning.updateLines(svgToLines(imported));
+      planning.updateLines(toLines(imported));
     }
   }, [planning.phase]);
   return (

@@ -397,7 +397,7 @@ export const movetoDrawToGroups = sequence(movetoDrawToGroup, manyWsp);
 
 // svg-path:
 //     wsp* moveto-drawto-command-groups? wsp*
-export const svgPath = rule(
+export const path = rule(
   (_, cmdG) => cmdG?.flatMap((i) => i) || [],
   manyWsp,
   optional(movetoDrawToGroups),
@@ -405,7 +405,7 @@ export const svgPath = rule(
 );
 
 export const parsePath = (pathDef) => {
-  const result = svgPath(pathDef);
+  const result = path(pathDef);
   if (result.remain) {
     throw new Error('Invalid svg path.');
   }

@@ -1,8 +1,8 @@
-import { transformLine } from './svg-math';
-import { getAttrVal } from './svg-utils';
+import { transformLine } from './math';
+import { getAttrVal } from './utils';
 
 // eslint-disable-next-line no-unused-vars
-export default function* svgPointsToLines(svgEl, opt) {
+export default function* pointsToLines(svgEl, opt) {
   const ctm = svgEl.getCTM();
   switch (svgEl.nodeName) {
     case 'line': {

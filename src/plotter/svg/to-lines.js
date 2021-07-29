@@ -1,4 +1,4 @@
-import svgElementToLines from './svg-element-to-lines';
+import elementToLines from './element-to-lines';
 import { mm2px } from '../../math/svg';
 import { logger } from '../utils';
 
@@ -27,7 +27,7 @@ export function* svgContainerToLines(svg, opt) {
       case 'path':
         // these are shape elements
         // we are going to extract lines from them directly or indirectly.
-        yield* svgElementToLines(svgEl, opt);
+        yield* elementToLines(svgEl, opt);
         break;
       default:
         // unsupported types, e.g. DEF,
@@ -39,7 +39,7 @@ export function* svgContainerToLines(svg, opt) {
 
 export const defaultSVGToLinesOptions = { maxError: mm2px(0.1) };
 
-export default function svgToLines(svg, opt) {
+export default function toLines(svg, opt) {
   const mergedOptions = { ...defaultSVGToLinesOptions, ...opt };
   return [...svgContainerToLines(svg, mergedOptions)];
 }

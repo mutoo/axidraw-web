@@ -1,6 +1,6 @@
 import { lineLengthSQ, lineLength } from '../math/geom';
 import { mm2px } from '../math/svg';
-import { transformLine } from './parser/svg-math';
+import { transformLine } from './svg/math';
 import { logger } from './utils';
 
 export const MOTION_PEN_UP = 1;

@@ -1,10 +1,10 @@
 /* eslint-disable prefer-destructuring */
-import svgArcToLines from './svg-arc-to-lines';
-import svgBezierToLines from './svg-bezier-to-lines';
-import { quadToCubicBezierControlPoints, transformLine } from './svg-math';
-import svgPathParser from './svg-path-parser/index';
+import arcToLines from './arc-to-lines';
+import bezierToLines from './bezier-to-lines';
+import { quadToCubicBezierControlPoints, transformLine } from './math';
+import svgPathParser from './path';
 
-export default function* svgPathToLines(svgPath, opt) {
+export default function* pathToLines(svgPath, opt) {
   const pathDef = svgPath.getAttribute('d');
   if (!pathDef) {
     return;
@@ -53,7 +53,7 @@ export default function* svgPathToLines(svgPath, opt) {
             p[4],
           );
           const bezier = ['C', ...controlPoints, p[3], p[4]];
-          prevPos = yield* svgBezierToLines(bezier, prevPos, ctm, opt);
+          prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
           prevBezier = p;
         }
         break;
@@ -74,7 +74,7 @@ export default function* svgPathToLines(svgPath, opt) {
             p[2],
           );
           const bezier = ['C', ...controlPoints, p[1], p[2]];
-          prevPos = yield* svgBezierToLines(bezier, prevPos, ctm, opt);
+          prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
           // convert to Q so that the (cx1, cy1) can be pass to next command
           prevBezier = ['Q', cx1, cy1, p[1], p[2]];
         }
@@ -82,7 +82,7 @@ export default function* svgPathToLines(svgPath, opt) {
       case 'C':
         {
           const bezier = p;
-          prevPos = yield* svgBezierToLines(bezier, prevPos, ctm, opt);
+          prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
           prevBezier = bezier;
         }
         break;
@@ -108,12 +108,12 @@ export default function* svgPathToLines(svgPath, opt) {
           const cx1 = 2 * prevPos[0] - pcx2;
           const cy1 = 2 * prevPos[1] - pcy2;
           const bezier = ['C', cx1, cy1, p[1], p[2], p[3], p[4]];
-          prevPos = yield* svgBezierToLines(bezier, prevPos, ctm, opt);
+          prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
           prevBezier = p;
         }
         break;
       case 'A':
-        prevPos = yield* svgArcToLines(p, prevPos, ctm, opt);
+        prevPos = yield* arcToLines(p, prevPos, ctm, opt);
         break;
       case 'Z':
         if (startPos) {

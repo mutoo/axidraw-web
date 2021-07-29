@@ -1,7 +1,7 @@
-import svgPathToLines from './svg-path-to-lines';
-import { createSVGElement, getAttrVal } from './svg-utils';
+import pathToLines from './path-to-lines';
+import { createSVGElement, getAttrVal } from './utils';
 
-export default function* svgElementToPath(svgEl, opt) {
+export default function* elementToPath(svgEl, opt) {
   let pathDef = '';
   switch (svgEl.nodeName) {
     case 'rect':
@@ -78,5 +78,5 @@ export default function* svgElementToPath(svgEl, opt) {
   path.setAttribute('d', pathDef);
   // proxy the ctm to current svg element;
   path.getCTM = () => svgEl.getCTM();
-  yield* svgPathToLines(path, opt);
+  yield* pathToLines(path, opt);
 }

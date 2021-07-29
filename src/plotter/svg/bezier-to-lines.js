@@ -4,9 +4,9 @@ import {
   isSufficientlyFlat,
   transformLine,
   transformPoint,
-} from './svg-math';
+} from './math';
 
-export default function* svgBezierToLines(bezier, startPos, ctm, opt) {
+export default function* bezierToLines(bezier, startPos, ctm, opt) {
   if (!bezier || bezier[0] !== 'C') {
     throw new Error(`invalid bezier: ${bezier}`);
   }
