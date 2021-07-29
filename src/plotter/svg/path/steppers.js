@@ -1,26 +1,27 @@
 export const stepX = (params, context, isAbsoluteCmd) => {
   if (isAbsoluteCmd) {
-    context.x = params[params.length - 1];
+    context.x = params[0];
   } else {
-    context.x += params[params.length - 1];
+    context.x += params[0];
   }
 };
 
 export const stepY = (params, context, isAbsoluteCmd) => {
   if (isAbsoluteCmd) {
-    context.y = params[params.length - 1];
+    context.y = params[0];
   } else {
-    context.y += params[params.length - 1];
+    context.y += params[0];
   }
 };
 
 export const stepXY = (params, context, isAbsoluteCmd) => {
+  const coordinatePair = params[params.length - 1];
   if (isAbsoluteCmd) {
-    context.x = params[params.length - 2];
-    context.y = params[params.length - 1];
+    context.x = coordinatePair[0];
+    context.y = coordinatePair[1];
   } else {
-    context.x += params[params.length - 2];
-    context.y += params[params.length - 1];
+    context.x += coordinatePair[0];
+    context.y += coordinatePair[1];
   }
 };
 

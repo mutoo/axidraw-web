@@ -1,17 +1,18 @@
 export const transformerXY = (params, context) => {
   const transformed = [...params];
-  transformed[transformed.length - 2] += context.x;
-  transformed[transformed.length - 1] += context.y;
+  // most commands store the coordinate-pair at last param
+  const [x, y] = transformed[transformed.length - 1];
+  transformed[transformed.length - 1] = [x + context.x, y + context.y];
   return transformed;
 };
 
-export const transformerX = (params, context) => {
-  return [params[0] + context.x];
+export const transformerX = ([x], context) => {
+  return [x + context.x];
 };
 
-export const transformerY = (params, context) => {
-  return [params[0] + context.y];
+export const transformerY = ([y], context) => {
+  return [y + context.y];
 };
 
-export const transformerXYPairs = (params, context) =>
-  params.map((p, idx) => p + (idx % 2 === 0 ? context.x : context.y));
+export const transformerXYPairs = (coordinatePairs, context) =>
+  coordinatePairs.map(([x, y]) => [x + context.x, y + context.y]);

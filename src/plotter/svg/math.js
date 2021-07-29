@@ -38,10 +38,17 @@ export const getMidPoint = (x0, y0, x1, y1) => [(x0 + x1) / 2, (y0 + y1) / 2];
 
 // convert quadratic to cubic bezier
 // https://codepen.io/enxaneta/post/quadratic-to-cubic-b-zier-in-svg
-export const quadToCubicBezierControlPoints = (x0, y0, x1, y1, x2, y2) => {
+export const quadToCubicBezierControlPoints = (
+  [x0, y0],
+  [x1, y1],
+  [x2, y2],
+) => {
   const cx1 = x0 + ((x1 - x0) * 2) / 3;
   const cy1 = y0 + ((y1 - y0) * 2) / 3;
   const cx2 = x2 + ((x1 - x2) * 2) / 3;
   const cy2 = y2 + ((y1 - y2) * 2) / 3;
-  return [cx1, cy1, cx2, cy2];
+  return [
+    [cx1, cy1],
+    [cx2, cy2],
+  ];
 };

@@ -2,17 +2,9 @@ import { createPathCommand, normalize } from './utils';
 import { transformerXYPairs } from './transformers';
 import { stepXY } from './steppers';
 
-export default createPathCommand('Q', function* (command, params, context) {
-  if (params.length % 4 !== 0) {
-    throw new Error(`invalid Q command: ${params}`);
-  }
-  for (let i = 0, len = params.length; i < len; i += 4) {
-    yield normalize(
-      command,
-      params.slice(i, i + 4),
-      context,
-      stepXY,
-      transformerXYPairs,
-    );
+export default createPathCommand('Q', function* (command, context) {
+  const [cmd, ...params] = command;
+  for (const param of params) {
+    yield normalize(cmd, param, context, stepXY, transformerXYPairs);
   }
 });

@@ -16,7 +16,7 @@ export default function* arcToLines(arc, startPos, ctm, opt) {
   const { cos, sin, PI } = Math;
   const [x1, y1] = startPos;
   // eslint-disable-next-line no-unused-vars, prefer-const
-  let [_, rx, ry, deg, fa, fs, x2, y2] = arc;
+  let [_, rx, ry, deg, fa, fs, [x2, y2]] = arc;
   // B.2.5 step 1: ensure radii are non-zero
   if (rx === 0 || ry === 0) {
     const currPos = [x2, y2];

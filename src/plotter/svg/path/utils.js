@@ -1,7 +1,7 @@
 // a helper function to create path command
-export const createPathCommand = (command, parse) => ({
-  command,
-  parse,
+export const createPathCommand = (type, execute) => ({
+  type,
+  execute,
 });
 
 /**

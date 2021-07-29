@@ -12,7 +12,7 @@ export default function* bezierToLines(bezier, startPos, ctm, opt) {
   }
   const [x0, y0] = startPos;
   // eslint-disable-next-line no-unused-vars
-  const [_, x1, y1, x2, y2, x3, y3] = bezier;
+  const [_, [x1, y1], [x2, y2], [x3, y3]] = bezier;
   // Useful resources:
   //
   // A Primer on Bezier Curves
