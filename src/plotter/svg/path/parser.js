@@ -5,9 +5,8 @@
 export const NOT_MATCH = {};
 
 // match a branches of consumer, return first match
-export const branches =
-  (...consumers) =>
-  (s) => {
+export const branches = (...consumers) =>
+  function Branches(s) {
     for (const consumer of consumers) {
       try {
         return consumer(s);
@@ -20,12 +19,21 @@ export const branches =
     throw NOT_MATCH;
   };
 
+export const fastBranches = (consumerDict) =>
+  function FastBranches(s) {
+    const peek = s[0];
+    const consumer = consumerDict[peek?.toUpperCase()];
+    if (!consumer) {
+      throw NOT_MATCH;
+    }
+    return consumer(s);
+  };
+
 // match a group of consumers
-export const rule =
-  (transform, ...consumers) =>
-  (s) => {
+export const rule = (transform, ...consumers) =>
+  function Rule(s) {
     const results = consumers.reduce(
-      (context, consumer) => {
+      function RuleReducer(context, consumer) {
         const ret = consumer(context.remain);
         context.remain = ret.remain;
         context.values.push(ret.value);
@@ -37,19 +45,19 @@ export const rule =
   };
 
 // match regex, return null or single string
-export const consume = (regex) => (s) => {
-  const ret = regex.exec(s);
-  if (!ret) throw NOT_MATCH;
-  const value = ret[0];
-  const consumed = value.length;
-  const remain = s.substr(consumed);
-  return { remain, value };
-};
+export const consume = (regex) =>
+  function Consume(s) {
+    const ret = regex.exec(s);
+    if (!ret) throw NOT_MATCH;
+    const value = ret[0];
+    const consumed = value.length;
+    const remain = s.substr(consumed);
+    return { remain, value };
+  };
 
 // match zero or one, return defaultValue or matched single value
-export const optional =
-  (consumer, defaultValue = null) =>
-  (s) => {
+export const optional = (consumer, defaultValue = null) =>
+  function Optional(s) {
     try {
       return consumer(s);
     } catch (e) {
@@ -61,28 +69,29 @@ export const optional =
   };
 
 // match zero or more, return in array
-export const many = (consumer) => (s) => {
-  const values = [];
-  let remain = s;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    try {
-      const ret = consumer(remain);
-      values.push(ret.value);
-      remain = ret.remain;
-    } catch (e) {
-      if (e === NOT_MATCH) {
-        break;
-      } else {
-        throw e;
+export const many = (consumer) =>
+  function Many(s) {
+    const values = [];
+    let remain = s;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const ret = consumer(remain);
+        values.push(ret.value);
+        remain = ret.remain;
+      } catch (e) {
+        if (e === NOT_MATCH) {
+          break;
+        } else {
+          throw e;
+        }
       }
     }
-  }
-  return {
-    remain,
-    value: values,
+    return {
+      remain,
+      value: values,
+    };
   };
-};
 
 // match one or more, return in array
 export const atLeastOne = (consumer) => (s) => {
@@ -92,20 +101,13 @@ export const atLeastOne = (consumer) => (s) => {
   return { remain: manyRet.remain, value: [ret.value, ...manyRet.value] };
 };
 
-// match .
-export const dot = consume(/^\./);
-
 // wsp:
 //     (#x20 | #x9 | #xD | #xA)
-export const wsp = consume(/^\s/);
-
 // many whitespace
-export const manyWsp = many(wsp);
+export const manyWsp = consume(/^\s*/);
 
 // digit:
 //     "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-export const digit = consume(/^[0-9]/);
-
 // digit-sequence:
 //     digit
 //     | digit digit-sequence
@@ -113,31 +115,16 @@ export const digits = consume(/^[0-9]+/);
 
 // sign:
 //     "+" | "-"
-export const sign = consume(/^[+-]/);
-
 // exponent:
 //     ( "e" | "E" ) sign? digit-sequence
-export const exp = rule(
-  (e, s, ds) => e + s + ds,
-  consume(/^E/i),
-  optional(sign, ''),
-  digits,
-);
-
 // fractional-constant:
 //     digit-sequence? "." digit-sequence
 //     | digit-sequence "."
-export const frac = branches(
-  rule((ds0, _, ds1) => `${ds0}.${ds1}`, optional(digits, ''), dot, digits),
-  rule((ds0) => ds0, digits, dot),
-);
-
 // floating-point-constant:
 //     fractional-constant exponent?
 //     | digit-sequence exponent
-export const floatConst = branches(
-  rule((f, e) => f + e, frac, optional(exp, '')),
-  rule((ds, e) => ds + e, digits, exp),
+export const floatConst = consume(
+  /^(([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)/i,
 );
 
 // integer-constant:
@@ -146,20 +133,12 @@ export const intConst = digits;
 
 // comma:
 //     ","
-export const comma = consume(/^,/);
-
-// optional comma
-export const optComma = optional(comma);
-
 // comma-wsp:
 //     (wsp+ comma? wsp*) | (comma wsp*)
-export const commaWsp = branches(
-  rule(() => null, atLeastOne(wsp), optComma, manyWsp),
-  rule(() => null, optComma, manyWsp),
-);
+export const commaWsp = consume(/^(\s+,?\s*|,\s*)/);
 
 // optional comma-wsp
-export const optCommaWsp = optional(commaWsp);
+export const optCommaWsp = consume(/^(\s+,?\s*|,\s*)?/);
 
 // flag:
 //     "0" | "1"
@@ -168,17 +147,21 @@ export const flag = rule((f) => parseInt(f, 10), consume(/^[01]/));
 // nonnegative-number:
 //     integer-constant
 //     | floating-point-constant
-export const nonNegNumber = branches(
-  rule((fc) => parseFloat(fc), floatConst),
-  rule((ic) => parseInt(ic, 10), intConst),
+export const nonNegNumber = rule(
+  (n) => parseFloat(n),
+  consume(
+    /^((([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)|[0-9]+)/i,
+  ),
 );
 
 // number:
 //     sign? integer-constant
 //     | sign? floating-point-constant
-export const number = branches(
-  rule((s, fc) => parseFloat(s + fc), optional(sign, '+'), floatConst),
-  rule((s, ic) => parseInt(s + ic, 10), optional(sign, '+'), intConst),
+export const number = rule(
+  (n) => parseFloat(n),
+  consume(
+    /^[+-]?((([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)|[0-9]+)/i,
+  ),
 );
 
 // coordinate:
@@ -188,7 +171,9 @@ export const coordinate = number;
 // coordinate-pair:
 //     coordinate comma-wsp? coordinate
 export const coordinatePair = rule(
-  (c0, _, c1) => [c0, c1],
+  function CoordinatePair(c0, _, c1) {
+    return [c0, c1];
+  },
   coordinate,
   optCommaWsp,
   coordinate,
@@ -197,10 +182,20 @@ export const coordinatePair = rule(
 // match a sequence with separator
 export const sequence = (itemConsumer, sepConsumer = optCommaWsp) =>
   rule(
-    (cp0, cps) => [cp0, ...cps],
+    function Sequence(cp0, cps) {
+      return [cp0, ...cps];
+    },
     itemConsumer,
     // eslint-disable-next-line no-use-before-define
-    many(rule((_, cp0) => cp0, sepConsumer, itemConsumer)),
+    many(
+      rule(
+        function SequenceNext(_, cp0) {
+          return cp0;
+        },
+        sepConsumer,
+        itemConsumer,
+      ),
+    ),
   );
 
 // coordinate-pair-sequence:
@@ -211,7 +206,9 @@ export const coordinatePairSequence = sequence(coordinatePair);
 // match command
 export const command = (cmdConsumer, sequenceComsumer) =>
   rule(
-    (cmd, _, args) => [cmd, ...args],
+    function Command(cmd, _, args) {
+      return [cmd, ...args];
+    },
     cmdConsumer,
     manyWsp,
     sequenceComsumer,
@@ -364,17 +361,17 @@ export const ellipticalArc = command(consume(/^A/i), ellipticalArcArgSequence);
 //     | quadratic-bezier-curveto
 //     | smooth-quadratic-bezier-curveto
 //     | elliptical-arc
-export const drawtoCommand = branches(
-  closePath,
-  lineto,
-  horizontalLineto,
-  verticalLineto,
-  curveTo,
-  smoothCurveTo,
-  quadBezierCurveTo,
-  smoothQuadBezierCurveTo,
-  ellipticalArc,
-);
+export const drawtoCommand = fastBranches({
+  Z: closePath,
+  L: lineto,
+  H: horizontalLineto,
+  V: verticalLineto,
+  C: curveTo,
+  S: smoothCurveTo,
+  Q: quadBezierCurveTo,
+  T: smoothQuadBezierCurveTo,
+  A: ellipticalArc,
+});
 
 // drawto-commands:
 //     drawto-command
@@ -384,7 +381,9 @@ export const drawtoCommands = sequence(drawtoCommand, manyWsp);
 // moveto-drawto-command-group:
 //     moveto wsp* drawto-commands?
 export const movetoDrawToGroup = rule(
-  (m, _, cmds) => [m, ...(cmds || [])],
+  function MovetoDrawToGroup(m, _, cmds) {
+    return [m, ...(cmds || [])];
+  },
   moveto,
   manyWsp,
   optional(drawtoCommands),
@@ -398,7 +397,9 @@ export const movetoDrawToGroups = sequence(movetoDrawToGroup, manyWsp);
 // svg-path:
 //     wsp* moveto-drawto-command-groups? wsp*
 export const path = rule(
-  (_, cmdG) => cmdG?.flatMap((i) => i) || [],
+  function Path(_, cmdG) {
+    return cmdG?.flatMap((i) => i) || [];
+  },
   manyWsp,
   optional(movetoDrawToGroups),
   manyWsp,

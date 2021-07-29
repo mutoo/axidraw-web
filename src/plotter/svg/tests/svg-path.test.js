@@ -18,11 +18,11 @@ describe('svg-path', () => {
   describe('float point constant', () => {
     it('parse valid float point constant', () => {
       expect(floatConst('1.23')).toEqual({ value: '1.23', remain: '' });
-      expect(floatConst('1.')).toEqual({ value: '1', remain: '' });
+      expect(floatConst('1.')).toEqual({ value: '1.', remain: '' });
       expect(floatConst('1.23e1')).toEqual({ value: '1.23e1', remain: '' });
       expect(floatConst('1.23e-1')).toEqual({ value: '1.23e-1', remain: '' });
       expect(floatConst('1.23e+1')).toEqual({ value: '1.23e+1', remain: '' });
-      expect(floatConst('1.e+1')).toEqual({ value: '1e+1', remain: '' });
+      expect(floatConst('1.e+1')).toEqual({ value: '1.e+1', remain: '' });
       expect(floatConst('.1')).toEqual({ value: '.1', remain: '' });
       expect(floatConst('.1e+1')).toEqual({ value: '.1e+1', remain: '' });
       expect(floatConst('1e+1')).toEqual({ value: '1e+1', remain: '' });
