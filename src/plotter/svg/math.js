@@ -1,19 +1,22 @@
-// create only one point to save memory allocation
-const thePoint = new DOMPoint();
-
-export const transformPoint = (x, y, ctm) => {
-  thePoint.x = x;
-  thePoint.y = y;
-  return thePoint.matrixTransform(ctm);
+/**
+ * Fast transform point with DOMMatrix:
+ *
+ * The original DOMPoint.transformMatrix(DOMMatrix) is very slow.
+ *
+ * DOMMatrix * 2D Point
+ *
+ * | m11 m21 m31 m41 | <-> |   a   c m31   e | * | x |
+ * | m12 m22 m32 m42 |     |   b   d m32   f |   | y |
+ * | m13 m23 m33 m43 |     | m13 m23 m33 m43 |   | 0 |
+ * | m14 m24 m34 m44 |     | m14 m24 m34 m44 |   | 1 |
+ */
+export const transformPoint = ([x, y], { a, b, c, d, e, f }) => {
+  return [a * x + c * y + e, b * x + d * y + f];
 };
 
 export const transformLine = (p0, p1, ctm) => {
-  const p0t = transformPoint(p0[0], p0[1], ctm);
-  const x0 = p0t.x;
-  const y0 = p0t.y;
-  const p1t = transformPoint(p1[0], p1[1], ctm);
-  const x1 = p1t.x;
-  const y1 = p1t.y;
+  const [x0, y0] = transformPoint(p0, ctm);
+  const [x1, y1] = transformPoint(p1, ctm);
   return [x0, y0, x1, y1];
 };
 

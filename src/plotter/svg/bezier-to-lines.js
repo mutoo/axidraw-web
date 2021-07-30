@@ -31,8 +31,8 @@ export default function* bezierToLines(bezier, startPos, ctm, opt) {
     0,
     0,
   ]);
-  const ep = transformPoint(maxError, 0, ctmInvForVec);
-  const errSq = ep.x * ep.x + ep.y * ep.y;
+  const [epx, epy] = transformPoint([maxError, 0], ctmInvForVec);
+  const errSq = epx * epx + epy * epy;
   function* bezierLinearApproximation(sx, sy, cx1, cy1, cx2, cy2, ex, ey) {
     if (isSufficientlyFlat(sx, sy, cx1, cy1, cx2, cy2, ex, ey, errSq)) {
       yield transformLine([sx, sy], [ex, ey], ctm);

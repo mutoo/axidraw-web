@@ -31,9 +31,7 @@ export default function* arcToLines(arc, startPos, ctm, opt) {
   const cosAngle = cos(angle);
   const sinAngle = sin(angle);
   const mat1 = new DOMMatrix([cosAngle, -sinAngle, sinAngle, cosAngle, 0, 0]);
-  const p1t = transformPoint((x1 - x2) / 2, (y1 - y2) / 2, mat1);
-  const x1t = p1t.x;
-  const y1t = p1t.y;
+  const [x1t, y1t] = transformPoint([(x1 - x2) / 2, (y1 - y2) / 2], mat1);
   // B.2.4 step 2: compute (cxt, cyt)
   let rx2 = rx * rx;
   let ry2 = ry * ry;
@@ -59,9 +57,9 @@ export default function* arcToLines(arc, startPos, ctm, opt) {
   const cyt = (-sign * root * ry * x1t) / rx;
   // B.2.4 step 3: compute (cx, cy) from (cxt, cyt)
   const mat3 = new DOMMatrix([cosAngle, sinAngle, -sinAngle, cosAngle, 0, 0]);
-  const pc = transformPoint(cxt, cyt, mat3);
-  const cx = pc.x + (x1 + x2) / 2;
-  const cy = pc.y + (y1 + y2) / 2;
+  const [pcx, pcy] = transformPoint([cxt, cyt], mat3);
+  const cx = pcx + (x1 + x2) / 2;
+  const cy = pcy + (y1 + y2) / 2;
   // B.2.4 step 4: compute theta1 and delta
   const vx1 = (x1t - cxt) / rx;
   const vy1 = (y1t - cyt) / ry;
@@ -83,13 +81,13 @@ export default function* arcToLines(arc, startPos, ctm, opt) {
   const matE = new DOMMatrix([ctm.a, ctm.b, ctm.c, ctm.d, 0, 0]);
   function* arcLinearApproximation(t1, t2, sx, sy, ex, ey) {
     const mt = (t1 + t2) / 2;
-    const mp = transformPoint(rx * cos(mt), ry * sin(mt), mat3);
-    const mx = mp.x + cx;
-    const my = mp.y + cy;
+    const [mpx, mpy] = transformPoint([rx * cos(mt), ry * sin(mt)], mat3);
+    const mx = mpx + cx;
+    const my = mpy + cy;
     const error = calculateArcError(sx, sy, mx, my, ex, ey);
     // transform error to paper space and test with maxError
-    const ep = transformPoint(error, 0, matE);
-    const errSq = ep.x * ep.x + ep.y * ep.y;
+    const [epx, epy] = transformPoint([error, 0], matE);
+    const errSq = epx * epx + epy * epy;
     if (errSq <= maxError * maxError) {
       yield transformLine([sx, sy], [ex, ey], ctm);
     } else {
