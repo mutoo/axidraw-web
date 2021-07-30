@@ -10,7 +10,7 @@ import {
   parsePath,
   path,
   verticalLineto,
-} from '../path/parser';
+} from '../index';
 
 describe('svg-path', () => {
   describe('non negative number', () => {
