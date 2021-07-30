@@ -2,8 +2,6 @@ export const NOT_MATCH = {};
 
 /* regex utils */
 
-export const nonCapturingRe = (re) => new RegExp(`(?:${re.source})`);
-
 export const composeRe = (...res) => {
   const source = res.reduce((src, re) => src + re.source, '');
   return new RegExp(source);
@@ -24,54 +22,50 @@ export const manyRe = (re) => new RegExp(`(?:${re.source})*`);
 
 // match a branches of consumer
 export const fastBranches = (consumerDict) =>
-  function FastBranches(s) {
-    const peek = s[0];
+  function FastBranches(s, idx = 0) {
+    const peek = s[idx];
     const consumer = consumerDict[peek?.toUpperCase()];
     if (!consumer) {
       throw NOT_MATCH;
     }
-    return consumer(s);
+    return consumer(s, idx);
   };
 
 // match a group of consumers
 export const rule = (transform, ...consumers) =>
-  function Rule(s) {
+  function Rule(s, idx = 0) {
     const results = consumers.reduce(
       function RuleReducer(context, consumer) {
-        const ret = consumer(context.remain);
-        context.remain = ret.remain;
+        const ret = consumer(s, context.idx);
+        context.idx = ret.idx;
         context.values.push(ret.value);
         return context;
       },
-      { remain: s, values: [] },
+      { idx, values: [] },
     );
-    return { remain: results.remain, value: transform(...results.values) };
+    return { idx: results.idx, value: transform(...results.values) };
   };
 
 // match regex, return null or single string
 export const consume = (regex) => {
-  let normalizedRe = regex;
-  if (!regex.source?.startsWith('^')) {
-    normalizedRe = composeRe(/^/, regex);
-  }
-  return function Consume(s) {
+  const normalizedRe = new RegExp(regex?.source || '', 'y');
+  return function Consume(s, idx = 0) {
+    normalizedRe.lastIndex = idx;
     const ret = normalizedRe.exec(s);
     if (!ret) throw NOT_MATCH;
     const value = ret[0];
-    const consumed = value.length;
-    const remain = s.substr(consumed);
-    return { remain, value };
+    return { idx: normalizedRe.lastIndex, value };
   };
 };
 
 // match zero or one, return defaultValue or matched single value
 export const optional = (consumer, defaultValue = null) =>
-  function Optional(s) {
+  function Optional(s, idx) {
     try {
-      return consumer(s);
+      return consumer(s, idx);
     } catch (e) {
       if (e === NOT_MATCH) {
-        return { remain: s, value: defaultValue };
+        return { idx, value: defaultValue };
       }
       throw e;
     }
@@ -79,15 +73,15 @@ export const optional = (consumer, defaultValue = null) =>
 
 // match zero or more, return in array
 export const many = (consumer) =>
-  function Many(s) {
+  function Many(s, idx = 0) {
     const values = [];
-    let remain = s;
+    let lastIdx = idx;
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
-        const ret = consumer(remain);
+        const ret = consumer(s, lastIdx);
         values.push(ret.value);
-        remain = ret.remain;
+        lastIdx = ret.idx;
       } catch (e) {
         if (e === NOT_MATCH) {
           break;
@@ -97,7 +91,7 @@ export const many = (consumer) =>
       }
     }
     return {
-      remain,
+      idx: lastIdx,
       value: values,
     };
   };

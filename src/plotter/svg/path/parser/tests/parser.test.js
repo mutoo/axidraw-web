@@ -15,13 +15,13 @@ import {
 describe('svg-path', () => {
   describe('non negative number', () => {
     it('parse valid non negative number', () => {
-      expect(nonNegNumber('1')).toEqual({ value: 1, remain: '' });
-      expect(nonNegNumber('12')).toEqual({ value: 12, remain: '' });
-      expect(nonNegNumber('012')).toEqual({ value: 12, remain: '' });
-      expect(nonNegNumber('1.23')).toEqual({ value: 1.23, remain: '' });
-      expect(nonNegNumber('12.3')).toEqual({ value: 12.3, remain: '' });
-      expect(nonNegNumber('1.23e1')).toEqual({ value: 12.3, remain: '' });
-      expect(nonNegNumber('1.23e-1')).toEqual({ value: 0.123, remain: '' });
+      expect(nonNegNumber('1').value).toEqual(1);
+      expect(nonNegNumber('12').value).toEqual(12);
+      expect(nonNegNumber('012').value).toEqual(12);
+      expect(nonNegNumber('1.23').value).toEqual(1.23);
+      expect(nonNegNumber('12.3').value).toEqual(12.3);
+      expect(nonNegNumber('1.23e1').value).toEqual(12.3);
+      expect(nonNegNumber('1.23e-1').value).toEqual(0.123);
     });
     it('throw invalid non negative number', () => {
       expect(() => nonNegNumber('')).toThrow();
@@ -31,20 +31,20 @@ describe('svg-path', () => {
 
   describe('number', () => {
     it('parse valid number', () => {
-      expect(number('1')).toEqual({ value: 1, remain: '' });
-      expect(number('12')).toEqual({ value: 12, remain: '' });
-      expect(number('012')).toEqual({ value: 12, remain: '' });
-      expect(number('1.23')).toEqual({ value: 1.23, remain: '' });
-      expect(number('12.3')).toEqual({ value: 12.3, remain: '' });
-      expect(number('1.23e1')).toEqual({ value: 12.3, remain: '' });
-      expect(number('1.23e-1')).toEqual({ value: 0.123, remain: '' });
-      expect(number('-1')).toEqual({ value: -1, remain: '' });
-      expect(number('+12')).toEqual({ value: 12, remain: '' });
-      expect(number('-012')).toEqual({ value: -12, remain: '' });
-      expect(number('+1.23')).toEqual({ value: 1.23, remain: '' });
-      expect(number('-12.3')).toEqual({ value: -12.3, remain: '' });
-      expect(number('+1.23e1')).toEqual({ value: 12.3, remain: '' });
-      expect(number('-1.23e-1')).toEqual({ value: -0.123, remain: '' });
+      expect(number('1').value).toEqual(1);
+      expect(number('12').value).toEqual(12);
+      expect(number('012').value).toEqual(12);
+      expect(number('1.23').value).toEqual(1.23);
+      expect(number('12.3').value).toEqual(12.3);
+      expect(number('1.23e1').value).toEqual(12.3);
+      expect(number('1.23e-1').value).toEqual(0.123);
+      expect(number('-1').value).toEqual(-1);
+      expect(number('+12').value).toEqual(12);
+      expect(number('-012').value).toEqual(-12);
+      expect(number('+1.23').value).toEqual(1.23);
+      expect(number('-12.3').value).toEqual(-12.3);
+      expect(number('+1.23e1').value).toEqual(12.3);
+      expect(number('-1.23e-1').value).toEqual(-0.123);
     });
     it('throw invalid number', () => {
       expect(() => number('')).toThrow();
@@ -54,25 +54,19 @@ describe('svg-path', () => {
 
   describe('coordinate pair', () => {
     it('parse valid coordinate pair', () => {
-      expect(coordinatePair('0 1')).toEqual({ value: [0, 1], remain: '' });
-      expect(coordinatePair('2,3')).toEqual({ value: [2, 3], remain: '' });
-      expect(coordinatePair('0  1')).toEqual({ value: [0, 1], remain: '' });
-      expect(coordinatePair('0, 1')).toEqual({ value: [0, 1], remain: '' });
-      expect(coordinatePair('0 ,1')).toEqual({ value: [0, 1], remain: '' });
-      expect(coordinatePair('0   1')).toEqual({ value: [0, 1], remain: '' });
+      expect(coordinatePair('0 1').value).toEqual([0, 1]);
+      expect(coordinatePair('2,3').value).toEqual([2, 3]);
+      expect(coordinatePair('0  1').value).toEqual([0, 1]);
+      expect(coordinatePair('0, 1').value).toEqual([0, 1]);
+      expect(coordinatePair('0 ,1').value).toEqual([0, 1]);
+      expect(coordinatePair('0   1').value).toEqual([0, 1]);
       // for the string "M 0.6.5", the first coordinate of the "moveto" consumes the characters "0.6"
       // and stops upon encountering the second decimal point because the production of a "coordinate"
       // only allows one decimal point. The result is that the first coordinate will be "0.6"
       // and the second coordinate will be ".5".
-      expect(coordinatePair('0.6.5')).toEqual({
-        value: [0.6, 0.5],
-        remain: '',
-      });
+      expect(coordinatePair('0.6.5').value).toEqual([0.6, 0.5]);
       // more complicate rules
-      expect(coordinatePair('+0.1e+2+3.4e+5')).toEqual({
-        value: [0.1e2, 3.4e5],
-        remain: '',
-      });
+      expect(coordinatePair('+0.1e+2+3.4e+5').value).toEqual([0.1e2, 3.4e5]);
     });
     it('throw invalid coordinate pair', () => {
       expect(() => coordinatePair('')).toThrow();
@@ -84,34 +78,22 @@ describe('svg-path', () => {
 
   describe('coordinate pair sequence', () => {
     it('parse valid coordinate pair sequence', () => {
-      expect(coordinatePairSequence('0 1 2 3')).toEqual({
-        value: [
-          [0, 1],
-          [2, 3],
-        ],
-        remain: '',
-      });
-      expect(coordinatePairSequence('0,1 2,3')).toEqual({
-        value: [
-          [0, 1],
-          [2, 3],
-        ],
-        remain: '',
-      });
-      expect(coordinatePairSequence('0 1,2 3')).toEqual({
-        value: [
-          [0, 1],
-          [2, 3],
-        ],
-        remain: '',
-      });
-      expect(coordinatePairSequence('0  1  2  3')).toEqual({
-        value: [
-          [0, 1],
-          [2, 3],
-        ],
-        remain: '',
-      });
+      expect(coordinatePairSequence('0 1 2 3').value).toEqual([
+        [0, 1],
+        [2, 3],
+      ]);
+      expect(coordinatePairSequence('0,1 2,3').value).toEqual([
+        [0, 1],
+        [2, 3],
+      ]);
+      expect(coordinatePairSequence('0 1,2 3').value).toEqual([
+        [0, 1],
+        [2, 3],
+      ]);
+      expect(coordinatePairSequence('0  1  2  3').value).toEqual([
+        [0, 1],
+        [2, 3],
+      ]);
     });
     it('throw invalid coordinate pair sequence', () => {
       expect(() => coordinatePairSequence('')).toThrow();
@@ -121,15 +103,12 @@ describe('svg-path', () => {
 
   describe('moveto', () => {
     it('parse valid moveto', () => {
-      expect(moveto('m0 1')).toEqual({ value: ['m', [0, 1]], remain: '' });
-      expect(moveto('M0 1')).toEqual({ value: ['M', [0, 1]], remain: '' });
-      expect(moveto('M0,1')).toEqual({ value: ['M', [0, 1]], remain: '' });
-      expect(moveto('M0  1')).toEqual({ value: ['M', [0, 1]], remain: '' });
-      expect(moveto('M 0 1')).toEqual({ value: ['M', [0, 1]], remain: '' });
-      expect(moveto('M0,1 2,3')).toEqual({
-        value: ['M', [0, 1], [2, 3]],
-        remain: '',
-      });
+      expect(moveto('m0 1').value).toEqual(['m', [0, 1]]);
+      expect(moveto('M0 1').value).toEqual(['M', [0, 1]]);
+      expect(moveto('M0,1').value).toEqual(['M', [0, 1]]);
+      expect(moveto('M0  1').value).toEqual(['M', [0, 1]]);
+      expect(moveto('M 0 1').value).toEqual(['M', [0, 1]]);
+      expect(moveto('M0,1 2,3').value).toEqual(['M', [0, 1], [2, 3]]);
     });
     it('throw invalid moveto', () => {
       expect(() => moveto('')).toThrow();
@@ -141,15 +120,12 @@ describe('svg-path', () => {
 
   describe('lineto', () => {
     it('parse valid lineto command', () => {
-      expect(lineto('l0 1')).toEqual({ value: ['l', [0, 1]], remain: '' });
-      expect(lineto('L0 1')).toEqual({ value: ['L', [0, 1]], remain: '' });
-      expect(lineto('L0,1')).toEqual({ value: ['L', [0, 1]], remain: '' });
-      expect(lineto('L0  1')).toEqual({ value: ['L', [0, 1]], remain: '' });
-      expect(lineto('L 0 1')).toEqual({ value: ['L', [0, 1]], remain: '' });
-      expect(lineto('L0,1 2,3')).toEqual({
-        value: ['L', [0, 1], [2, 3]],
-        remain: '',
-      });
+      expect(lineto('l0 1').value).toEqual(['l', [0, 1]]);
+      expect(lineto('L0 1').value).toEqual(['L', [0, 1]]);
+      expect(lineto('L0,1').value).toEqual(['L', [0, 1]]);
+      expect(lineto('L0  1').value).toEqual(['L', [0, 1]]);
+      expect(lineto('L 0 1').value).toEqual(['L', [0, 1]]);
+      expect(lineto('L0,1 2,3').value).toEqual(['L', [0, 1], [2, 3]]);
     });
     it('throw invalid lineto command', () => {
       expect(() => lineto('')).toThrow();
@@ -161,24 +137,12 @@ describe('svg-path', () => {
 
   describe('horizontal lineto', () => {
     it('parse valid horizontal lineto command', () => {
-      expect(horizontalLineto('h1')).toEqual({ value: ['h', 1], remain: '' });
-      expect(horizontalLineto('H1')).toEqual({ value: ['H', 1], remain: '' });
-      expect(horizontalLineto('H1 2')).toEqual({
-        value: ['H', 1, 2],
-        remain: '',
-      });
-      expect(horizontalLineto('H1,2')).toEqual({
-        value: ['H', 1, 2],
-        remain: '',
-      });
-      expect(horizontalLineto('H1 2 3')).toEqual({
-        value: ['H', 1, 2, 3],
-        remain: '',
-      });
-      expect(horizontalLineto('H1 2,3')).toEqual({
-        value: ['H', 1, 2, 3],
-        remain: '',
-      });
+      expect(horizontalLineto('h1').value).toEqual(['h', 1]);
+      expect(horizontalLineto('H1').value).toEqual(['H', 1]);
+      expect(horizontalLineto('H1 2').value).toEqual(['H', 1, 2]);
+      expect(horizontalLineto('H1,2').value).toEqual(['H', 1, 2]);
+      expect(horizontalLineto('H1 2 3').value).toEqual(['H', 1, 2, 3]);
+      expect(horizontalLineto('H1 2,3').value).toEqual(['H', 1, 2, 3]);
     });
     it('throw invalid horizontal lineto command', () => {
       expect(() => horizontalLineto('')).toThrow();
@@ -188,24 +152,12 @@ describe('svg-path', () => {
 
   describe('vertical lineto', () => {
     it('parse valid vertical lineto command', () => {
-      expect(verticalLineto('v1')).toEqual({ value: ['v', 1], remain: '' });
-      expect(verticalLineto('V1')).toEqual({ value: ['V', 1], remain: '' });
-      expect(verticalLineto('V1 2')).toEqual({
-        value: ['V', 1, 2],
-        remain: '',
-      });
-      expect(verticalLineto('V1,2')).toEqual({
-        value: ['V', 1, 2],
-        remain: '',
-      });
-      expect(verticalLineto('V1 2 3')).toEqual({
-        value: ['V', 1, 2, 3],
-        remain: '',
-      });
-      expect(verticalLineto('V1 2,3')).toEqual({
-        value: ['V', 1, 2, 3],
-        remain: '',
-      });
+      expect(verticalLineto('v1').value).toEqual(['v', 1]);
+      expect(verticalLineto('V1').value).toEqual(['V', 1]);
+      expect(verticalLineto('V1 2').value).toEqual(['V', 1, 2]);
+      expect(verticalLineto('V1,2').value).toEqual(['V', 1, 2]);
+      expect(verticalLineto('V1 2 3').value).toEqual(['V', 1, 2, 3]);
+      expect(verticalLineto('V1 2,3').value).toEqual(['V', 1, 2, 3]);
     });
     it('throw invalid vertical lineto command', () => {
       expect(() => verticalLineto('')).toThrow();
@@ -215,8 +167,8 @@ describe('svg-path', () => {
 
   describe('close-path', () => {
     it('parse valid close-path command', () => {
-      expect(closePath('z')).toEqual({ value: ['z'], remain: '' });
-      expect(closePath('Z')).toEqual({ value: ['Z'], remain: '' });
+      expect(closePath('z').value).toEqual(['z']);
+      expect(closePath('Z').value).toEqual(['Z']);
     });
     it('throw invalid close-path command', () => {
       expect(() => closePath('')).toThrow();
@@ -226,9 +178,9 @@ describe('svg-path', () => {
 
   describe('svg path', () => {
     it('parse valid svg path', () => {
-      expect(path('')).toEqual({ value: [], remain: '' });
-      expect(path('L')).toEqual({ value: [], remain: 'L' });
-      expect(path('M0 0')).toEqual({ value: [['M', [0, 0]]], remain: '' });
+      expect(path('')).toEqual({ value: null, idx: 0 });
+      expect(path('L')).toEqual({ value: null, idx: 0 });
+      expect(path('M0 0')).toEqual({ value: [['M', [0, 0]]], idx: 4 });
     });
   });
 

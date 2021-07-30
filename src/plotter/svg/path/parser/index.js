@@ -83,7 +83,7 @@ export const optCommaWsp = consume(optionalRe(commaWspRe));
 
 // flag:
 //     "0" | "1"
-export const flag = rule((f) => parseInt(f, 10), consume(/^[01]/));
+export const flag = rule((f) => parseInt(f, 10), consume(/[01]/));
 
 // nonnegative-number:
 //     integer-constant
@@ -156,18 +156,18 @@ export const command = (cmdConsumer, sequenceComsumer) =>
 // moveto-argument-sequence:
 //     coordinate-pair
 //     | coordinate-pair comma-wsp? lineto-argument-sequence
-export const moveto = command(consume(/^M/i), coordinatePairSequence);
+export const moveto = command(consume(/[Mm]/), coordinatePairSequence);
 
 // lineto:
 //     ( "L" | "l" ) wsp* lineto-argument-sequence
 // lineto-argument-sequence:
 //     coordinate-pair
 //     | coordinate-pair comma-wsp? lineto-argument-sequence
-export const lineto = command(consume(/^L/i), coordinatePairSequence);
+export const lineto = command(consume(/[Ll]/), coordinatePairSequence);
 
 // closepath:
 //     ("Z" | "z")
-export const closePath = rule((z) => [z], consume(/^Z/i));
+export const closePath = rule((z) => [z], consume(/[Zz]/));
 
 // coordinate-sequence:
 //     coordinate
@@ -179,14 +179,14 @@ export const coordinateSequence = sequence(coordinate);
 // horizontal-lineto-argument-sequence:
 //     coordinate
 //     | coordinate comma-wsp? horizontal-lineto-argument-sequence
-export const horizontalLineto = command(consume(/^H/i), coordinateSequence);
+export const horizontalLineto = command(consume(/[Hh]/), coordinateSequence);
 
 // vertical-lineto:
 //     ( "V" | "v" ) wsp* vertical-lineto-argument-sequence
 // vertical-lineto-argument-sequence:
 //     coordinate
 //     | coordinate comma-wsp? vertical-lineto-argument-sequence
-export const verticalLineto = command(consume(/^V/i), coordinateSequence);
+export const verticalLineto = command(consume(/[Vv]/), coordinateSequence);
 
 // curveto-argument:
 //     coordinate-pair comma-wsp? coordinate-pair comma-wsp? coordinate-pair
@@ -206,7 +206,7 @@ export const curvetoArgSequence = sequence(curveToArg);
 
 // curveto:
 //     ( "C" | "c" ) wsp* curveto-argument-sequence
-export const curveTo = command(consume(/^C/i), curvetoArgSequence);
+export const curveTo = command(consume(/[Cc]/), curvetoArgSequence);
 
 // two-coordinate-pair:
 //     coordinate-pair comma-wsp? coordinate-pair
@@ -229,7 +229,10 @@ export const twoCoordinatePairSequence = sequence(twoCoordinatePair);
 //     | smooth-curveto-argument comma-wsp? smooth-curveto-argument-sequence
 // smooth-curveto-argument:
 //     coordinate-pair comma-wsp? coordinate-pair
-export const smoothCurveTo = command(consume(/^S/i), twoCoordinatePairSequence);
+export const smoothCurveTo = command(
+  consume(/[Ss]/),
+  twoCoordinatePairSequence,
+);
 
 // quadratic-bezier-curveto:
 //     ( "Q" | "q" ) wsp* quadratic-bezier-curveto-argument-sequence
@@ -240,7 +243,7 @@ export const smoothCurveTo = command(consume(/^S/i), twoCoordinatePairSequence);
 // quadratic-bezier-curveto-argument:
 //     coordinate-pair comma-wsp? coordinate-pair
 export const quadBezierCurveTo = command(
-  consume(/^Q/i),
+  consume(/[Qq]/),
   twoCoordinatePairSequence,
 );
 
@@ -250,7 +253,7 @@ export const quadBezierCurveTo = command(
 //     coordinate-pair
 //     | coordinate-pair comma-wsp? smooth-quadratic-bezier-curveto-argument-sequence
 export const smoothQuadBezierCurveTo = command(
-  consume(/^T/i),
+  consume(/[Tt]/),
   coordinatePairSequence,
 );
 
@@ -286,7 +289,7 @@ export const ellipticalArcArgSequence = sequence(ellipticalArcArg);
 
 // elliptical-arc:
 //     ( "A" | "a" ) wsp* elliptical-arc-argument-sequence
-export const ellipticalArc = command(consume(/^A/i), ellipticalArcArgSequence);
+export const ellipticalArc = command(consume(/[Aa]/), ellipticalArcArgSequence);
 
 // drawto-command:
 //     closepath
@@ -335,16 +338,18 @@ export const movetoDrawToGroups = sequence(movetoDrawToGroup, manyWsp);
 //     wsp* moveto-drawto-command-groups? wsp*
 export const path = rule(
   function Path(_, cmdG) {
-    return cmdG?.flatMap((i) => i) || [];
+    return cmdG?.flatMap((i) => i) || null;
   },
   manyWsp,
   optional(movetoDrawToGroups),
   manyWsp,
 );
 
-export const parsePath = (pathDef) => {
+export const parsePath = (pathDef = '') => {
+  // svg 1.1 allow empty path def
+  if (!pathDef) return [];
   const result = path(pathDef);
-  if (result.remain) {
+  if (!result.value) {
     throw new Error('Invalid svg path.');
   }
   return result.value;
