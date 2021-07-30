@@ -4,21 +4,23 @@
 
 export const NOT_MATCH = {};
 
-// match a branches of consumer, return first match
-export const branches = (...consumers) =>
-  function Branches(s) {
-    for (const consumer of consumers) {
-      try {
-        return consumer(s);
-      } catch (e) {
-        if (e !== NOT_MATCH) {
-          throw e;
-        }
-      }
-    }
-    throw NOT_MATCH;
-  };
+export const composeRe = (...res) => {
+  const source = res.reduce((src, re) => src + re.source, '');
+  return new RegExp(source);
+};
 
+export const branchesRe = (...res) => {
+  const source = res.map((re) => re.source).join('|');
+  return new RegExp(`(${source})`);
+};
+
+export const optionalRe = (re) => new RegExp(`(${re.source})?`);
+
+export const atLeastRe = (re) => new RegExp(`(${re.source})+`);
+
+export const manyRe = (re) => new RegExp(`(${re.source})*`);
+
+// match a branches of consumer
 export const fastBranches = (consumerDict) =>
   function FastBranches(s) {
     const peek = s[0];
@@ -45,15 +47,20 @@ export const rule = (transform, ...consumers) =>
   };
 
 // match regex, return null or single string
-export const consume = (regex) =>
-  function Consume(s) {
-    const ret = regex.exec(s);
+export const consume = (regex) => {
+  let normalizedRe = regex;
+  if (!regex.source?.startsWith('^')) {
+    normalizedRe = composeRe(/^/, regex);
+  }
+  return function Consume(s) {
+    const ret = normalizedRe.exec(s);
     if (!ret) throw NOT_MATCH;
     const value = ret[0];
     const consumed = value.length;
     const remain = s.substr(consumed);
     return { remain, value };
   };
+};
 
 // match zero or one, return defaultValue or matched single value
 export const optional = (consumer, defaultValue = null) =>
@@ -93,52 +100,71 @@ export const many = (consumer) =>
     };
   };
 
-// match one or more, return in array
-export const atLeastOne = (consumer) => (s) => {
-  const ret = consumer(s);
-  const manyConsumer = many(consumer);
-  const manyRet = manyConsumer(ret.remain);
-  return { remain: manyRet.remain, value: [ret.value, ...manyRet.value] };
-};
-
 // wsp:
 //     (#x20 | #x9 | #xD | #xA)
-// many whitespace
-export const manyWsp = consume(/^\s*/);
+export const wspRe = /\s/;
+
+// zero or many whitespace
+export const manyWspRe = manyRe(wspRe);
+
+export const manyWsp = consume(manyWspRe);
+
+// one or many whitespace
+export const atLeastWspRe = atLeastRe(wspRe);
 
 // digit:
 //     "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 // digit-sequence:
 //     digit
 //     | digit digit-sequence
-export const digits = consume(/^[0-9]+/);
+export const digitsRe = /\d+/;
 
 // sign:
 //     "+" | "-"
+export const signRe = /[+-]/;
+
 // exponent:
 //     ( "e" | "E" ) sign? digit-sequence
+export const expRe = composeRe(/[Ee]/, optionalRe(signRe), digitsRe);
+
+// dot
+export const dotRe = /\./;
+
 // fractional-constant:
 //     digit-sequence? "." digit-sequence
 //     | digit-sequence "."
+export const fracConstRe = branchesRe(
+  composeRe(optionalRe(digitsRe), dotRe, digitsRe),
+  composeRe(digitsRe, dotRe),
+);
+
 // floating-point-constant:
 //     fractional-constant exponent?
 //     | digit-sequence exponent
-export const floatConst = consume(
-  /^(([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)/i,
+export const floatConstRe = branchesRe(
+  composeRe(fracConstRe, optionalRe(expRe)),
+  composeRe(digitsRe, expRe),
 );
 
 // integer-constant:
 //     digit-sequence
-export const intConst = digits;
+export const intConstRe = digitsRe;
 
 // comma:
 //     ","
+export const commaRe = /,/;
+
 // comma-wsp:
 //     (wsp+ comma? wsp*) | (comma wsp*)
-export const commaWsp = consume(/^(\s+,?\s*|,\s*)/);
+const commaWspRe = branchesRe(
+  composeRe(atLeastWspRe, optionalRe(commaRe), manyWspRe),
+  composeRe(commaRe, manyWspRe),
+);
+
+export const commaWsp = consume(commaWspRe);
 
 // optional comma-wsp
-export const optCommaWsp = consume(/^(\s+,?\s*|,\s*)?/);
+export const optCommaWsp = consume(optionalRe(commaWspRe));
 
 // flag:
 //     "0" | "1"
@@ -149,9 +175,7 @@ export const flag = rule((f) => parseInt(f, 10), consume(/^[01]/));
 //     | floating-point-constant
 export const nonNegNumber = rule(
   (n) => parseFloat(n),
-  consume(
-    /^((([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)|[0-9]+)/i,
-  ),
+  consume(branchesRe(floatConstRe, intConstRe)),
 );
 
 // number:
@@ -159,9 +183,7 @@ export const nonNegNumber = rule(
 //     | sign? floating-point-constant
 export const number = rule(
   (n) => parseFloat(n),
-  consume(
-    /^[+-]?((([0-9]*\.[0-9]+|[0-9]+\.)(E[+-]?[0-9]+)?|[0-9]+E[+-]?[0-9]+)|[0-9]+)/i,
-  ),
+  consume(composeRe(optionalRe(signRe), branchesRe(floatConstRe, intConstRe))),
 );
 
 // coordinate:

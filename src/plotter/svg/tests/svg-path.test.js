@@ -2,9 +2,7 @@ import {
   closePath,
   coordinatePair,
   coordinatePairSequence,
-  floatConst,
   horizontalLineto,
-  intConst,
   lineto,
   moveto,
   nonNegNumber,
@@ -15,39 +13,6 @@ import {
 } from '../path/parser';
 
 describe('svg-path', () => {
-  describe('float point constant', () => {
-    it('parse valid float point constant', () => {
-      expect(floatConst('1.23')).toEqual({ value: '1.23', remain: '' });
-      expect(floatConst('1.')).toEqual({ value: '1.', remain: '' });
-      expect(floatConst('1.23e1')).toEqual({ value: '1.23e1', remain: '' });
-      expect(floatConst('1.23e-1')).toEqual({ value: '1.23e-1', remain: '' });
-      expect(floatConst('1.23e+1')).toEqual({ value: '1.23e+1', remain: '' });
-      expect(floatConst('1.e+1')).toEqual({ value: '1.e+1', remain: '' });
-      expect(floatConst('.1')).toEqual({ value: '.1', remain: '' });
-      expect(floatConst('.1e+1')).toEqual({ value: '.1e+1', remain: '' });
-      expect(floatConst('1e+1')).toEqual({ value: '1e+1', remain: '' });
-      expect(floatConst('12e+1')).toEqual({ value: '12e+1', remain: '' });
-    });
-    it('throw invalid float point constant', () => {
-      expect(() => floatConst('')).toThrow();
-      expect(() => floatConst('M')).toThrow();
-    });
-  });
-
-  describe('integer constant', () => {
-    it('parse valid integer constant', () => {
-      expect(intConst('1')).toEqual({ value: '1', remain: '' });
-      expect(intConst('12')).toEqual({ value: '12', remain: '' });
-      expect(intConst('012')).toEqual({ value: '012', remain: '' });
-      expect(intConst('1.23')).toEqual({ value: '1', remain: '.23' });
-      expect(intConst('12.3')).toEqual({ value: '12', remain: '.3' });
-    });
-    it('throw invalid integer constant', () => {
-      expect(() => intConst('')).toThrow();
-      expect(() => intConst('M')).toThrow();
-    });
-  });
-
   describe('non negative number', () => {
     it('parse valid non negative number', () => {
       expect(nonNegNumber('1')).toEqual({ value: 1, remain: '' });
