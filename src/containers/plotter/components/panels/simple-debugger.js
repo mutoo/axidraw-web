@@ -50,7 +50,7 @@ const SimpleDebugger = ({ device }) => {
   return (
     <form className={formStyles.root}>
       <h3>Simple Debugger</h3>
-      <Alert type="info">Debug AxiDraw before plotting.</Alert>
+      <Alert type="info">Debug AxiDraw before plotting here.</Alert>
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
         {frequentlyCommands.map((cmd) => {
           const title = cmd.title || cmd.cmd.title;

@@ -31,8 +31,8 @@ const Setup = observer(({ ...props }) => {
     <Panel active={planning.phase === PLANNING_PHASE_SETUP} {...props}>
       <section>
         <h3>Setup</h3>
-        <p>In this phase, you could load svg and set up the page.</p>
-        <div className="flex my-4 justify-center">
+        <p>
+          In this phase, you could{' '}
           <input
             className="hidden"
             type="file"
@@ -52,10 +52,9 @@ const Setup = observer(({ ...props }) => {
             }}
           >
             Load SVG
-          </Button>
-        </div>
-        <p>
-          Or simply <b>Drag & Drop</b> your svg into the page area.
+          </Button>{' '}
+          and set up the page. Or simply <b>Drag & Drop</b> your svg into the
+          page area.
         </p>
       </section>
       <section className={styles.inputs}>
@@ -169,11 +168,15 @@ const Setup = observer(({ ...props }) => {
         </Button>
         {planning.fileInfo && (
           <>
-            <h4>Svg Counts:</h4>
-            <textarea
-              value={JSON.stringify(planning.fileInfo, null, 2)}
-              readOnly
-            />
+            <h4>Svg Info:</h4>
+            <dl className="grid grid-cols-2 gap-4">
+              {planning.fileInfo.map((info) => (
+                <>
+                  <dt>{info[0]}</dt>
+                  <dd>{info[1]}</dd>
+                </>
+              ))}
+            </dl>
           </>
         )}
       </section>

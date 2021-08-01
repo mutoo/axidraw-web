@@ -4,10 +4,14 @@ import DeviceConnector from 'components/device-connector/device-connector';
 import Alert from 'components/ui/alert/alert';
 import Button from 'components/ui/button/button';
 import {
+  PLOTTER_SPEED_MODE_ACCELERATING,
+  PLOTTER_SPEED_MODE_CONSTANT,
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
   PLOTTER_STATUS_STANDBY,
 } from 'plotter/plotter';
+import classNames from 'classnames';
+import formStyles from 'components/ui/form.css';
 import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
@@ -64,7 +68,36 @@ const Plotting = observer(({ ...props }) => {
               work.plot({ motions: planning.motions });
             }}
           >
-            <label htmlFor="pen-down-speed">Speed(Pen-down):</label>
+            <div className="col-span-2 flex items-center">
+              <label className="mr-2">Speed Mode:</label>
+              <label className={classNames(formStyles.radioLabel, 'mr-2')}>
+                <input
+                  type="radio"
+                  value={PLOTTER_SPEED_MODE_CONSTANT}
+                  checked={work.speedMode === PLOTTER_SPEED_MODE_CONSTANT}
+                  onChange={() => {
+                    work.setSpeedMode(PLOTTER_SPEED_MODE_CONSTANT);
+                  }}
+                />
+                <span>Constant</span>
+              </label>{' '}
+              <label className={formStyles.radioLabel}>
+                <input
+                  type="radio"
+                  value={PLOTTER_SPEED_MODE_ACCELERATING}
+                  checked={work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING}
+                  onChange={() => {
+                    work.setSpeedMode(PLOTTER_SPEED_MODE_ACCELERATING);
+                  }}
+                />
+                <span>Accelerating</span>
+              </label>
+            </div>
+            <h4 className="col-span-2">Moving Speed</h4>
+            <label htmlFor="pen-down-speed">
+              Pen Down{' '}
+              {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && '(Max)'}
+            </label>
             <input
               id="pen-down-speed"
               type="number"
@@ -76,7 +109,10 @@ const Plotting = observer(({ ...props }) => {
                 work.setPenDownMoveSpeed(parseFloat(e.target.value))
               }
             />
-            <label htmlFor="pen-up-speed">Speed(Pen-up):</label>
+            <label htmlFor="pen-up-speed">
+              Pen Up{' '}
+              {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && '(Const)'}
+            </label>
             <input
               id="pen-up-speed"
               type="number"

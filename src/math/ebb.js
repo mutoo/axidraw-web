@@ -91,6 +91,6 @@ export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
   return xy2aa({ x: xSteps, y: ySteps });
 };
 
-export const aaStepsToLMParams = ({ a1, a2 }, t) => {
-  return [s2rate(a1 / t), a1, 0, s2rate(a2 / t), a2, 0];
+export const aaStepsToLMParams = ({ a1, a2 }, t, clear = 3) => {
+  return [s2rate(a1 / t), a1, 0, s2rate(a2 / t), a2, clear];
 };
