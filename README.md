@@ -1,10 +1,16 @@
-This repo is in work-in-progress actively!
+# Axidraw-Web
 
-# Axidraw-web
+This project is work-in-progress actively!
 
-This project allow users to control axidraw in the browser with the WebUSB API.
+![screenshot](./docs/screenshot-setup.png)
+
+Axidraw-Web allow artists to connect [AxiDraw](https://axidraw.com/) in the browser with the WebUSB API. Or connect to remote AxiDraw with WebSocket proxy.
+
+![arch](./docs/axidaw-web-arch.png)
 
 ## TODOs
+
+Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projects/1). 
 
 ### Communication Interface
 
@@ -32,11 +38,13 @@ This project allow users to control axidraw in the browser with the WebUSB API.
 
 ## Play it on browsers:
 
-The latest version is deployed at https://axidraw.mutoo.im , you don't need to install or run anything to use it. Just open the web app and plug in the Axidraw on your machine to play it.
+The latest version is deployed at https://axidraw.mutoo.im , you don't need to install any software or plugins to use it. Just open the website and plug the AxiDraw on your machine to plot any svg with it.
 
-The debugger is at https://axidraw.mutoo.im/debugger.html if you want to play with low-level ebb command.
+### Other Apps
 
-The composer is at https://axidraw.mutoo.im/composer.html for ppl wondering how the pen plotter singing.
+Try the [Debugger](https://axidraw.mutoo.im/debugger.html) if you want to play with low-level ebb command.
+
+Try the [Composer](https://axidraw.mutoo.im/composer.html) if you wondering how the pen plotter singing.
 
 ## Run locally
 
@@ -51,14 +59,14 @@ $ yarn
 In order to use WebUSB on the browser, you have to generate a self-signed cert on your own:
 
 ```
-bash ./scripts/create-cert.sh
+$ bash ./scripts/create-cert.sh
 ```
 
 This is required even you are running it locally. This command will generate a `CA.pem` and `localhost.crt` in the `server/cert` folder.
 
 Please import the `CA.pem` to your system (Keychain on macOS or browser trust list).
 
-The local server will use the `localhost.crt` and `localhost.key` to host the website at
+The local server will use the `localhost.crt` and `localhost.key` to host the website at:
 
 ```
 https://localhost:8443
@@ -73,11 +81,11 @@ https://raspberry-pi:8443
 http://192.168.3.14.nip.io:8433
 ```
 
-This very handy when you run the web server on Raspberry PI.
+This very handy when you run the web server on Raspberry PI or other computer.
 
 ### Production build
 
-To run production build locally, run the `yarn build` to build the and, and then `yarn start`:
+To run production build locally, run the `yarn build` to build the and, and then `yarn start` to start the web server:
 
 ```
 $ yarn build
@@ -94,8 +102,20 @@ Feel free to run dev build if you like to inspect how the app work with devTools
 yarn dev
 ```
 
-## Run on raspberry
+it will run a dev server at `https://localhost:8443`, which will popup automatically in your browser.
 
-What if you plug in the axidraw on a Raspberry PI! No worries, this app also provide a proxy mode via WebSocket, so that you can run a web server to communicate the axidraw and your browsers in different computers.
+## Run on Raspberry PI
+
+What if you plug in the axidraw on a Raspberry PI? No problem! This app also provide a proxy mode via WebSocket, so that you can run a web server to communicate the axidraw and your browsers in different computers.
 
 N.B. The serialport permission has to be set up so that the server can communicate with the device.
+
+## License
+
+MIT
+
+## Credits
+
+Thanks [Evil Mad Scientist](https://www.evilmadscientist.com/) for providing such a great machine to play with.
+
+This project also inspired by [saxi](https://github.com/nornagon/saxi) initially.
