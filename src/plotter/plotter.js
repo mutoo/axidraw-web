@@ -3,7 +3,7 @@ import * as commands from 'communication/ebb';
 import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner';
 import { s2rate, xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
-import { logger } from './utils';
+import { accelMotion, logger, slopeSegments } from './utils';
 
 export const PLOTTER_STATUS_STANDBY = 'axidraw-web-plotter-status-standby';
 export const PLOTTER_STATUS_PAUSED = 'axidraw-web-plotter-status-paused';
@@ -17,53 +17,21 @@ export const PLOTTER_SPEED_MODE_CONSTANT =
 export const PLOTTER_SPEED_MODE_ACCELERATING =
   'axidraw-web-plotter-speed-mode-accelerating';
 
-export const initialContext = { x: 0, y: 0, a1: 0, a2: 0, pen: MOTION_PEN_UP };
-
-export function* slopeSegments({ t, stepLong, stepShort }) {
-  const absStepShort = Math.abs(stepShort);
-  const maxTimeShort = absStepShort * 1310;
-  const stepShortDir = Math.sign(stepShort);
-  const flatT = Math.floor((t - maxTimeShort) / (absStepShort + 1));
-  const stepRateLong = stepLong / t;
-  const flatStepLong = Math.floor(stepRateLong * flatT);
-  const slopeStopLong = Math.floor(stepRateLong * 1310);
-  let remainT = t;
-  let remainStopLong = stepLong;
-  /**
-   *  |         ____
-   *  |    ___/
-   *  |___/_________
-   */
-  for (let i = 0, segments = 2 * absStepShort + 1; i < segments; i += 1) {
-    if (i % 2 === 0) {
-      // flat segment
-      if (flatT > 0) {
-        yield { time: flatT, longStep: flatStepLong, shortStep: 0 };
-        remainT -= flatT;
-        remainStopLong -= flatStepLong;
-      }
-    } else {
-      // slope segment
-      yield { time: 1310, longStep: slopeStopLong, shortStep: stepShortDir };
-      remainT -= 1310;
-      remainStopLong -= slopeStopLong;
-    }
-  }
-  // there might be remain step due to Math.floor
-  if (remainStopLong > 0) {
-    yield {
-      time: Math.max(1, remainT),
-      longStep: remainStopLong,
-      shortStep: 0,
-    };
-  }
-}
+export const initialContext = {
+  x: 0,
+  y: 0,
+  a1: 0,
+  a2: 0,
+  rate: 0,
+  pen: MOTION_PEN_UP,
+};
 
 async function* plot({
   device,
   speedMode,
   penUpMoveSpeed,
   penDownMoveSpeed,
+  penDownMoveAccel,
   motions,
   control,
 }) {
@@ -154,29 +122,45 @@ async function* plot({
           logger.debug(`step-move: ${deltaA1}, ${deltaA2} in ${t}ms`);
           await device.executeCommand(commands.sm, t, deltaA1, deltaA2);
         }
+        context.rate = s2rate(penRate);
       } else {
-        // first phase: try to match const speed motion
-        const finalRate = s2rate(penRate);
-        const initRate = finalRate;
-        const tt = (deltaAA * 2 ** 32) / (initRate + finalRate);
-        const initRate1 = (initRate * absDeltaA1) / deltaAA;
-        const finalRate1 = (finalRate * absDeltaA1) / deltaAA;
-        const accel1 = (finalRate1 - initRate1) / tt;
-        const initRate2 = (initRate * absDeltaA2) / deltaAA;
-        const finalRate2 = (finalRate * absDeltaA2) / deltaAA;
-        const accel2 = (finalRate2 - initRate2) / tt;
-        // with this low-level stepper, we don't need to handle the slope segments issue in constant speed mode
-        await device.executeCommand(
-          commands.lm,
-          initRate1 | 0,
-          deltaA1,
-          accel1 | 0,
-          initRate2 | 0,
-          deltaA2,
-          accel2 | 0,
-          3, // clear both accumulators
+        const accMotions = accelMotion(
+          deltaAA,
+          0,
+          penRate,
+          0,
+          penDownMoveAccel.get(),
         );
-        t = (tt / 25000) * 1000;
+        for (const motion of accMotions) {
+          const initRate = s2rate(motion.v0);
+          const dir = motion.v0 <= motion.vt ? 1 : -1;
+          const cos = deltaA1 / deltaAA;
+          const initRate1 = Math.abs(initRate * cos) | 0;
+          const step1 = (motion.s * cos) | 0;
+          const accel = (motion.vt - motion.v0) / motion.t;
+          const acc = s2rate(accel) / 25000;
+          const accel1 = (dir * Math.abs(acc * cos)) | 0;
+          const sin = deltaA2 / deltaAA;
+          const initRate2 = Math.abs(initRate * sin) | 0;
+          const step2 = (motion.s * sin) | 0;
+          const accel2 = (dir * Math.abs(acc * sin)) | 0;
+          // with this low-level stepper, we don't need to handle the slope segments issue in constant speed mode
+          logger.debug(
+            `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
+          );
+          await device.executeCommand(
+            commands.lm,
+            initRate1,
+            step1,
+            accel1,
+            initRate2,
+            step2,
+            accel2,
+            3, // clear both accumulators
+          );
+          t = motion.t * 1000;
+        }
+        context.rate = 0;
       }
       context.x = targetLine[2];
       context.y = targetLine[3];
