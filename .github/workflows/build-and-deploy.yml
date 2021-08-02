@@ -18,6 +18,8 @@ jobs:
           node-version: '12.22.x'
 
       - name: Install and Build
+        env:
+          GA: G-TXLP3TJS9N
         run: |
           yarn
           yarn build
