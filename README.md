@@ -28,7 +28,6 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [ ] Motion Planning (reorder)
 - [x] Plotting (constant speed)
 - [ ] Plotting (acceleration mode)
-- [ ] Plotting (acceleration mode)
 - [x] Plotting control (pause/resume/stop)
 - [ ] Plot skipping/seeking
 
@@ -77,7 +76,7 @@ The cert generation script will also provide extra DNS including your hostname, 
 ```
 # e.g. your hostname is raspberry-pi.local
 # and your LAN ip is 192.168.3.14
-https://raspberry-pi:8443
+https://raspberry-pi.local:8443
 http://192.168.3.14.nip.io:8433
 ```
 
@@ -99,7 +98,7 @@ Then visit the app in your browser with links listed in the section above.
 Feel free to run dev build if you like to inspect how the app work with devTools:
 
 ```
-yarn dev
+$ yarn dev
 ```
 
 it will run a dev server at `https://localhost:8443`, which will popup automatically in your browser.
