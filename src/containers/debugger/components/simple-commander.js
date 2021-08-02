@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
+import { trackEvent } from '../utils';
 
 const commandList = Object.keys(commands);
 
@@ -17,6 +18,7 @@ const SimpleCommander = ({ device }) => {
   const sendCommand = useCallback(
     async (e) => {
       e.preventDefault();
+      trackEvent('simple', cmd);
       try {
         const paramsStr = params.trim();
         setParamsHistory({ ...paramsHistory, [cmd]: paramsStr });

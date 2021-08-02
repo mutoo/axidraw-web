@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
+import { trackEvent } from '../utils';
 
 const frequentlyCommands = [
   {
@@ -43,6 +44,7 @@ const FavCommander = ({ device }) => {
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
     async (cmd, params = []) => {
+      trackEvent('fav', cmd.title);
       try {
         const cmdResult = await device.executeCommand(cmd, ...params);
         if (typeof cmdResult === 'object') {

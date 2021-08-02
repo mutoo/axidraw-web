@@ -22,6 +22,7 @@ import {
 import PlotterContext from '../../context';
 import Panel from './panel';
 import styles from './setup.css';
+import { trackEvent } from '../../utils';
 
 const Setup = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
@@ -46,6 +47,7 @@ const Setup = observer(({ ...props }) => {
           <Button
             variant={planning.svgContent ? 'secondary' : 'primary'}
             onClick={() => {
+              trackEvent('load svg');
               fileInputRef.current?.click();
             }}
           >
@@ -160,6 +162,7 @@ const Setup = observer(({ ...props }) => {
           disabled={!planning.svgContent}
           onClick={() => {
             planning.setPhase(PLANNING_PHASE_PLANNING);
+            trackEvent('go to', PLANNING_PHASE_PLANNING);
           }}
         >
           <span className="inline-block w-32">Next</span>

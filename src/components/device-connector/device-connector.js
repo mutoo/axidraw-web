@@ -10,10 +10,13 @@ import {
   DEVICE_TYPE_WEBSOCKET,
 } from 'communication/device/consts';
 import formStyles from 'components/ui/form.css';
+import { trackCategoryEvent } from 'configureGA';
 import Button from '../ui/button/button';
 import Alert from '../ui/alert/alert';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
+
+const trackEvent = trackCategoryEvent('connector');
 
 const DeviceConnector = ({ onConnected, onDisconnected }) => {
   const {
@@ -31,6 +34,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
 
   useEffect(() => {
     if (deviceStatus === DEVICE_STATUS_CONNECTED) {
+      trackEvent('type', device.type);
       onConnected(device);
     } else {
       onDisconnected(device);

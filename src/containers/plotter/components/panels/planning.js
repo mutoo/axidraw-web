@@ -12,6 +12,7 @@ import {
 import Panel from './panel';
 import styles from './planning.css';
 import { PAGE_ORIENTATION_LANDSCAPE } from '../../presenters/page';
+import { trackEvent } from '../../utils';
 
 const Planning = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
@@ -36,6 +37,7 @@ const Planning = observer(({ ...props }) => {
         <Button
           onClick={() => {
             planning.setPhase(PLANNING_PHASE_SETUP);
+            trackEvent('go to', PLANNING_PHASE_SETUP);
           }}
         >
           Back to Setup
@@ -46,6 +48,7 @@ const Planning = observer(({ ...props }) => {
           className={styles.form}
           onSubmit={(e) => {
             e.preventDefault();
+            trackEvent('plan');
             planning.planMotion({
               screenToPageMatrix: page.screenToPageMatrix,
               origin:
@@ -92,6 +95,7 @@ const Planning = observer(({ ...props }) => {
           variant="primary"
           onClick={() => {
             planning.setPhase(PLANNING_PHASE_PLOTTING);
+            trackEvent('go to', PLANNING_PHASE_PLOTTING);
           }}
         >
           <span className="inline-block w-32">Next</span>

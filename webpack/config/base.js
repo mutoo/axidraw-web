@@ -21,6 +21,7 @@ export default merge([
       new EnvironmentPlugin({
         NODE_ENV: 'production',
         DEBUG: false,
+        GA: '',
       }),
     ],
     optimization: {

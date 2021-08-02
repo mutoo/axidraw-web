@@ -5,7 +5,7 @@ import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
 import * as commands from 'communication/ebb';
 import { delay } from 'utils/time';
-import { parseNote, planSteps, songToSteps } from '../utils';
+import { parseNote, planSteps, songToSteps, trackEvent } from '../utils';
 import * as songs from '../songs';
 
 const songList = Object.keys(songs);
@@ -31,6 +31,7 @@ const MidiCommander = ({ device }) => {
     async (e) => {
       e.preventDefault();
       try {
+        trackEvent('play');
         // eslint-disable-next-line no-unused-vars
         const steps = songToSteps(
           {

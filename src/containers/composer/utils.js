@@ -1,3 +1,7 @@
+import { trackCategoryEvent } from 'configureGA';
+
+export const trackEvent = trackCategoryEvent('composer');
+
 export const createSong = (title, channel1, channel2) => ({
   title,
   channel1,

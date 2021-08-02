@@ -16,6 +16,7 @@ import {
 import SimpleDebugger from './simple-debugger';
 import Panel from './panel';
 import styles from './plotting.css';
+import { trackEvent } from '../../utils';
 
 const Plotting = observer(({ ...props }) => {
   const { planning, work } = useContext(PlotterContext);
@@ -39,6 +40,7 @@ const Plotting = observer(({ ...props }) => {
             <Button
               onClick={() => {
                 planning.setPhase(PLANNING_PHASE_PLANNING);
+                trackEvent('go to', PLANNING_PHASE_PLANNING);
               }}
             >
               Back to planning
@@ -58,6 +60,7 @@ const Plotting = observer(({ ...props }) => {
             onSubmit={(e) => {
               e.preventDefault();
               if (plottingInProgress) return;
+              trackEvent('control', 'plot');
               work.plot({ motions: planning.motions });
             }}
           >
@@ -96,6 +99,7 @@ const Plotting = observer(({ ...props }) => {
                   <Button
                     onClick={() => {
                       work.pause();
+                      trackEvent('control', 'pause');
                     }}
                     disabled={work.control.get() !== null}
                   >
@@ -106,6 +110,7 @@ const Plotting = observer(({ ...props }) => {
                   <Button
                     onClick={() => {
                       work.resume();
+                      trackEvent('control', 'resume');
                     }}
                   >
                     Resume
@@ -115,6 +120,7 @@ const Plotting = observer(({ ...props }) => {
                   <Button
                     onClick={() => {
                       work.stop();
+                      trackEvent('control', 'stop');
                     }}
                     disabled={work.control.get() !== null}
                   >

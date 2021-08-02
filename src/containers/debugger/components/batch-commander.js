@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
+import { trackEvent } from '../utils';
 
 const BatchCommander = ({ device }) => {
   const [batch, setBatch] = useState('');
@@ -11,6 +12,7 @@ const BatchCommander = ({ device }) => {
     async (e) => {
       e.preventDefault();
       try {
+        trackEvent('batch');
         const CMDs = batch.trim().split(/\s+/);
         let resultStr = '';
         for (const cmdWithParams of CMDs) {

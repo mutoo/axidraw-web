@@ -4,6 +4,7 @@ import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
+import { trackEvent } from '../../utils';
 
 const frequentlyCommands = [
   {
@@ -58,6 +59,7 @@ const SimpleDebugger = ({ device }) => {
               key={title}
               onClick={() => {
                 sendCommand(cmd.cmd, cmd.params);
+                trackEvent('debug', title);
               }}
             >
               {title}
