@@ -9,7 +9,7 @@ import {
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
   PLOTTER_STATUS_STANDBY,
-} from 'plotter/plotter';
+} from 'plotter/consts';
 import classNames from 'classnames';
 import formStyles from 'components/ui/form.css';
 import PlotterContext from '../../context';

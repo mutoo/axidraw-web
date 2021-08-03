@@ -2,9 +2,7 @@ import { lineLengthSQ, lineLength } from '../math/geom';
 import { mm2px } from '../math/svg';
 import { transformLine } from './svg/math';
 import { logger } from './utils';
-
-export const MOTION_PEN_UP = 1;
-export const MOTION_PEN_DOWN = 0;
+import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './consts';
 
 export const distPointToLine = ([xm, ym], [x1, y1], [x2, y2]) =>
   Math.abs(xm * (y2 - y1) - ym * (x2 - x1) + x2 * y1 - x1 * y2) /

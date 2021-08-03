@@ -77,6 +77,11 @@ export const ira2s = ({ interval, rate, acc }) => {
   return (V * T + (A * T * T) / 2) | 0;
 };
 
+export const mm2steps = (mm, mode = 1) => {
+  const stepsPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
+  return (stepsPerMm * mm) | 0;
+};
+
 /**
  * calculator axis steps {a1, a2} from {x, y} coordinate
  * @param x x component in mm
@@ -85,9 +90,8 @@ export const ira2s = ({ interval, rate, acc }) => {
  * @returns {{a1: number, a2: number}}
  */
 export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
-  const stepsPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
-  const xSteps = (stepsPerMm * x) | 0;
-  const ySteps = (stepsPerMm * y) | 0;
+  const xSteps = mm2steps(x, mode);
+  const ySteps = mm2steps(y, mode);
   return xy2aa({ x: xSteps, y: ySteps });
 };
 

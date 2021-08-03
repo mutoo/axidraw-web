@@ -1,12 +1,13 @@
 import { makeAutoObservable, observable } from 'mobx';
-import plot, {
+import plot from 'plotter/plotter';
+import {
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
   PLOTTER_SPEED_MODE_CONSTANT,
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
   PLOTTER_STATUS_STANDBY,
-} from 'plotter/plotter';
+} from 'plotter/consts';
 
 const createWork = () =>
   makeAutoObservable({

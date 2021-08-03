@@ -1,21 +1,17 @@
 /* eslint-disable no-await-in-loop */
 import * as commands from 'communication/ebb';
-import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './planner';
+import {
+  PLOTTER_ACTION_PAUSE,
+  PLOTTER_ACTION_STOP,
+  PLOTTER_SPEED_MODE_CONSTANT,
+  PLOTTER_STATUS_PAUSED,
+  PLOTTER_STATUS_STANDBY,
+  MOTION_PEN_DOWN,
+  MOTION_PEN_UP,
+} from './consts';
 import { s2rate, xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
-import { accelMotion, logger, slopeSegments } from './utils';
-
-export const PLOTTER_STATUS_STANDBY = 'axidraw-web-plotter-status-standby';
-export const PLOTTER_STATUS_PAUSED = 'axidraw-web-plotter-status-paused';
-export const PLOTTER_STATUS_PLOTTING = 'axidraw-web-plotter-status-plotting';
-
-export const PLOTTER_ACTION_PAUSE = 'axidraw-web-plotter-action-pause';
-export const PLOTTER_ACTION_STOP = 'axidraw-web-plotter-action-stop';
-
-export const PLOTTER_SPEED_MODE_CONSTANT =
-  'axidraw-web-plotter-speed-mode-constant';
-export const PLOTTER_SPEED_MODE_ACCELERATING =
-  'axidraw-web-plotter-speed-mode-accelerating';
+import { accelMotion, estimateExitRate, logger, slopeSegments } from './utils';
 
 export const initialContext = {
   x: 0,
@@ -46,7 +42,8 @@ async function* plot({
   await reset();
   let bufferTime = 0;
   try {
-    for (const { line, pen } of motions) {
+    for (let i = 0, len = motions.length; i < len; i += 1) {
+      const { line, pen } = motions[i];
       const shouldPause = await device.executeCommand(commands.qb);
       let action = control.get();
       if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
@@ -67,6 +64,7 @@ async function* plot({
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
         await device.executeCommand(commands.sp, targetPen, 500);
         context.pen = targetPen;
+        context.rate = 0;
       }
 
       const penRate =
@@ -122,28 +120,37 @@ async function* plot({
           logger.debug(`step-move: ${deltaA1}, ${deltaA2} in ${t}ms`);
           await device.executeCommand(commands.sm, t, deltaA1, deltaA2);
         }
-        context.rate = s2rate(penRate);
+        context.rate = penRate;
       } else {
+        const accelRate = penDownMoveAccel.get();
+        const exitRate = estimateExitRate(motions, i, accelRate);
         const accMotions = accelMotion(
           deltaAA,
-          0,
+          context.rate,
           penRate,
-          0,
-          penDownMoveAccel.get(),
+          exitRate,
+          accelRate,
         );
-        for (const motion of accMotions) {
-          const initRate = s2rate(motion.v0);
-          const dir = motion.v0 <= motion.vt ? 1 : -1;
+        for (const accMotion of accMotions) {
+          const initRate = s2rate(accMotion.v0);
+          const dir = accMotion.v0 <= accMotion.vt ? 1 : -1;
           const cos = deltaA1 / deltaAA;
           const initRate1 = Math.abs(initRate * cos) | 0;
-          const step1 = (motion.s * cos) | 0;
-          const accel = (motion.vt - motion.v0) / motion.t;
+          const step1 = (accMotion.s * cos) | 0;
+          const accel = (accMotion.vt - accMotion.v0) / accMotion.t;
           const acc = s2rate(accel) / 25000;
           const accel1 = (dir * Math.abs(acc * cos)) | 0;
           const sin = deltaA2 / deltaAA;
           const initRate2 = Math.abs(initRate * sin) | 0;
-          const step2 = (motion.s * sin) | 0;
+          const step2 = (accMotion.s * sin) | 0;
           const accel2 = (dir * Math.abs(acc * sin)) | 0;
+          if (step1 === 0 && step2 === 0) {
+            logger.warn(
+              `ignore low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
+            );
+            // eslint-disable-next-line no-continue
+            continue;
+          }
           // with this low-level stepper, we don't need to handle the slope segments issue in constant speed mode
           logger.debug(
             `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
@@ -158,9 +165,9 @@ async function* plot({
             accel2,
             3, // clear both accumulators
           );
-          t = motion.t * 1000;
+          t = accMotion.t * 1000;
         }
-        context.rate = 0;
+        context.rate = exitRate;
       }
       context.x = targetLine[2];
       context.y = targetLine[3];
