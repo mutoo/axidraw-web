@@ -74,6 +74,7 @@ const Plotting = observer(({ ...props }) => {
                 <input
                   type="radio"
                   value={PLOTTER_SPEED_MODE_CONSTANT}
+                  disabled={work.plotterStatus !== PLOTTER_STATUS_STANDBY}
                   checked={work.speedMode === PLOTTER_SPEED_MODE_CONSTANT}
                   onChange={() => {
                     work.setSpeedMode(PLOTTER_SPEED_MODE_CONSTANT);
@@ -85,6 +86,7 @@ const Plotting = observer(({ ...props }) => {
                 <input
                   type="radio"
                   value={PLOTTER_SPEED_MODE_ACCELERATING}
+                  disabled={work.plotterStatus !== PLOTTER_STATUS_STANDBY}
                   checked={work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING}
                   onChange={() => {
                     work.setSpeedMode(PLOTTER_SPEED_MODE_ACCELERATING);
@@ -93,6 +95,23 @@ const Plotting = observer(({ ...props }) => {
                 <span>Accelerating</span>
               </label>
             </div>
+            {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && (
+              <>
+                <h4 className="col-span-2">Moving Acceleration</h4>
+                <label htmlFor="pen-down-accel">Pen Down</label>
+                <input
+                  id="pen-down-accel"
+                  type="number"
+                  min="100"
+                  step="100"
+                  max="10000"
+                  value={work.penDownMoveAccel}
+                  onChange={(e) =>
+                    work.setPenDownMoveAccel(parseFloat(e.target.value))
+                  }
+                />
+              </>
+            )}
             <h4 className="col-span-2">Moving Speed</h4>
             <label htmlFor="pen-down-speed">
               Pen Down{' '}

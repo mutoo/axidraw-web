@@ -1,5 +1,4 @@
 import { makeAutoObservable, observable } from 'mobx';
-import { s2rate } from 'math/ebb';
 import plot, {
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
@@ -24,9 +23,12 @@ const createWork = () =>
     setSpeedMode(mode) {
       this.speedMode = mode;
     },
-    penDownMoveAccel: observable.box(s2rate(2000)),
+    penDownMoveAccel: observable.box(2000),
     penDownMoveSpeed: observable.box(2000), // steps per seconds
     penUpMoveSpeed: observable.box(5000), // steps per seconds
+    setPenDownMoveAccel(accel) {
+      this.penDownMoveAccel.set(accel);
+    },
     setPenDownMoveSpeed(speed) {
       this.penDownMoveSpeed.set(speed);
     },
@@ -44,7 +46,8 @@ const createWork = () =>
       const plotting = plot({
         device,
         motions,
-        speedModeL: this.speedMode,
+        speedMode: this.speedMode,
+        penDownMoveAccel: this.penDownMoveAccel,
         penUpMoveSpeed: this.penUpMoveSpeed,
         penDownMoveSpeed: this.penDownMoveSpeed,
         control: this.control,
