@@ -3,6 +3,7 @@ import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
 import { observer } from 'mobx-react-lite';
 import { mm2px } from 'math/svg';
+import { saveAs } from 'file-saver';
 import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
@@ -80,9 +81,29 @@ const Planning = observer(({ ...props }) => {
             value={flatLineError}
             onChange={(e) => setFlatLineError(parseFloat(e.target.value))}
           />
-          <div className="col-start-2">
+          <div className="col-start-2 grid grid-cols-2 gap-4">
             <Button submit ref={planningButtonRef}>
               Re-plan
+            </Button>
+            <Button
+              onClick={() => {
+                const blob = new Blob(
+                  [
+                    `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="${page.width}mm" height="${page.height}mm" viewBox="0 0 ${page.width} ${page.height}">
+  <g style="stroke: #000000; stroke-width: 0.1; fill: none;">
+      <path d="${planning.linesAsPathDef}"></path>
+  </g>  
+</svg>
+`,
+                  ],
+                  {
+                    type: 'image/svg+xml;charset=utf-8',
+                  },
+                );
+                saveAs(blob, `${planning.filename}-aw.svg`);
+              }}
+            >
+              Export SVG
             </Button>
           </div>
         </form>

@@ -10,6 +10,7 @@ const createPlanning = () =>
   makeAutoObservable(
     {
       svgContent: null,
+      filename: null,
       lines: null,
       motions: null,
       fileInfo: null,
@@ -25,17 +26,19 @@ const createPlanning = () =>
         fetch(url)
           .then((resp) => resp.text())
           .then((svg) => {
-            this.loadSVGContent(svg);
+            const filename = url.split('/').pop();
+            this.loadSVGContent(filename.split(/\.svg/i)[0], svg);
           });
       },
       loadFromFile(file) {
         const reader = new FileReader();
         reader.onload = (ev) => {
-          this.loadSVGContent(ev.target.result);
+          this.loadSVGContent(file.name, ev.target.result);
         };
         reader.readAsText(file);
       },
-      loadSVGContent(content) {
+      loadSVGContent(filename, content) {
+        this.filename = filename.split(/\.svg/i)[0];
         this.svgContent = content;
         this.lines = null;
         this.motions = null;
