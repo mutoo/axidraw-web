@@ -24,8 +24,8 @@ const createWork = () =>
     setSpeedMode(mode) {
       this.speedMode = mode;
     },
-    penDownMoveAccel: observable.box(2000),
-    penDownMoveSpeed: observable.box(2000), // steps per seconds
+    penDownMoveAccel: observable.box(40000),
+    penDownMoveSpeed: observable.box(4000), // steps per seconds
     penUpMoveSpeed: observable.box(5000), // steps per seconds
     setPenDownMoveAccel(accel) {
       this.penDownMoveAccel.set(accel);

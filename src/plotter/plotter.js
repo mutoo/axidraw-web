@@ -9,9 +9,15 @@ import {
   MOTION_PEN_DOWN,
   MOTION_PEN_UP,
 } from './consts';
-import { s2rate, xyDist2aaSteps } from '../math/ebb';
+import { xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
-import { accelMotion, estimateExitRate, logger, slopeSegments } from './utils';
+import { logger } from './utils';
+import { slopeSegments } from './motion/const-velocity';
+import {
+  accelMotion,
+  accMotion2LMParams,
+  estimateExitRate,
+} from './motion/const-acceleration';
 
 export const initialContext = {
   x: 0,
@@ -137,30 +143,16 @@ async function* plot({
           exitRate,
           accelRate,
         );
-        for (const accMotion of accMotions) {
-          const initRate = s2rate(accMotion.v0);
-          const dir = accMotion.v0 <= accMotion.vt ? 1 : -1;
-          const cos = deltaA1 / deltaAA;
-          const initRate1 = Math.abs(initRate * cos) | 0;
-          const step1 = (accMotion.s * cos) | 0;
-          const accel = (accMotion.vt - accMotion.v0) / accMotion.t;
-          const acc = s2rate(accel) / 25000;
-          const accel1 = (dir * Math.abs(acc * cos)) | 0;
-          const sin = deltaA2 / deltaAA;
-          const initRate2 = Math.abs(initRate * sin) | 0;
-          const step2 = (accMotion.s * sin) | 0;
-          const accel2 = (dir * Math.abs(acc * sin)) | 0;
-          if (step1 === 0 && step2 === 0) {
-            logger.warn(
-              `ignore low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
-            );
-            // eslint-disable-next-line no-continue
-            continue;
-          }
+        const LMParams = accMotion2LMParams(accMotions, deltaA1, deltaA2);
+        for (const {
+          initRate1,
+          step1,
+          accel1,
+          initRate2,
+          step2,
+          accel2,
+        } of LMParams) {
           // with this low-level stepper, we don't need to handle the slope segments issue in constant speed mode
-          logger.debug(
-            `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
-          );
           await device.executeCommand(
             commands.lm,
             initRate1,
@@ -171,8 +163,8 @@ async function* plot({
             accel2,
             3, // clear both accumulators
           );
-          t = accMotion.t * 1000;
         }
+        t = accMotions[accMotions.length - 1].t * 1000;
         context.rate = exitRate;
       }
       context.x = targetLine[2];

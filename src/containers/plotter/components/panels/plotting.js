@@ -104,7 +104,7 @@ const Plotting = observer(({ ...props }) => {
                   type="number"
                   min="100"
                   step="100"
-                  max="10000"
+                  max="50000"
                   value={work.penDownMoveAccel}
                   onChange={(e) =>
                     work.setPenDownMoveAccel(parseFloat(e.target.value))
