@@ -75,15 +75,15 @@ async function* plot({
       const deltaA1 = targetAA.a1 - context.a1;
       const deltaA2 = targetAA.a2 - context.a2;
       const deltaAA = Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2);
-      const absDeltaA1 = Math.abs(deltaA1);
-      const absDeltaA2 = Math.abs(deltaA2);
       let t = 0;
 
       if (targetMode === PLOTTER_SPEED_MODE_CONSTANT) {
-        t = Math.ceil((deltaAA / penRate) * 1000);
+        const absDeltaA1 = Math.abs(deltaA1);
+        const absDeltaA2 = Math.abs(deltaA2);
         const mt1 = absDeltaA1 * 1310;
         const mt2 = absDeltaA2 * 1310;
 
+        t = Math.ceil((deltaAA / penRate) * 1000);
         if (t > mt1 && t > mt2) {
           t = Math.max(mt1, mt2);
         }
@@ -123,7 +123,13 @@ async function* plot({
         context.rate = penRate;
       } else {
         const accelRate = penDownMoveAccel.get();
-        const exitRate = estimateExitRate(motions, i, accelRate);
+        const exitRate = estimateExitRate(
+          motions,
+          i,
+          context.rate,
+          penRate,
+          accelRate,
+        );
         const accMotions = accelMotion(
           deltaAA,
           context.rate,

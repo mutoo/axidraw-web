@@ -49,7 +49,7 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
     // try to make an acceleration(or deceleration) to catchup the speed first
     const catchupTime = Math.abs(v0 - vt) / accel;
     const requiredStepsToCatchup = ((v0 + vt) * catchupTime) / 2;
-    const remainingSteps = s - requiredStepsToCatchup;
+    const remainingSteps = (s - requiredStepsToCatchup) | 0;
     if (remainingSteps < 0) {
       // TODO: handle this smarter
       throw new Error("Don't have enough room to accelerating");
@@ -68,7 +68,7 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
       return [
         catchupMotion,
         // there are some room allow to speed up after accelerating
-        ...accelMotion(remainingSteps, v0, vm, v0, accel),
+        ...accelMotion(remainingSteps, vt, vm, vt, accel),
       ];
     }
     return [
@@ -148,7 +148,14 @@ export const computeJunctionRate = ([x0, y0], [x1, y1], accel, opt) => {
   return Math.sqrt(accel * R);
 };
 
-export const estimateExitRate = (motions, fromIdx, accel, options = {}) => {
+export const estimateExitRate = (
+  motions,
+  fromIdx,
+  vEnter,
+  maxPenRate,
+  accel,
+  options = {},
+) => {
   const opt = {
     delta: 2,
     lookingForward: 10,
@@ -173,7 +180,7 @@ export const estimateExitRate = (motions, fromIdx, accel, options = {}) => {
     const motionSecondTheEnd = followingMotions[i - 1];
     const [x0, y0] = motionSecondTheEnd.line;
     const [x1, y1, x2, y2] = motionAtTheEnd.line;
-    const aa0 = xyDist2aaSteps({ x: x1 - x0, y: y1 - y0 });
+    const aa0 = xyDist2aaSteps({ x: x0 - x1, y: y0 - y1 });
     const aa1 = xyDist2aaSteps({ x: x2 - x1, y: y2 - y1 });
     const aaDist1 = Math.sqrt(aa1.a1 ** 2 + aa1.a2 ** 2);
     const maxEnterRate = Math.sqrt(accel * aaDist1 * 2 + context.exitRate);
@@ -183,7 +190,11 @@ export const estimateExitRate = (motions, fromIdx, accel, options = {}) => {
       accel,
       opt,
     );
-    context.exitRate = Math.min(maxEnterRate, junctionRate);
+    context.exitRate = Math.min(junctionRate, maxEnterRate, maxPenRate);
   }
-  return context.exitRate;
+  const [x0, y0, x1, y1] = currentMotion.line;
+  const aa = xyDist2aaSteps({ x: x1 - x0, y: y1 - y0 });
+  const aaDist = Math.sqrt(aa.a1 ** 2 + aa.a2 ** 2);
+  const maxExitRate = Math.sqrt(accel * aaDist * 2 + vEnter);
+  return Math.min(maxExitRate, context.exitRate);
 };
