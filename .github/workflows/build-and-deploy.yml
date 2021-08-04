@@ -19,7 +19,7 @@ jobs:
 
       - name: Install and Build
         env:
-          GA: G-TXLP3TJS9N
+          GA: UA-8876369-14
         run: |
           yarn
           yarn build
