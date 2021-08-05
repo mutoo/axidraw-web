@@ -143,7 +143,7 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
   // =>
   // v1 = v0 + sqrt(a * s + v0 ^ 2)
   // t = (v1 - v0) / a
-  const vc = v0 + Math.sqrt(accel * s + v0 * v0);
+  const vc = Math.sqrt(accel * s + v0 * v0);
   const t = (vc - v0) / accel;
   const cappedAccelerationMotion = {
     s: s / 2,
@@ -200,29 +200,38 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
   for (const accMotion of accMotions) {
     const initRate = s2rate(accMotion.v0);
     const dir = accMotion.v0 <= accMotion.vt ? 1 : -1;
-    const accel = (accMotion.vt - accMotion.v0) / accMotion.t;
-    const acc = s2rate(accel) / 25000;
+    const accel =
+      (s2rate(accMotion.vt) - s2rate(accMotion.v0)) / (accMotion.t * 25000);
     const initRate1 = Math.abs(initRate * cos) | 0;
     const initRate2 = Math.abs(initRate * sin) | 0;
     const step1 = (accMotion.s * cos) | 0;
     const step2 = (accMotion.s * sin) | 0;
-    const accel1 = (dir * Math.abs(acc * cos)) | 0;
-    const accel2 = (dir * Math.abs(acc * sin)) | 0;
-    if (!(step1 === 0 && step2 === 0)) {
-      logger.debug(
-        `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
-      );
-      LMParams.push({
-        initRate1,
-        step1,
-        accel1,
-        initRate2,
-        step2,
-        accel2,
-      });
-      remainingA1 -= step1;
-      remainingA2 -= step2;
+    const accel1 = (dir * Math.abs(accel * cos)) | 0;
+    const accel2 = (dir * Math.abs(accel * sin)) | 0;
+    if (
+      // no move
+      (step1 === 0 && step2 === 0) ||
+      // step1 can not move
+      (step1 !== 0 && initRate1 === 0 && accel1 === 0) ||
+      // step2 can not move
+      (step2 !== 0 && initRate2 === 0 && accel2 === 0)
+    ) {
+      // eslint-disable-next-line no-continue
+      continue;
     }
+    logger.debug(
+      `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
+    );
+    LMParams.push({
+      initRate1,
+      step1,
+      accel1,
+      initRate2,
+      step2,
+      accel2,
+    });
+    remainingA1 -= step1;
+    remainingA2 -= step2;
   }
 
   return {
