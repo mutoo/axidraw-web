@@ -19,6 +19,7 @@ export const estimateExitRate = (
   vEnter,
   maxPenRate,
   accel,
+  deltaAA,
   options = {},
 ) => {
   const opt = {
@@ -57,15 +58,13 @@ export const estimateExitRate = (
     );
     context.exitRate = Math.min(junctionRate, maxEnterRate, maxPenRate);
   }
-  const [x0, y0, x1, y1] = currentMotion.line;
-  const aa = xyDist2aaSteps({ x: x1 - x0, y: y1 - y0 });
-  const aaDist = Math.sqrt(aa.a1 ** 2 + aa.a2 ** 2);
-  const maxExitRate = Math.sqrt(accel * aaDist * 2 + vEnter);
-  return Math.min(maxExitRate, context.exitRate);
+  const maxExitRate = Math.sqrt(accel * deltaAA * 2 + vEnter);
+  return Math.min(maxExitRate, context.exitRate) | 0;
 };
 
 export const accelMotion = (s, v0, vm, vt, accel) => {
   if (v0 !== vt) {
+    const dir = Math.sign(vt - v0);
     // try to make an acceleration(or deceleration) to catchup the speed first
     const catchupTime = Math.abs(v0 - vt) / accel;
     const requiredStepsToCatchup = ((v0 + vt) * catchupTime) / 2;
@@ -79,6 +78,7 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
       t: catchupTime,
       v0,
       vt,
+      dir,
     };
     if (remainingSteps === 0) {
       // noice! the acceleration/deceleration just cover all the steps to catchup
@@ -108,12 +108,14 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
     t: acceleratingTime,
     v0,
     vt: vm,
+    dir: 0,
   };
   const decelerationMotion = {
     s: requiredStepsToAccelerating,
     t: acceleratingTime,
     v0: vm,
     vt: v0,
+    dir: 0,
   };
   if (requiredStepsToAccelerating === s / 2) {
     return [accelerationMotion, decelerationMotion];
@@ -126,6 +128,7 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
       t: constTime,
       v0: vm,
       vt: vm,
+      dir: 0,
     };
     return [
       requiredStepsToAccelerating > 0 ? accelerationMotion : null,
@@ -147,12 +150,14 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
     t,
     v0,
     vt: vc,
+    dir: 1,
   };
   const cappedDecelerationMotion = {
     s: s / 2,
     t,
     v0: vc,
     vt: v0,
+    dir: -1,
   };
   return [cappedAccelerationMotion, cappedDecelerationMotion];
 };
@@ -191,11 +196,12 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
       remainingA2 -= step2;
     }
   }
-  // there will be small error, just merge into last step.
-  if (remainingA1 !== 0 || remainingA2 !== 0) {
-    logger.debug(`low-level-move error: ${remainingA1} ${remainingA2}`);
-    LMParams[LMParams.length - 1].step1 += remainingA1;
-    LMParams[LMParams.length - 1].step2 += remainingA2;
-  }
-  return LMParams;
+
+  return {
+    LMParams,
+    remaining: {
+      a1: remainingA1,
+      a2: remainingA2,
+    },
+  };
 };

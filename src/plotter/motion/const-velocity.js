@@ -7,8 +7,7 @@ export function* slopeSegments({ t, stepLong, stepShort }) {
   const stepRateLong = stepLong / t;
   const flatStepLong = Math.floor(stepRateLong * flatT);
   const slopeStopLong = Math.floor(stepRateLong * 1310);
-  let remainT = t;
-  let remainStopLong = stepLong;
+  let remainingStepLong = stepLong;
   /**
    *  |         ____
    *  |    ___/
@@ -18,23 +17,24 @@ export function* slopeSegments({ t, stepLong, stepShort }) {
     if (i % 2 === 0) {
       // flat segment
       if (flatT > 0) {
-        yield { time: flatT, longStep: flatStepLong, shortStep: 0 };
-        remainT -= flatT;
-        remainStopLong -= flatStepLong;
+        remainingStepLong -= flatStepLong;
+        yield {
+          time: flatT,
+          longStep: flatStepLong,
+          shortStep: 0,
+          remaining: remainingStepLong,
+        };
       }
     } else {
       // slope segment
-      yield { time: 1310, longStep: slopeStopLong, shortStep: stepShortDir };
-      remainT -= 1310;
-      remainStopLong -= slopeStopLong;
+      remainingStepLong -= slopeStopLong;
+      yield {
+        time: 1310,
+        longStep: slopeStopLong,
+        shortStep: stepShortDir,
+        remaining: remainingStepLong,
+      };
     }
   }
   // there might be remain step due to Math.floor
-  if (remainStopLong > 0) {
-    yield {
-      time: Math.max(1, remainT),
-      longStep: remainStopLong,
-      shortStep: 0,
-    };
-  }
 }

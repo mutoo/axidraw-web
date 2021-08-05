@@ -80,7 +80,8 @@ async function* plot({
       const deltaA2 = targetAA.a2 - context.a2;
       const deltaAA = Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2);
       let t = 0;
-
+      let remainingA1 = 0;
+      let remainingA2 = 0;
       if (speedMode === PLOTTER_SPEED_MODE_CONSTANT) {
         const absDeltaA1 = Math.abs(deltaA1);
         const absDeltaA2 = Math.abs(deltaA2);
@@ -94,31 +95,23 @@ async function* plot({
 
         if (t > mt1 && absDeltaA1 > 0) {
           logger.warn(`Vertical edge occurs: SM,${t},${deltaA1},${deltaA2}`);
-          for (const segment of slopeSegments({
+          for (const { longStep, shortStep, time, remaining } of slopeSegments({
             t,
             stepLong: deltaA2,
             stepShort: deltaA1,
           })) {
-            await device.executeCommand(
-              commands.sm,
-              segment.time,
-              segment.shortStep,
-              segment.longStep,
-            );
+            await device.executeCommand(commands.sm, time, shortStep, longStep);
+            remainingA2 = remaining;
           }
         } else if (t > mt2 && absDeltaA2 > 0) {
           logger.warn(`Horizontal edge occurs: SM,${t},${deltaA1},${deltaA2}`);
-          for (const segment of slopeSegments({
+          for (const { longStep, shortStep, time, remaining } of slopeSegments({
             t,
             stepLong: deltaA1,
             stepShort: deltaA2,
           })) {
-            await device.executeCommand(
-              commands.sm,
-              segment.time,
-              segment.longStep,
-              segment.shortStep,
-            );
+            await device.executeCommand(commands.sm, time, longStep, shortStep);
+            remainingA1 = remaining;
           }
         } else if (t > 0) {
           logger.debug(`step-move: ${deltaA1}, ${deltaA2} in ${t}ms`);
@@ -133,6 +126,7 @@ async function* plot({
           context.rate,
           penRate,
           accelRate,
+          deltaAA,
         );
         const accMotions = accelMotion(
           deltaAA,
@@ -141,7 +135,11 @@ async function* plot({
           exitRate,
           accelRate,
         );
-        const LMParams = accMotion2LMParams(accMotions, deltaA1, deltaA2);
+        const { LMParams, remaining } = accMotion2LMParams(
+          accMotions,
+          deltaA1,
+          deltaA2,
+        );
         for (const {
           initRate1,
           step1,
@@ -162,13 +160,15 @@ async function* plot({
             3, // clear both accumulators
           );
         }
+        remainingA1 = remaining.a1;
+        remainingA2 = remaining.a2;
         t = accMotions[accMotions.length - 1].t * 1000;
         context.rate = exitRate;
       }
       context.x = targetLine[2];
       context.y = targetLine[3];
-      context.a1 = targetAA.a1;
-      context.a2 = targetAA.a2;
+      context.a1 = targetAA.a1 - remainingA1;
+      context.a2 = targetAA.a2 - remainingA2;
 
       bufferTime = t;
 
