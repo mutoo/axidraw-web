@@ -193,6 +193,7 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
   }
   // there will be small error, just merge into last step.
   if (remainingA1 !== 0 || remainingA2 !== 0) {
+    logger.debug(`low-level-move error: ${remainingA1} ${remainingA2}`);
     LMParams[LMParams.length - 1].step1 += remainingA1;
     LMParams[LMParams.length - 1].step2 += remainingA2;
   }

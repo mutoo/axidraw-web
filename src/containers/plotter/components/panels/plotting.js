@@ -68,8 +68,8 @@ const Plotting = observer(({ ...props }) => {
               work.plot({ motions: planning.motions });
             }}
           >
-            <div className="col-span-2 flex items-center">
-              <label className="mr-2">Speed Mode:</label>
+            <label className="mr-2">Constant</label>
+            <div className="flex items-center">
               <label className={classNames(formStyles.radioLabel, 'mr-2')}>
                 <input
                   type="radio"
@@ -80,7 +80,7 @@ const Plotting = observer(({ ...props }) => {
                     work.setSpeedMode(PLOTTER_SPEED_MODE_CONSTANT);
                   }}
                 />
-                <span>Constant</span>
+                <span>Velocity</span>
               </label>{' '}
               <label className={formStyles.radioLabel}>
                 <input
@@ -92,7 +92,7 @@ const Plotting = observer(({ ...props }) => {
                     work.setSpeedMode(PLOTTER_SPEED_MODE_ACCELERATING);
                   }}
                 />
-                <span>Accelerating</span>
+                <span>Acceleration</span>
               </label>
             </div>
             {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && (
@@ -112,11 +112,11 @@ const Plotting = observer(({ ...props }) => {
                 />
               </>
             )}
-            <h4 className="col-span-2">Moving Speed</h4>
-            <label htmlFor="pen-down-speed">
-              Pen Down{' '}
+            <h4 className="col-span-2">
+              Moving Speed{' '}
               {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && '(Max)'}
-            </label>
+            </h4>
+            <label htmlFor="pen-down-speed">Pen Down</label>
             <input
               id="pen-down-speed"
               type="number"
@@ -128,10 +128,7 @@ const Plotting = observer(({ ...props }) => {
                 work.setPenDownMoveSpeed(parseFloat(e.target.value))
               }
             />
-            <label htmlFor="pen-up-speed">
-              Pen Up{' '}
-              {work.speedMode === PLOTTER_SPEED_MODE_ACCELERATING && '(Const)'}
-            </label>
+            <label htmlFor="pen-up-speed">Pen Up</label>
             <input
               id="pen-up-speed"
               type="number"

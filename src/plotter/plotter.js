@@ -1,13 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import * as commands from 'communication/ebb';
 import {
+  MOTION_PEN_DOWN,
+  MOTION_PEN_UP,
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
   PLOTTER_SPEED_MODE_CONSTANT,
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_STANDBY,
-  MOTION_PEN_DOWN,
-  MOTION_PEN_UP,
 } from './consts';
 import { xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
@@ -44,15 +44,15 @@ async function* plot({
     context = { ...initialContext };
     await device.executeCommand(commands.r);
     await device.executeCommand(commands.sp, 1, 500);
+    await device.executeCommand(commands.sr, 60e3);
   };
   await reset();
   let bufferTime = 0;
   try {
     for (let i = 0, len = motions.length; i < len; i += 1) {
       const { line, pen } = motions[i];
-      const shouldPause = await device.executeCommand(commands.qb);
       let action = control.get();
-      if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
+      if (action === PLOTTER_ACTION_PAUSE) {
         logger.debug(`action: pause`);
         await device.executeCommand(commands.sp, 1, 500);
         context.pen = MOTION_PEN_UP;
@@ -63,8 +63,6 @@ async function* plot({
         logger.debug(`action: stop`);
       }
       const targetPen = shouldStop ? MOTION_PEN_UP : pen;
-      const targetMode =
-        targetPen === MOTION_PEN_UP ? PLOTTER_SPEED_MODE_CONSTANT : speedMode;
       const targetLine = shouldStop ? [context.x, context.y, 0, 0] : line;
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
@@ -83,7 +81,7 @@ async function* plot({
       const deltaAA = Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2);
       let t = 0;
 
-      if (targetMode === PLOTTER_SPEED_MODE_CONSTANT) {
+      if (speedMode === PLOTTER_SPEED_MODE_CONSTANT) {
         const absDeltaA1 = Math.abs(deltaA1);
         const absDeltaA2 = Math.abs(deltaA2);
         const mt1 = absDeltaA1 * 1310;
