@@ -17,6 +17,7 @@ import {
   accelMotion,
   accMotion2LMParams,
   estimateExitRate,
+  mergeAccMotions,
 } from './motion/const-acceleration';
 
 export const initialContext = {
@@ -136,7 +137,7 @@ async function* plot({
           accelRate,
         );
         const { LMParams, remaining } = accMotion2LMParams(
-          accMotions,
+          mergeAccMotions(accMotions),
           deltaA1,
           deltaA2,
         );
@@ -162,7 +163,7 @@ async function* plot({
         }
         remainingA1 = remaining.a1;
         remainingA2 = remaining.a2;
-        t = accMotions[accMotions.length - 1].t * 1000;
+        t = accMotions.reduce((s, m) => s + m.t, 0) * 1000;
         context.rate = exitRate;
       }
       context.x = targetLine[2];

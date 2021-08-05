@@ -108,14 +108,14 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
     t: acceleratingTime,
     v0,
     vt: vm,
-    dir: 0,
+    dir: 1,
   };
   const decelerationMotion = {
     s: requiredStepsToAccelerating,
     t: acceleratingTime,
     v0: vm,
     vt: v0,
-    dir: 0,
+    dir: -1,
   };
   if (requiredStepsToAccelerating === s / 2) {
     return [accelerationMotion, decelerationMotion];
@@ -161,6 +161,34 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
   };
   return [cappedAccelerationMotion, cappedDecelerationMotion];
 };
+
+export function mergeAccMotions(accMotions) {
+  if (accMotions?.length < 2) {
+    return accMotions;
+  }
+  const mergedMotions = [];
+  for (let i = 0; i < accMotions.length; i += 1) {
+    const accMotion0 = accMotions[i];
+    const accMotion1 = accMotions[i + 1];
+    if (
+      accMotion1 &&
+      accMotion0.vt === accMotion1.v0 &&
+      accMotion0.dir === accMotion1.dir
+    ) {
+      mergedMotions.push({
+        s: accMotion0.s + accMotion1.s,
+        t: accMotion0.t + accMotion1.t,
+        v0: accMotion0.v0,
+        vt: accMotion1.vt,
+        dir: accMotion0.dir,
+      });
+      i += 1;
+    } else {
+      mergedMotions.push(accMotion0);
+    }
+  }
+  return mergedMotions;
+}
 
 export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
   const deltaAA = Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2);
