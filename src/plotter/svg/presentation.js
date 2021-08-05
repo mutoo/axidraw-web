@@ -8,20 +8,23 @@ export const toSvgPathDef = (lines) => {
   if (!lines) return 'M 0 0';
   const toFixed = (n) => n.toFixed(3);
   return lines
-    .reduce((defs, line) => {
-      if (line[0] === context.x && line[1] === context.y) {
-        defs.push(`${toFixed(line[2])} ${toFixed(line[3])}`);
-      } else {
-        defs.push(
-          `M ${toFixed(line[0])} ${toFixed(line[1])} ${toFixed(
-            line[2],
-          )} ${toFixed(line[3])}`,
-        );
-      }
-      context.x = line[2];
-      context.y = line[3];
-      return defs;
-    }, [])
+    .reduce(
+      (defs, line) => {
+        if (line[0] === context.x && line[1] === context.y) {
+          defs.push(`${toFixed(line[2])} ${toFixed(line[3])}`);
+        } else {
+          defs.push(
+            `M ${toFixed(line[0])} ${toFixed(line[1])} ${toFixed(
+              line[2],
+            )} ${toFixed(line[3])}`,
+          );
+        }
+        context.x = line[2];
+        context.y = line[3];
+        return defs;
+      },
+      ['M 0 0'],
+    )
     .join(' ');
 };
 
