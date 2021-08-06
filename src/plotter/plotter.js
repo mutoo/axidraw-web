@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import * as commands from 'communication/ebb';
+import { aa2xy, servoTime, xyDist2aaSteps } from 'math/ebb';
 import {
   MOTION_PEN_DOWN,
   MOTION_PEN_UP,
@@ -9,7 +10,6 @@ import {
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_STANDBY,
 } from './consts';
-import { aa2xy, xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
 import { logger } from './utils';
 import { slopeSegments } from './motion/const-velocity';
@@ -42,10 +42,18 @@ async function* plot({
   // this async generator would keep working-in-progress status
   // allow user to pause/resume to work.
   let context = null;
+  const servoMin = 16000;
+  const servoMax = 20000;
+  const servoRate = 400;
+  const servoDelay = servoTime(servoMin, servoMax, servoRate);
+
   const reset = async () => {
     context = { ...initialContext };
     await device.executeCommand(commands.r);
-    await device.executeCommand(commands.sp, 1, 500);
+    await device.executeCommand(commands.sc, 4, servoMax);
+    await device.executeCommand(commands.sc, 5, servoMin);
+    await device.executeCommand(commands.sc, 10, servoRate);
+    await device.executeCommand(commands.sp, 1, servoDelay);
     await device.executeCommand(commands.sr, 60e3);
   };
   await reset();
@@ -57,7 +65,7 @@ async function* plot({
       const shouldPause = await device.executeCommand(commands.qb);
       if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
         logger.debug(`action: pause`);
-        await device.executeCommand(commands.sp, 1, 500);
+        await device.executeCommand(commands.sp, 1, servoDelay);
         context.pen = MOTION_PEN_UP;
         action = yield PLOTTER_STATUS_PAUSED;
       }
@@ -70,7 +78,7 @@ async function* plot({
       const targetLine = shouldStop ? [currentX, currentY, 0, 0] : line;
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
-        await device.executeCommand(commands.sp, targetPen, 500);
+        await device.executeCommand(commands.sp, targetPen, servoDelay);
         context.pen = targetPen;
         context.rate = 0;
       }

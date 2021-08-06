@@ -3,24 +3,36 @@ import plot from 'plotter/plotter';
 import {
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
-  PLOTTER_SPEED_MODE_CONSTANT,
+  PLOTTER_SPEED_MODE_ACCELERATING,
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
   PLOTTER_STATUS_STANDBY,
 } from 'plotter/consts';
+import * as commands from 'communication/ebb';
+import { servoTime } from 'math/ebb';
 
 const createWork = () =>
   makeAutoObservable({
     device: observable.box(null, { deep: false }),
-    setDevice(device) {
+    async setDevice(device) {
       this.device.set(device);
+      if (device) {
+        const servoMin = 16000;
+        const servoMax = 20000;
+        const servoRate = 400;
+        const servoDelay = servoTime(servoMin, servoMax, servoRate);
+        await device.executeCommand(commands.sc, 4, servoMax);
+        await device.executeCommand(commands.sc, 5, servoMin);
+        await device.executeCommand(commands.sc, 10, servoRate);
+        await device.executeCommand(commands.sp, 1, servoDelay);
+      }
       const pit = this.plottingInProgress.get();
       if (!device && pit) {
         pit.return();
         this.plottingInProgress.set(null);
       }
     },
-    speedMode: PLOTTER_SPEED_MODE_CONSTANT,
+    speedMode: PLOTTER_SPEED_MODE_ACCELERATING,
     setSpeedMode(mode) {
       this.speedMode = mode;
     },

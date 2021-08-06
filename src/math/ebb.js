@@ -98,3 +98,6 @@ export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
 export const aaStepsToLMParams = ({ a1, a2 }, t, clear = 3) => {
   return [s2rate(a1 / t), a1, 0, s2rate(a2 / t), a2, clear];
 };
+
+export const servoTime = (min, max, rate) =>
+  ((Math.abs(min - max) * 0.024) / rate) * 1000;
