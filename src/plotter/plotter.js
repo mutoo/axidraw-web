@@ -35,6 +35,7 @@ async function* plot({
   penUpMoveSpeed,
   penDownMoveSpeed,
   penDownMoveAccel,
+  cornering,
   motions,
   control,
 }) {
@@ -128,6 +129,7 @@ async function* plot({
           penRate,
           accelRate,
           deltaAA,
+          { cornering: cornering.get() },
         );
         const accMotions = accelMotion(
           deltaAA,

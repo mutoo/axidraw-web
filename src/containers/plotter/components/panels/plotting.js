@@ -110,6 +110,18 @@ const Plotting = observer(({ ...props }) => {
                     work.setPenDownMoveAccel(parseFloat(e.target.value))
                   }
                 />
+                <label htmlFor="pen-down-accel">Cornering</label>
+                <input
+                  id="pen-down-accel"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  max="2"
+                  value={work.cornering}
+                  onChange={(e) =>
+                    work.setCornering(parseFloat(e.target.value))
+                  }
+                />
               </>
             )}
             <h4 className="col-span-2">

@@ -27,6 +27,7 @@ const createWork = () =>
     penDownMoveAccel: observable.box(40000), // steps per second squared
     penDownMoveSpeed: observable.box(5000), // steps per second
     penUpMoveSpeed: observable.box(10000), // steps per second
+    cornering: observable.box(0.1), // mm
     setPenDownMoveAccel(accel) {
       this.penDownMoveAccel.set(accel);
     },
@@ -35,6 +36,9 @@ const createWork = () =>
     },
     setPenUpMoveSpeed(speed) {
       this.penUpMoveSpeed.set(speed);
+    },
+    setCornering(value) {
+      this.cornering.set(value);
     },
     control: observable.box(null),
     plotterStatus: PLOTTER_STATUS_STANDBY,
@@ -51,6 +55,7 @@ const createWork = () =>
         penDownMoveAccel: this.penDownMoveAccel,
         penUpMoveSpeed: this.penUpMoveSpeed,
         penDownMoveSpeed: this.penDownMoveSpeed,
+        cornering: this.cornering,
         control: this.control,
       });
       this.plottingInProgress.set(plotting);

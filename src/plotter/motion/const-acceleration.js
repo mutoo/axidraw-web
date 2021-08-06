@@ -9,7 +9,7 @@ export const computeJunctionRate = ([x0, y0], [x1, y1], accel, opt) => {
     (x0 * x1 + y0 * y1) /
     (Math.sqrt(x0 * x0 + y0 * y0) * Math.sqrt(x1 * x1 + y1 * y1));
   const sinHalf = Math.sqrt((1 - cos) / 2);
-  const R = (mm2steps(opt.delta) * sinHalf) / (1 - sinHalf);
+  const R = (mm2steps(opt.cornering) * sinHalf) / (1 - sinHalf);
   return Math.sqrt(accel * R);
 };
 
@@ -23,7 +23,7 @@ export const estimateExitRate = (
   options = {},
 ) => {
   const opt = {
-    delta: 0.1,
+    cornering: 0.1,
     lookingForward: 10,
     ...options,
   };
