@@ -17,7 +17,6 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] EBB Communication via WebUSB
 - [x] EBB Communication via WebSocket
 - [x] EBB Command Debugger
-- [ ] Extract it from this repo and make it a npm module
 
 ### Plotter App
 
@@ -27,7 +26,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] Motion Planning (simple)
 - [ ] Motion Planning (reorder)
 - [x] Plotting (constant speed)
-- [ ] Plotting (acceleration mode)
+- [x] Plotting (acceleration mode)
 - [x] Plotting control (pause/resume/stop)
 - [ ] Plot skipping/seeking
 
@@ -63,7 +62,7 @@ $ bash ./scripts/create-cert.sh
 
 This is required even you are running it locally. This command will generate a `CA.pem` and `localhost.crt` in the `server/cert` folder.
 
-Please import the `CA.pem` to your system (Keychain on macOS or browser trust list).
+Please import the `CA.pem` to your system or browser and trust it for Secure Sockets Layer (SSL).
 
 The local server will use the `localhost.crt` and `localhost.key` to host the website at:
 
