@@ -172,7 +172,7 @@ export function mergeAccMotions(accMotions) {
     const accMotion1 = accMotions[i + 1];
     if (
       accMotion1 &&
-      accMotion0.vt === accMotion1.v0 &&
+      Math.abs(accMotion0.vt - accMotion1.v0) < 0.001 &&
       accMotion0.dir === accMotion1.dir
     ) {
       mergedMotions.push({

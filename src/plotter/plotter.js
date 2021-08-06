@@ -9,7 +9,7 @@ import {
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_STANDBY,
 } from './consts';
-import { xyDist2aaSteps } from '../math/ebb';
+import { aa2xy, xyDist2aaSteps } from '../math/ebb';
 import { delay } from '../utils/time';
 import { logger } from './utils';
 import { slopeSegments } from './motion/const-velocity';
@@ -54,7 +54,8 @@ async function* plot({
     for (let i = 0, len = motions.length; i < len; i += 1) {
       const { line, pen } = motions[i];
       let action = control.get();
-      if (action === PLOTTER_ACTION_PAUSE) {
+      const shouldPause = await device.executeCommand(commands.qb);
+      if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
         logger.debug(`action: pause`);
         await device.executeCommand(commands.sp, 1, 500);
         context.pen = MOTION_PEN_UP;
@@ -65,7 +66,8 @@ async function* plot({
         logger.debug(`action: stop`);
       }
       const targetPen = shouldStop ? MOTION_PEN_UP : pen;
-      const targetLine = shouldStop ? [context.x, context.y, 0, 0] : line;
+      const { x: currentX, y: currentY } = aa2xy(context);
+      const targetLine = shouldStop ? [currentX, currentY, 0, 0] : line;
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
         await device.executeCommand(commands.sp, targetPen, 500);
@@ -168,8 +170,6 @@ async function* plot({
         t = accMotions.reduce((s, m) => s + m.t, 0) * 1000;
         context.rate = exitRate;
       }
-      context.x = targetLine[2];
-      context.y = targetLine[3];
       context.a1 = targetAA.a1 - remainingA1;
       context.a2 = targetAA.a2 - remainingA2;
 

@@ -1,4 +1,4 @@
-import { lineLengthSQ, lineLength } from '../math/geom';
+import { lineLengthSQ, lineLength, isSamePoint } from '../math/geom';
 import { mm2px } from '../math/svg';
 import { transformLine } from './svg/math';
 import { logger } from './utils';
@@ -23,13 +23,27 @@ export const simplifyLines = (lines, opt) => {
     if (startIdx >= endIdx) return;
     const startPoint = points[startIdx];
     const endPoint = points[endIdx];
+    if (startIdx + 1 === endIdx) {
+      const line = [...startPoint, ...endPoint];
+      yield { reduced: 0, line };
+      return;
+    }
     let maxDistancePointIdx = -1;
     let maxDistance = Number.MIN_VALUE;
-    const isRing =
-      startPoint[0] === endPoint[0] && startPoint[1] === endPoint[1];
-    const ghostEndPoint = isRing ? [endPoint[0] + 1, endPoint[1]] : endPoint;
-    for (let i = startIdx + 1; i < endIdx; i += 1) {
-      const dist = distPointToLine(points[i], startPoint, ghostEndPoint);
+    const isRing = isSamePoint(startPoint, endPoint);
+    if (isRing) {
+      if (startIdx + 1 === endIdx) {
+        // the only two point collapse, ignore it
+        yield { reduced: 1, line: null };
+      } else {
+        const midIdx = Math.floor((endIdx - startIdx) / 2);
+        yield* douglasPeucker(startIdx, midIdx);
+        yield* douglasPeucker(midIdx, endIdx);
+      }
+      return;
+    }
+    for (let i = startIdx + 1; i <= endIdx - 1; i += 1) {
+      const dist = distPointToLine(points[i], startPoint, endPoint);
       if (dist > maxDistance) {
         maxDistancePointIdx = i;
         maxDistance = dist;
@@ -45,9 +59,12 @@ export const simplifyLines = (lines, opt) => {
     }
   }
 
-  return [...douglasPeucker(0, len - 1)].reduce(
+  const dpLines = [...douglasPeucker(0, len - 1)];
+  return dpLines.reduce(
     (result, entry) => {
-      result.lines.push(entry.line);
+      if (entry.line) {
+        result.lines.push(entry.line);
+      }
       // eslint-disable-next-line no-param-reassign
       result.reduced += entry.reduced ?? 0;
       return result;
