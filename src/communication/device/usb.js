@@ -94,6 +94,9 @@ export const connectDevice =
       },
       async disconnect() {
         logger.debug('Closing communication.device...');
+        // abort all pending data
+        await device.reset();
+        // close the device
         await device.close();
         logger.debug('Device is closed');
         // the disconnected event will be trigger from the message handler
