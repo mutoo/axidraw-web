@@ -36,7 +36,7 @@ export const simplifyLines = (lines, opt) => {
         // the only two point collapse, ignore it
         yield { reduced: 1, line: null };
       } else {
-        const midIdx = Math.floor((endIdx - startIdx) / 2);
+        const midIdx = Math.floor((startIdx + endIdx) / 2);
         yield* douglasPeucker(startIdx, midIdx);
         yield* douglasPeucker(midIdx, endIdx);
       }

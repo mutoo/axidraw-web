@@ -21,8 +21,6 @@ import {
 } from './motion/const-acceleration';
 
 export const initialContext = {
-  x: 0,
-  y: 0,
   a1: 0,
   a2: 0,
   rate: 0,
