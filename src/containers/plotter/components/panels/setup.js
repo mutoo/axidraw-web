@@ -170,7 +170,7 @@ const Setup = observer(({ ...props }) => {
           <>
             <h4>Svg Info:</h4>
             <dl className="grid grid-cols-2 gap-4">
-              {planning.fileInfo.map((info) => (
+              {Object.entries(planning.fileInfo).map((info) => (
                 <>
                   <dt>{info[0]}</dt>
                   <dd>{info[1]}</dd>

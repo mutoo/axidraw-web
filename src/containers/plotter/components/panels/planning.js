@@ -121,6 +121,21 @@ const Planning = observer(({ ...props }) => {
         >
           <span className="inline-block w-32">Next</span>
         </Button>
+        <h4>Planning Info:</h4>
+        <dl className="grid grid-cols-2 gap-4">
+          {Object.entries(planning.linesInfo).map((info) => (
+            <>
+              <dt>{info[0]}</dt>
+              <dd>{info[1]}</dd>
+            </>
+          ))}
+          {Object.entries(planning.motionsInfo).map((info) => (
+            <>
+              <dt>{info[0]}</dt>
+              <dd>{info[1]}</dd>
+            </>
+          ))}
+        </dl>
       </section>
     </Panel>
   );

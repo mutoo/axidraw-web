@@ -27,7 +27,7 @@ const Setup = observer(({ ...props }) => {
     /* remove unsupported elements */
     if (!imported.hasAttribute('data-cleaned')) {
       const response = clean(imported);
-      planning.updateFileInfo(Object.entries(response.counts));
+      planning.updateFileInfo(response.counts);
       imported.setAttribute('data-cleaned', true);
     }
     /* adjust svg dimension as per page setup */

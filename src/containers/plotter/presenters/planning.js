@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/svg/presentation';
 
@@ -9,11 +9,16 @@ export const PLANNING_PHASE_PLOTTING = 'axidraw-web-planning-phase-plotting';
 const createPlanning = () =>
   makeAutoObservable(
     {
+      // store loaded raw svg content
       svgContent: null,
+      // store filename
       filename: null,
-      lines: null,
-      motions: null,
+      // store detail of loaded svg
       fileInfo: null,
+      // store planned lines
+      lines: null,
+      // store lines with pen status
+      motions: null,
       previewStrokeWidth: 0.4, // mm
       setPreviewStrokeWidth(width) {
         this.previewStrokeWidth = width;
@@ -26,14 +31,18 @@ const createPlanning = () =>
         fetch(url)
           .then((resp) => resp.text())
           .then((svg) => {
-            const filename = url.split('/').pop();
-            this.loadSVGContent(filename.split(/\.svg/i)[0], svg);
+            runInAction(() => {
+              const filename = url.split('/').pop();
+              this.loadSVGContent(filename.split(/\.svg/i)[0], svg);
+            });
           });
       },
       loadFromFile(file) {
         const reader = new FileReader();
         reader.onload = (ev) => {
-          this.loadSVGContent(file.name, ev.target.result);
+          runInAction(() => {
+            this.loadSVGContent(file.name, ev.target.result);
+          });
         };
         reader.readAsText(file);
       },
@@ -55,6 +64,19 @@ const createPlanning = () =>
           throw new Error('Lines are not ready');
         }
         this.motions = plan(this.lines, options);
+      },
+      get linesInfo() {
+        return { lines: this.lines?.length || 0 };
+      },
+      get motionsInfo() {
+        const init = { penDown: 0, penUp: 0 };
+        return (
+          this.motions?.reduce((info, motion) => {
+            // eslint-disable-next-line no-param-reassign
+            info[motion.pen === 0 ? 'penDown' : 'penUp'] += 1;
+            return info;
+          }, init) || init
+        );
       },
       get linesAsPathDef() {
         return toSvgPathDef(

@@ -151,7 +151,7 @@ export function* walkLines(lines, opt) {
     i += result.skip;
     reduced += result.reduced ?? 0;
   }
-  logger.info(`Reduced lines ${reduced}`);
+  logger.debug(`Reduced lines ${reduced}`);
   const lastLine = lines[lines.length - 1];
   context.x = lastLine[2];
   context.y = lastLine[3];
