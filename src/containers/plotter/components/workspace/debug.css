@@ -1,0 +1,7 @@
+.internalNode {
+  outline: 1px solid red;
+}
+
+.leafNode {
+  outline: 1px solid green;
+}

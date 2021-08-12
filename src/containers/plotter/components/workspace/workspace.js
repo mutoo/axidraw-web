@@ -10,6 +10,7 @@ import ShadowDef from './shadow-def';
 import Setup from './setup';
 import Planning from './planning';
 import Gizmo from './gizmo';
+import Debug from './debug';
 
 const Workspace = observer(({ margin = 20 }) => {
   const { page, planning } = useContext(PlotterContext);
@@ -44,6 +45,7 @@ const Workspace = observer(({ margin = 20 }) => {
       <Page />
       <Setup />
       <Planning strokeWidth={strokeWidth} />
+      <Debug debugRtree={true} />
       <Gizmo />
     </svg>
   );

@@ -31,10 +31,10 @@ describe('rtree', () => {
       expect(rtree.root.entries.length).toBe(2);
       expect(rtree.root.entries[0].type).toEqual(RTREE_TYPE_NODE_LEAF);
     });
-    it('insert 1000 random points', () => {
+    it('insert 10000 random points', () => {
       const rtree = createRTree(2, 4);
       expect(() => {
-        for (let i = 0; i < 10; i += 1) {
+        for (let i = 0; i < 10000; i += 1) {
           const x = (Math.random() * 512) | 0;
           const y = (Math.random() * 512) | 0;
           rtree.insert({

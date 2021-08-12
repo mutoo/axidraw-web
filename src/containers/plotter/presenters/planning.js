@@ -85,12 +85,15 @@ const createPlanning = () =>
             .map((motion) => motion.line),
         );
       },
-      get connectionsAsPathDef() {
-        return toSvgPathDef(
+      get connections() {
+        return (
           this.motions
             ?.filter((motion) => motion.pen === 1)
-            .map((motion) => motion.line),
+            .map((motion) => motion.line) || []
         );
+      },
+      get connectionsAsPathDef() {
+        return toSvgPathDef(this.connections);
       },
     },
     null,

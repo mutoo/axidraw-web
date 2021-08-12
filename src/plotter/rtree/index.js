@@ -10,26 +10,41 @@ export const RTREE_TYPE_NODE_LEAF = 'rtree-type-node-leaf';
 
 export const pointAsMbr = (p) => ({ p0: [...p], p1: [...p] });
 
-export const extendMbr = (node, entryMbr) => {
+export const formatMbr = ({ p0: [x0, y0], p1: [x1, y1] }) =>
+  `(${x0}, ${y0}), (${x1}, ${y1})`;
+
+export const extendMbr = (mbr0, mbr1) => {
+  const {
+    p0: [np0x, np0y],
+    p1: [np1x, np1y],
+  } = mbr0;
+  const {
+    p0: [ep0x, ep0y],
+    p1: [ep1x, ep1y],
+  } = mbr1;
+  const p0x = Math.min(np0x, ep0x);
+  const p0y = Math.min(np0y, ep0y);
+  const p1x = Math.max(np1x, ep1x);
+  const p1y = Math.max(np1y, ep1y);
+  return {
+    p0: [p0x, p0y],
+    p1: [p1x, p1y],
+  };
+};
+
+export const extendMbrPlan = (node, entryMbr) => {
+  const extendedMbr = extendMbr(node.mbr, entryMbr);
   const {
     p0: [np0x, np0y],
     p1: [np1x, np1y],
   } = node.mbr;
   const {
-    p0: [ep0x, ep0y],
-    p1: [ep1x, ep1y],
-  } = entryMbr;
-  const p0x = Math.min(np0x, ep0x);
-  const p0y = Math.min(np0y, ep0y);
-  const p1x = Math.max(np1x, ep1x);
-  const p1y = Math.min(np1y, ep1y);
+    p0: [p0x, p0y],
+    p1: [p1x, p1y],
+  } = extendedMbr;
   const originalArea = (np1x - np0x) * (np1y - np0y);
   const extendedArea = (p1x - p0x) * (p1y - p0y);
   const cost = extendedArea - originalArea;
-  const extendedMbr = {
-    p0: [p0x, p0y],
-    p1: [p1x, p1y],
-  };
   return {
     node,
     extendedMbr,
@@ -39,42 +54,89 @@ export const extendMbr = (node, entryMbr) => {
   };
 };
 
+export const isCoverMbr = (nodeMbr, entryMbr) => {
+  const {
+    p0: [np0x, np0y],
+    p1: [np1x, np1y],
+  } = nodeMbr;
+  const {
+    p0: [ep0x, ep0y],
+    p1: [ep1x, ep1y],
+  } = entryMbr;
+  return (
+    np0x <= ep0x &&
+    ep0x <= np1x &&
+    np0x <= ep1x &&
+    ep1x <= np1x &&
+    np0y <= ep0y &&
+    ep0y <= np1y &&
+    np0y <= ep1y &&
+    ep1y <= np1y
+  );
+};
+
+export const mergeMbrs = (mbrs) => mbrs.reduce(extendMbr);
+
+export const batchAddToNode = (addToNode, entries, startIdx, endIdx) => {
+  for (let i = startIdx; i < endIdx; i += 1) {
+    const entryToAdd = entries[i];
+    // eslint-disable-next-line no-param-reassign
+    addToNode.entries.push(entryToAdd);
+    entryToAdd.parent = addToNode;
+    const extended = extendMbrPlan(addToNode, entryToAdd.mbr);
+    // eslint-disable-next-line no-param-reassign
+    addToNode.mbr = extended.extendedMbr;
+  }
+};
+
 export const createRTree = (minimum, nodeCapacity) => {
   // reference the root node;
   let root = null;
 
-  const createLeafNode = (entry) => ({
-    type: RTREE_TYPE_NODE_LEAF,
-    entries: [entry],
-    mbr: {
-      ...entry.mbr,
-    },
-  });
+  const createLeafNode = (parent) =>
+    function _createLeafNode(...entries) {
+      return {
+        type: RTREE_TYPE_NODE_LEAF,
+        parent,
+        entries: [...entries],
+        mbr: mergeMbrs(entries.map((e) => e.mbr)),
+      };
+    };
 
-  const createInternalNode = (entry) => ({
-    type: RTREE_TYPE_NODE_INTERNAL,
-    entries: [entry],
-    mbr: {
-      ...entry.mbr,
-    },
-  });
+  const createInternalNode = (parent) =>
+    function _createInternalNode(...entries) {
+      return {
+        type: RTREE_TYPE_NODE_INTERNAL,
+        parent,
+        entries: [...entries],
+        mbr: mergeMbrs(entries.map((e) => e.mbr)),
+      };
+    };
 
-  const addThenSplit = (node, entry, createNodeFn) => {
-    const toSplit = [...node.entries, entry].sort(
-      (e0, e1) => e0.mbr.p0[0] - e1.mbr.p0[0],
+  function maybeSplit(createNodeFn, node) {
+    if (node.entries.length <= nodeCapacity) {
+      return;
+    }
+    const toSplit = node.entries.sort(
+      (
+        {
+          mbr: {
+            p0: [e0p0x],
+            p1: [e0p1x],
+          },
+        },
+        {
+          mbr: {
+            p0: [e1p0x],
+            p1: [e1p1x],
+          },
+        },
+      ) => (e0p0x + e0p1x) / 2 - (e1p0x + e1p1x) / 2,
     );
     const node0 = createNodeFn(toSplit[0]);
+    toSplit[0].parent = node0;
     const node1 = createNodeFn(toSplit[toSplit.length - 1]);
-    const batchAddToNode = (addToNode, entries, startIdx, endIdx) => {
-      for (let i = startIdx; i < endIdx; i += 1) {
-        const entryToAdd = toSplit[i];
-        const extended = extendMbr(addToNode, entryToAdd.mbr);
-        // eslint-disable-next-line no-param-reassign
-        addToNode.entries.push(entryToAdd);
-        // eslint-disable-next-line no-param-reassign
-        addToNode.mbr = extended.extendedMbr;
-      }
-    };
+    toSplit[toSplit.length - 1].parent = node1;
     for (let i = 1; i < toSplit.length - 1; i += 1) {
       const remaining = toSplit.length - 1 - i;
       // if during the assignment of entries, there are n remain entries to be
@@ -89,40 +151,42 @@ export const createRTree = (minimum, nodeCapacity) => {
         break;
       }
       const entryToAdd = toSplit[i];
-      const addToNode0 = extendMbr(node0, entryToAdd.mbr);
-      const addToNode1 = extendMbr(node1, entryToAdd.mbr);
-      let addToNode = addToNode1;
-      if (addToNode0.cost === addToNode1.cost) {
-        if (addToNode0.originalArea === addToNode1.originalArea) {
+      const addToNodePlan0 = extendMbrPlan(node0, entryToAdd.mbr);
+      const addToNodePlan1 = extendMbrPlan(node1, entryToAdd.mbr);
+      let addToNodePlan = addToNodePlan1;
+      if (addToNodePlan0.cost === addToNodePlan1.cost) {
+        if (addToNodePlan0.originalArea === addToNodePlan1.originalArea) {
           if (node0.entries.length < node1.entries.length) {
-            addToNode = addToNode0;
+            addToNodePlan = addToNodePlan0;
           }
-        } else if (addToNode0.originalArea < addToNode1.originalArea) {
-          addToNode = addToNode0;
+        } else if (addToNodePlan0.originalArea < addToNodePlan1.originalArea) {
+          addToNodePlan = addToNodePlan0;
         }
-      } else if (addToNode0.cost < addToNode1.cost) {
-        addToNode = addToNode0;
+      } else if (addToNodePlan0.cost < addToNodePlan1.cost) {
+        addToNodePlan = addToNodePlan0;
       }
-      addToNode.node.entries.push(entryToAdd);
-      addToNode.node.mbr = addToNode0.extendedMbr;
+      addToNodePlan.node.entries.push(entryToAdd);
+      entryToAdd.parent = addToNodePlan.node;
+      addToNodePlan.node.mbr = addToNodePlan.extendedMbr;
     }
     if (node === root) {
-      root = createInternalNode(node0);
-      root.entries.push(node1);
+      root = createInternalNode(null)(node0, node1);
+      node0.parent = root;
+      node1.parent = root;
       return;
     }
 
     // eslint-disable-next-line consistent-return
     return [node0, node1];
-  };
+  }
 
-  const insert = (node, entry) => {
+  function insert(node, entry) {
     // travers the tree from root to appropriate leaf
     if (node.type === RTREE_TYPE_NODE_INTERNAL) {
       // at each level, select the node whose node.mbr will require the minimum area
       // enlargement to cover entry.mbr
       const sortedCandidates = node.entries
-        .map((subNode) => extendMbr(subNode, entry.mbr))
+        .map((subNode) => extendMbrPlan(subNode, entry.mbr))
         .sort((n0, n1) => {
           if (n0.cost !== n1.cost) {
             return n0.cost - n1.cost;
@@ -131,32 +195,56 @@ export const createRTree = (minimum, nodeCapacity) => {
           return n0.originalArea - n1.originalArea;
         });
       const chosenCandidate = sortedCandidates[0];
-      const splited = insert(chosenCandidate.node, entry);
-      if (!splited) {
+      const split = insert(chosenCandidate.node, entry);
+      if (!split) {
         chosenCandidate.node.mbr = chosenCandidate.extendedMbr;
         return;
       }
-      const candidateIdx = node.entries.indexOf(chosenCandidate[0]);
-      node.entries.splice(candidateIdx, 1);
-      node.entries.push(splited[0]);
-      if (node.entries.length < nodeCapacity) {
-        node.entries.push(splited[1]);
-        return;
-      }
+      const candidateIdx = node.entries.indexOf(chosenCandidate.node);
+      node.entries.splice(candidateIdx, 1, split[0], split[1]);
+      split[0].parent = node;
+      split[1].parent = node;
       // eslint-disable-next-line consistent-return
-      return addThenSplit(node, splited[1], createInternalNode);
+      return maybeSplit(createInternalNode(node.parent), node);
     }
     /* node.type === RTREE_TYPE_NODE_LEAF */
-    if (node.entries.length < nodeCapacity) {
-      // the selected leaf can accommodate entry
-      node.entries.push(entry);
-      // update all mbrs in the path from L to root in the call stack;
-      return;
-    }
-    /* the leaf is already full */
+    node.entries.push(entry);
     // eslint-disable-next-line consistent-return
-    return addThenSplit(node, entry, createLeafNode);
-  };
+    return maybeSplit(createLeafNode(node.parent), node);
+  }
+
+  function condenseTree(node) {
+    let currentNode = node;
+    // const toReinsert = [];
+    while (currentNode !== root) {
+      currentNode = node.parent;
+    }
+  }
+
+  function remove(node, entry) {
+    if (node.type === RTREE_TYPE_NODE_INTERNAL) {
+      node.entries
+        .filter((n) => isCoverMbr(n.mbr, entry.mbr))
+        .forEach((n) => {
+          remove(n, entry);
+        });
+    } else {
+      const entryIdx = node.entries.findIndex((e) => e.id === entry.id);
+      if (entryIdx === -1) {
+        // not found
+        return;
+      }
+      node.entries.splice(entryIdx, 1);
+      condenseTree(node);
+    }
+    if (
+      node === root &&
+      node.entries.length === 1 &&
+      node.entries[0].type === RTREE_TYPE_NODE_INTERNAL
+    ) {
+      root = node.entries[0];
+    }
+  }
 
   return {
     get root() {
@@ -164,10 +252,14 @@ export const createRTree = (minimum, nodeCapacity) => {
     },
     insert(entry) {
       if (!root) {
-        root = createLeafNode(entry);
+        root = createLeafNode(null)(entry);
         return;
       }
       insert(root, entry);
+    },
+    remove(entry) {
+      if (!root) return;
+      remove(root, entry);
     },
   };
 };
