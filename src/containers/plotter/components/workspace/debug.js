@@ -1,8 +1,6 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
-  createRTree,
-  pointAsMbr,
   formatMbr,
   RTREE_TYPE_NODE_INTERNAL,
   RTREE_TYPE_NODE_LEAF,
@@ -11,6 +9,7 @@ import { observer } from 'mobx-react-lite';
 import PlotterContext from '../../context';
 import { mm2px } from '../../../../math/svg';
 import styles from './debug.css';
+import { PLANNING_PHASE_PLANNING } from '../../presenters/planning';
 
 function LeafNode({ node }) {
   return (
@@ -18,9 +17,10 @@ function LeafNode({ node }) {
       {node.entries.map((entry) => (
         <circle
           key={entry.id}
+          className={`node-${entry.id}`}
           cx={mm2px(entry.mbr.p0[0])}
           cy={mm2px(entry.mbr.p0[1])}
-          r={2}
+          r={0.1}
         />
       ))}
     </g>
@@ -62,15 +62,16 @@ TreeNode.propTypes = {
 
 const Debug = observer(({ debugRtree, ...props }) => {
   const { planning } = useContext(PlotterContext);
-  const root = useMemo(() => {
-    const rtree = createRTree(2, 4);
-    planning.connections.forEach((line, idx) => {
-      rtree.insert({ id: idx, mbr: pointAsMbr([line[0], line[1]]) });
-    });
-    return rtree.root;
-  }, [planning.connections]);
 
-  return <g {...props}>{debugRtree && root && <TreeNode node={root} />}</g>;
+  return (
+    <g {...props}>
+      {planning.phase === PLANNING_PHASE_PLANNING &&
+        debugRtree &&
+        planning.rtree.root && (
+          <TreeNode key={planning.forceRefresh} node={planning.rtree.root} />
+        )}
+    </g>
+  );
 });
 
 Debug.propTypes = {

@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/svg/presentation';
+import { createRTree, pointAsMbr } from '../../../plotter/rtree';
 
 export const PLANNING_PHASE_SETUP = 'axidraw-web-planning-phase-setup';
 export const PLANNING_PHASE_PLANNING = 'axidraw-web-planning-phase-planning';
@@ -94,6 +95,35 @@ const createPlanning = () =>
       },
       get connectionsAsPathDef() {
         return toSvgPathDef(this.connections);
+      },
+      get rtree() {
+        const rtree = createRTree(2, 4);
+        this.connections.forEach((line, idx) => {
+          rtree.insert({ id: idx * 2, mbr: pointAsMbr([line[0], line[1]]) });
+          rtree.insert({
+            id: idx * 2 + 1,
+            mbr: pointAsMbr([line[2], line[3]]),
+          });
+        });
+        this.forceRefresh = 0;
+        return rtree;
+      },
+      forceRefresh: 0,
+      removePoint() {
+        const idx = this.forceRefresh;
+        const line = this.connections[idx];
+        if (!line) return;
+        const entryToRemove0 = {
+          id: idx * 2,
+          mbr: pointAsMbr([line[0], line[1]]),
+        };
+        this.rtree.remove(entryToRemove0);
+        const entryToRemove1 = {
+          id: idx * 2 + 1,
+          mbr: pointAsMbr([line[2], line[3]]),
+        };
+        this.rtree.remove(entryToRemove1);
+        this.forceRefresh += 1;
       },
     },
     null,

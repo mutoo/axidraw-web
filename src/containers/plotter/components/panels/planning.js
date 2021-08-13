@@ -121,6 +121,13 @@ const Planning = observer(({ ...props }) => {
         >
           <span className="inline-block w-32">Next</span>
         </Button>
+        <Button
+          onClick={() => {
+            planning.removePoint();
+          }}
+        >
+          <span className="inline-block w-32">Remove Point</span>
+        </Button>
         <h4>Planning Info:</h4>
         <dl className="grid grid-cols-2 gap-4">
           {Object.entries(planning.linesInfo).map((info) => (

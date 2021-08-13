@@ -14,6 +14,7 @@ export const formatMbr = ({ p0: [x0, y0], p1: [x1, y1] }) =>
   `(${x0}, ${y0}), (${x1}, ${y1})`;
 
 export const extendMbr = (mbr0, mbr1) => {
+  if (!mbr0) return mbr1;
   const {
     p0: [np0x, np0y],
     p1: [np1x, np1y],
@@ -75,7 +76,10 @@ export const isCoverMbr = (nodeMbr, entryMbr) => {
   );
 };
 
-export const mergeMbrs = (mbrs) => mbrs.reduce(extendMbr);
+export const mergeMbrs = (mbrs) => {
+  if (!mbrs.length) return null;
+  return mbrs.reduce(extendMbr);
+};
 
 export const batchAddToNode = (addToNode, entries, startIdx, endIdx) => {
   for (let i = startIdx; i < endIdx; i += 1) {
@@ -92,10 +96,13 @@ export const batchAddToNode = (addToNode, entries, startIdx, endIdx) => {
 export const createRTree = (minimum, nodeCapacity) => {
   // reference the root node;
   let root = null;
+  let nodeUniqId = 0;
 
   const createLeafNode = (parent) =>
     function _createLeafNode(...entries) {
       return {
+        // eslint-disable-next-line no-plusplus
+        nid: nodeUniqId++,
         type: RTREE_TYPE_NODE_LEAF,
         parent,
         entries: [...entries],
@@ -106,6 +113,8 @@ export const createRTree = (minimum, nodeCapacity) => {
   const createInternalNode = (parent) =>
     function _createInternalNode(...entries) {
       return {
+        // eslint-disable-next-line no-plusplus
+        nid: nodeUniqId++,
         type: RTREE_TYPE_NODE_INTERNAL,
         parent,
         entries: [...entries],
@@ -213,12 +222,36 @@ export const createRTree = (minimum, nodeCapacity) => {
     return maybeSplit(createLeafNode(node.parent), node);
   }
 
-  function condenseTree(node) {
-    let currentNode = node;
-    // const toReinsert = [];
-    while (currentNode !== root) {
-      currentNode = node.parent;
+  function reInsertEntries(node) {
+    if (node.type === RTREE_TYPE_NODE_INTERNAL) {
+      node.entries.forEach((n) => {
+        reInsertEntries(n);
+      });
+    } else {
+      node.entries.forEach((e) => {
+        insert(root, e);
+      });
     }
+  }
+
+  function condenseTree(node) {
+    const toReinsert = [];
+    let currentNode = node;
+    while (currentNode !== root) {
+      const parent = currentNode.parent;
+      if (currentNode.entries.length < minimum) {
+        const idx = parent.entries.indexOf(currentNode);
+        parent.entries.splice(idx, 1);
+        toReinsert.push(currentNode);
+      } else {
+        currentNode.mbr = mergeMbrs(currentNode.entries.map((e) => e.mbr));
+      }
+      currentNode = parent;
+    }
+    if (root.entries.length === 0) {
+      root = createLeafNode(null)();
+    }
+    toReinsert.forEach((n) => reInsertEntries(n));
   }
 
   function remove(node, entry) {
@@ -243,6 +276,7 @@ export const createRTree = (minimum, nodeCapacity) => {
       node.entries[0].type === RTREE_TYPE_NODE_INTERNAL
     ) {
       root = node.entries[0];
+      root.parent = null;
     }
   }
 
