@@ -1,9 +1,6 @@
-import {
-  createRTree,
-  pointAsMbr,
-  RTREE_TYPE_NODE_INTERNAL,
-  RTREE_TYPE_NODE_LEAF,
-} from '../index';
+import { createRTree } from '../index';
+import { RTREE_TYPE_NODE_INTERNAL, RTREE_TYPE_NODE_LEAF } from '../consts';
+import { pointAsMbr } from '../utils';
 
 describe('rtree', () => {
   describe('insert', () => {
@@ -63,7 +60,7 @@ describe('rtree', () => {
       rtree.insert(entry);
       expect(rtree.root.entries.length).toBe(1);
       rtree.remove(entry);
-      expect(rtree.root.entries.length).toBe(1);
+      expect(rtree.root.entries.length).toBe(0);
     });
     it('condense tree after remove', () => {
       const entries = [
