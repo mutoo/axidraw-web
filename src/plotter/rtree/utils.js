@@ -85,3 +85,25 @@ export function batchAddToNode(addToNode, entries, startIdx, endIdx) {
     addToNode.mbr = extended.extendedMbr;
   }
 }
+
+export function minDist([px, py], { p0: [sx, sy], p1: [tx, ty] }) {
+  let rx = px;
+  if (rx < sx) rx = sx;
+  else if (rx > tx) rx = tx;
+  let ry = py;
+  if (ry < sy) ry = sy;
+  else if (ry > ty) ry = ty;
+  return (px - rx) ** 2 + (py - ry) ** 2;
+}
+
+export function minMaxDist([px, py], { p0: [sx, sy], p1: [tx, ty] }) {
+  const mx = (sx + tx) / 2;
+  const rmx = px <= mx ? sx : tx;
+  const rMx = px >= mx ? sx : tx;
+  const my = (sy + ty) / 2;
+  const rmy = py <= my ? sy : ty;
+  const rMy = py >= my ? sy : ty;
+  const dx = (px - rmx) ** 2 + (py - rMy) ** 2;
+  const dy = (py - rmy) ** 2 + (px - rMx) ** 2;
+  return Math.min(dx, dy);
+}
