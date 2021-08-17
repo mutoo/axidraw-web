@@ -1,7 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import plan from 'plotter/planner';
 import { toSvgPathDef } from 'plotter/svg/presentation';
-import { createRTree, pointAsMbr } from '../../../plotter/rtree';
+import { createRTree } from 'plotter/rtree';
+import { pointAsMbr } from 'plotter/rtree/utils';
 
 export const PLANNING_PHASE_SETUP = 'axidraw-web-planning-phase-setup';
 export const PLANNING_PHASE_PLANNING = 'axidraw-web-planning-phase-planning';

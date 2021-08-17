@@ -1,10 +1,9 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
-  formatMbr,
   RTREE_TYPE_NODE_INTERNAL,
   RTREE_TYPE_NODE_LEAF,
-} from 'plotter/rtree';
+} from 'plotter/rtree/consts';
 import { observer } from 'mobx-react-lite';
 import PlotterContext from '../../context';
 import { mm2px } from '../../../../math/svg';
@@ -35,7 +34,7 @@ function InternalNode({ node }) {
   return (
     <g className={styles.internalNode}>
       {node.entries.map((subNode) => (
-        <TreeNode key={formatMbr(subNode.mbr)} node={subNode} />
+        <TreeNode key={subNode.nid} node={subNode} />
       ))}
     </g>
   );

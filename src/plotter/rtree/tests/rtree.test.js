@@ -83,4 +83,32 @@ describe('rtree', () => {
       expect(rtree.root.entries[0].entries.length).toEqual(4);
     });
   });
+
+  describe('nn search', () => {
+    it('returns null when tree is empty', () => {
+      const rtree = createRTree(2, 4);
+      expect(rtree.nnSearch([0, 0])).toBe(null);
+    });
+
+    it('returns id of near point', () => {
+      const entries = [
+        { id: 0, mbr: pointAsMbr([10, 10]) },
+        { id: 1, mbr: pointAsMbr([13, 13]) },
+        { id: 2, mbr: pointAsMbr([14, 14]) },
+        { id: 3, mbr: pointAsMbr([12, 12]) },
+        { id: 4, mbr: pointAsMbr([11, 11]) },
+      ];
+      const rtree = createRTree(2, 4);
+      for (const entry of entries) {
+        rtree.insert(entry);
+      }
+
+      expect(rtree.nnSearch([9, 9])).toBe(0);
+      expect(rtree.nnSearch([10, 10])).toBe(0);
+      expect(rtree.nnSearch([13, 13])).toBe(1);
+      expect(rtree.nnSearch([14, 14])).toBe(2);
+      expect(rtree.nnSearch([12, 12])).toBe(3);
+      expect(rtree.nnSearch([15, 15])).toBe(2);
+    });
+  });
 });

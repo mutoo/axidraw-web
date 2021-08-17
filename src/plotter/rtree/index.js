@@ -1,5 +1,12 @@
 import { RTREE_TYPE_NODE_INTERNAL, RTREE_TYPE_NODE_LEAF } from './consts';
-import { batchAddToNode, extendMbrPlan, canCoverMbr, mergeMbrs } from './utils';
+import {
+  batchAddToNode,
+  extendMbrPlan,
+  canCoverMbr,
+  mergeMbrs,
+  minDist,
+  minMaxDist,
+} from './utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export const createRTree = (minimum, nodeCapacity) => {
@@ -189,6 +196,44 @@ export const createRTree = (minimum, nodeCapacity) => {
     }
   }
 
+  function nnSearch(node, p, nearest) {
+    if (node.type === RTREE_TYPE_NODE_LEAF) {
+      node.entries.forEach((entry) => {
+        const [x0, y0] = p;
+        const [x1, y1] = entry.mbr.p0;
+        const distSq = (x0 - x1) ** 2 + (y0 - y1) ** 2;
+        if (distSq < nearest.distSq) {
+          nearest.distSq = distSq;
+          nearest.id = entry.id;
+        }
+      });
+    } else {
+      let branches = node.entries
+        .map((subNode) => ({
+          minDist: minDist(p, subNode.mbr),
+          minMaxDist: minMaxDist(p, subNode.mbr),
+          subNode,
+        }))
+        .sort((d0, d1) => d0.minMaxDist - d1.minMaxDist);
+      // H1: an MBR M with MINDIST(P,M) grater than the MINMAXDIST(P,M0)
+      // of another MBR M0, is discarded because it cannot contain the NN.
+      branches = branches
+        .filter((d) => d === branches[0] || d.minDist <= branches[0].minMaxDist)
+        .sort((d0, d1) => d0.minDist - d1.minDist);
+      for (let i = 0; i < branches.length; i += 1) {
+        const branch = branches[i];
+        if (branch.minDist > nearest.distSq) {
+          // H3: ever MBR M with MINDIST(P, M) greater than the actual distance
+          // from P to a give object O is discarded because it cannot enclose
+          // an object nearer than O.
+          break;
+        }
+        const subNode = branch.subNode;
+        nnSearch(subNode, p, nearest);
+      }
+    }
+  }
+
   return {
     get root() {
       return root;
@@ -203,6 +248,12 @@ export const createRTree = (minimum, nodeCapacity) => {
     remove(entry) {
       if (!root) return;
       remove(root, entry);
+    },
+    nnSearch(p) {
+      if (!root) return null;
+      const result = { distSq: Number.MAX_VALUE };
+      nnSearch(root, p, result);
+      return result.id;
     },
   };
 };
