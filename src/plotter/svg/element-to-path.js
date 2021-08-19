@@ -1,7 +1,6 @@
-import pathToLines from './path-to-lines';
 import { createSVGElement, getAttrVal } from './utils';
 
-export default function* elementToPath(svgEl, opt) {
+export default function* elementToPath(svgEl) {
   let pathDef = '';
   switch (svgEl.nodeName) {
     case 'rect':
@@ -15,10 +14,16 @@ export default function* elementToPath(svgEl, opt) {
         rx = Math.min(rx, w / 2);
         ry = Math.min(ry, h / 2);
         if (rx === 0 || ry === 0) {
+          /* it's a normal rectangle */
           // we goes the rect counter-clock-wise
+          //  1-(-h)-4
+          //  |      |
+          //  v     -v
+          //  |      |
+          //  2-( h)-3
           pathDef += `M${x} ${y} v${h} h${w} v${-h} h${-w}`;
         } else {
-          // it's a rounded rect
+          /* it's a rounded rectangle */
           w -= 2 * rx;
           h -= 2 * ry;
           // rotation = 0
@@ -55,9 +60,8 @@ export default function* elementToPath(svgEl, opt) {
         const rx = svgEl.nodeName === 'circle' ? r : getAttrVal(svgEl, 'rx');
         const ry = svgEl.nodeName === 'circle' ? r : getAttrVal(svgEl, 'ry');
         if (rx === 0 || ry === 0) {
-          // arc with no radius
-          // discard
-          return;
+          // it won't be drawn at all if circle or ellipse has no radius
+          return null;
         }
         pathDef +=
           // start point
@@ -72,11 +76,15 @@ export default function* elementToPath(svgEl, opt) {
       }
       break;
     default:
-    // discard
+      throw new Error(`Can't generate path definition from ${svgEl.nodeName}`);
   }
+  // create svg path with generated path definition
   const path = createSVGElement('path');
   path.setAttribute('d', pathDef);
-  // proxy the ctm to current svg element;
+  // the new path element would not be inserted to the DOM, so it won't have
+  // a calculated CTM(current transformation matrix).
+  // we have to proxy the getCTM to current svg element, so that when generates
+  // lines from this path, it would get a correct matrix.
   path.getCTM = () => svgEl.getCTM();
-  yield* pathToLines(path, opt);
+  return path;
 }

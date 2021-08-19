@@ -1,5 +1,5 @@
-import { lineLengthSQ, lineLength, isSamePoint } from '../math/geom';
-import { mm2px } from '../math/svg';
+import { dist, distSq, isSamePoint } from 'math/geom';
+import { mm2px } from 'math/svg';
 import { transformLine } from './svg/math';
 import { logger } from './utils';
 import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './consts';
@@ -13,9 +13,9 @@ export const simplifyLines = (lines, opt) => {
   if (lines.length === 1) return { lines };
   const maxError = mm2px(opt.flatLineError);
   if (!maxError) return { lines };
-  const points = lines.map((l) => [l[0], l[1]]);
+  const points = lines.map((l) => l[0]);
   const lastLine = lines[lines.length - 1];
-  points.push([lastLine[2], lastLine[3]]);
+  points.push(lastLine[1]);
   const len = points.length;
 
   // https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
@@ -24,7 +24,7 @@ export const simplifyLines = (lines, opt) => {
     const startPoint = points[startIdx];
     const endPoint = points[endIdx];
     if (startIdx + 1 === endIdx) {
-      const line = [...startPoint, ...endPoint];
+      const line = [startPoint, endPoint];
       yield { reduced: 0, line };
       return;
     }
@@ -43,10 +43,10 @@ export const simplifyLines = (lines, opt) => {
       return;
     }
     for (let i = startIdx + 1; i <= endIdx - 1; i += 1) {
-      const dist = distPointToLine(points[i], startPoint, endPoint);
-      if (dist > maxDistance) {
+      const d = distPointToLine(points[i], startPoint, endPoint);
+      if (d > maxDistance) {
         maxDistancePointIdx = i;
-        maxDistance = dist;
+        maxDistance = d;
       }
     }
     if (maxDistance > maxError) {
@@ -54,7 +54,7 @@ export const simplifyLines = (lines, opt) => {
       yield* douglasPeucker(maxDistancePointIdx, endIdx);
     } else {
       const reduced = endIdx - startIdx - 1;
-      const line = [...startPoint, ...endPoint];
+      const line = [startPoint, endPoint];
       yield { reduced, line };
     }
   }
@@ -91,9 +91,9 @@ export function* planAhead(lines, toPaperLine, opt) {
   for (let len = lines.length; i < len - 1; i += 1) {
     const line = lines[i];
     const nextLine = lines[i + 1];
-    gap = [line[2], line[3], nextLine[0], nextLine[1]];
     toFlatten.push(line);
-    const gapLen = lineLengthSQ(gap);
+    gap = [line[1], nextLine[0]];
+    const gapLen = distSq(gap[0], gap[1]);
     if (gapLen > connectedErrorSq) {
       break;
     }
@@ -122,13 +122,12 @@ export function* walkLines(lines, opt) {
 
   const { screenToPageMatrix, origin } = opt;
   // assume the pen always start from HOME position with UP state
-  const context = { x: origin[0], y: origin[1], pen: MOTION_PEN_UP };
-  const toPaperLine = (line) =>
-    transformLine([line[0], line[1]], [line[2], line[3]], screenToPageMatrix);
+  const context = { pos: origin, pen: MOTION_PEN_UP };
+  const toPaperLine = ([p0, p1]) => transformLine(p0, p1, screenToPageMatrix);
   // move to starting point
   const firstLine = lines[0];
   yield {
-    line: toPaperLine([context.x, context.y, firstLine[0], firstLine[1]]),
+    line: toPaperLine([context.pos, firstLine[0]]),
     pen: MOTION_PEN_UP,
   };
   const planAheadPx = mm2px(opt.planAhead);
@@ -142,7 +141,7 @@ export function* walkLines(lines, opt) {
       const lineAhead = lines[i + j];
       // ensure at least two lines in the slide window unless last line
       if (!lineAhead) break;
-      accumulatePx += lineLength(lineAhead);
+      accumulatePx += dist(lineAhead[0], lineAhead[1]);
       planWindow.push(lineAhead);
       j += 1;
     }
@@ -153,11 +152,10 @@ export function* walkLines(lines, opt) {
   }
   logger.debug(`Reduced lines ${reduced}`);
   const lastLine = lines[lines.length - 1];
-  context.x = lastLine[2];
-  context.y = lastLine[3];
+  context.post = lastLine[1];
   // homing
   yield {
-    line: toPaperLine([context.x, context.y, origin[0], origin[1]]),
+    line: toPaperLine([context.pos, origin]),
     pen: MOTION_PEN_UP,
   };
 }

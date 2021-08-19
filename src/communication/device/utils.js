@@ -87,7 +87,6 @@ export const createDeviceBind = ({ type, connectDevice }) => {
       });
       await executedCommandBind(r);
       const versionResp = await executedCommandBind(v);
-      // eslint-disable-next-line prefer-destructuring
       version = versionResp.match(/\d\.\d\.\d/)[0];
       emitter.emit(DEVICE_EVENT_CONNECTED);
     }

@@ -44,8 +44,8 @@ export const estimateExitRate = (
   for (let i = followingMotions.length - 1; i > 0; i -= 1) {
     const motionAtTheEnd = followingMotions[i];
     const motionSecondTheEnd = followingMotions[i - 1];
-    const [x0, y0] = motionSecondTheEnd.line;
-    const [x1, y1, x2, y2] = motionAtTheEnd.line;
+    const [[x0, y0]] = motionSecondTheEnd.line;
+    const [[x1, y1], [x2, y2]] = motionAtTheEnd.line;
     const aa0 = xyDist2aaSteps({ x: x0 - x1, y: y0 - y1 });
     const aa1 = xyDist2aaSteps({ x: x2 - x1, y: y2 - y1 });
     const aaDist1 = Math.sqrt(aa1.a1 ** 2 + aa1.a2 ** 2);

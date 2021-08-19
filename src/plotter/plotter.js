@@ -73,7 +73,12 @@ async function* plot({
       }
       const targetPen = shouldStop ? MOTION_PEN_UP : pen;
       const { x: currentX, y: currentY } = aa2xy(context);
-      const targetLine = shouldStop ? [currentX, currentY, 0, 0] : line;
+      const targetLine = shouldStop
+        ? [
+            [currentX, currentY],
+            [0, 0],
+          ]
+        : line;
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
         await device.executeCommand(commands.sp, targetPen, servoDelay);
@@ -85,7 +90,10 @@ async function* plot({
         targetPen === MOTION_PEN_DOWN
           ? penDownMoveSpeed.get()
           : penUpMoveSpeed.get();
-      const targetAA = xyDist2aaSteps({ x: targetLine[2], y: targetLine[3] });
+      const targetAA = xyDist2aaSteps({
+        x: targetLine[1][0],
+        y: targetLine[1][1],
+      });
       const deltaA1 = targetAA.a1 - context.a1;
       const deltaA2 = targetAA.a2 - context.a2;
       const deltaAA = Math.sqrt(deltaA1 ** 2 + deltaA2 ** 2);

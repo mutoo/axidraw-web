@@ -1,26 +1,25 @@
+import { isSamePoint } from '../../math/geom';
+
 export const toSvgLines = (lines) =>
   lines
-    .map((l) => `<line x1="${l[0]}" y1="${l[1]}" x2="${l[2]}" y2="${l[3]}"/>`)
+    .map(
+      ([[x1, y1], [x2, y2]]) =>
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`,
+    )
     .join('');
 
 export const toSvgPathDef = (lines) => {
-  const context = { x: 0, y: 0 };
-  if (!lines) return 'M 0 0';
-  const toFixed = (n) => n.toFixed(3);
+  if (!lines || !lines.length) return '';
+  let currentPos = [0, 0];
   return lines
     .reduce(
-      (defs, line) => {
-        if (line[0] === context.x && line[1] === context.y) {
-          defs.push(`${toFixed(line[2])} ${toFixed(line[3])}`);
+      (defs, [[x0, y0], [x1, y1]]) => {
+        if (isSamePoint([x0, y0], currentPos)) {
+          defs.push(`${x1} ${y1}`);
         } else {
-          defs.push(
-            `M ${toFixed(line[0])} ${toFixed(line[1])} ${toFixed(
-              line[2],
-            )} ${toFixed(line[3])}`,
-          );
+          defs.push(`M ${x0} ${y0} ${x1} ${y1}`);
         }
-        context.x = line[2];
-        context.y = line[3];
+        currentPos = [x1, y1];
         return defs;
       },
       ['M 0 0'],

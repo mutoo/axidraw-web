@@ -100,10 +100,10 @@ const createPlanning = () =>
       get rtree() {
         const rtree = createRTree(2, 4);
         this.connections.forEach((line, idx) => {
-          rtree.insert({ id: idx * 2, mbr: pointAsMbr([line[0], line[1]]) });
+          rtree.insert({ id: idx * 2, mbr: pointAsMbr(line[0]) });
           rtree.insert({
             id: idx * 2 + 1,
-            mbr: pointAsMbr([line[2], line[3]]),
+            mbr: pointAsMbr(line[1]),
           });
         });
         this.forceRefresh = 0;
@@ -116,12 +116,12 @@ const createPlanning = () =>
         if (!line) return;
         const entryToRemove0 = {
           id: idx * 2,
-          mbr: pointAsMbr([line[0], line[1]]),
+          mbr: pointAsMbr(line[0]),
         };
         this.rtree.remove(entryToRemove0);
         const entryToRemove1 = {
           id: idx * 2 + 1,
-          mbr: pointAsMbr([line[2], line[3]]),
+          mbr: pointAsMbr(line[1]),
         };
         this.rtree.remove(entryToRemove1);
         this.forceRefresh += 1;

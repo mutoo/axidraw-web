@@ -1,43 +1,48 @@
-/* eslint-disable prefer-destructuring */
 import arcToLines from './arc-to-lines';
 import bezierToLines from './bezier-to-lines';
 import { quadToCubicBezierControlPoints, transformLine } from './math';
 import svgPathParser from './path';
+import { attachIds } from './utils';
 
 export default function* pathToLines(svgPath, opt) {
   const pathDef = svgPath.getAttribute('d');
   if (!pathDef) {
+    // discard path element with no path definition
     return;
   }
+
+  // the CTM(current transformation matrix) is a matrix that transform this
+  // element from its local space to svg world space
   const ctm = svgPath.getCTM();
   let prevPos = [0, 0];
   let currPos;
-  let startPos;
-  let prevBezier;
+  let startPos; // store the start position of last Move command
+  let prevBezier; // store prev control points for connected beziers
+  opt.inPath = true;
   for (const cmd of svgPathParser(pathDef)) {
     switch (cmd[0]) {
       // move command
       case 'M':
         prevPos = cmd[1];
-        // also set down the startPos for Z command
+        // also set down the startPos for Z command to return back
         startPos = prevPos;
         break;
       // line command
       case 'L':
         currPos = cmd[1];
-        yield transformLine(prevPos, currPos, ctm);
+        yield attachIds(transformLine(prevPos, currPos, ctm), opt);
         prevPos = currPos;
         break;
       // horizontal line command
       case 'H':
         currPos = [cmd[1], prevPos[1]];
-        yield transformLine(prevPos, currPos, ctm);
+        yield attachIds(transformLine(prevPos, currPos, ctm), opt);
         prevPos = currPos;
         break;
       // vertical line command
       case 'V':
         currPos = [prevPos[0], cmd[1]];
-        yield transformLine(prevPos, currPos, ctm);
+        yield attachIds(transformLine(prevPos, currPos, ctm), opt);
         prevPos = currPos;
         break;
       // quadratic bezier command
@@ -108,11 +113,12 @@ export default function* pathToLines(svgPath, opt) {
         break;
       case 'Z':
         if (startPos) {
-          yield transformLine(prevPos, startPos, ctm);
+          yield attachIds(transformLine(prevPos, startPos, ctm), opt);
           prevPos = startPos;
         }
         break;
       default:
     }
   }
+  opt.inPath = false;
 }
