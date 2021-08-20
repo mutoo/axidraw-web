@@ -2,6 +2,8 @@ import { dist, distSq, isSamePoint } from 'math/geom';
 import { mm2px } from 'math/svg';
 import { transformLine } from './svg/math';
 import { logger } from './utils';
+import { createRTree } from './rtree';
+import { pointAsMbr } from './rtree/utils';
 import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './consts';
 
 export const distPointToLine = ([xm, ym], [x1, y1], [x2, y2]) =>
@@ -79,7 +81,7 @@ export function* planAhead(lines, toPaperLine, opt) {
   const { connectedError } = opt;
 
   if (lines.length === 1) {
-    yield { line: toPaperLine(lines[0]), pen: MOTION_PEN_DOWN };
+    yield { line: toPaperLine(lines[0]), lineGroupId: opt.lindGroupId };
     return { skip: 1 };
   }
 
@@ -105,11 +107,11 @@ export function* planAhead(lines, toPaperLine, opt) {
 
   const simplified = simplifyLines(toFlatten, opt);
   for (const line of simplified.lines) {
-    yield { line: toPaperLine(line), pen: MOTION_PEN_DOWN };
+    yield { line: toPaperLine(line), lineGroupId: opt.lindGroupId };
   }
 
   if (gap) {
-    yield { line: toPaperLine(gap), pen: MOTION_PEN_UP };
+    opt.lindGroupId += 1;
     return { skip: i + 1, reduced: simplified.reduced };
   }
 
@@ -120,16 +122,9 @@ export function* planAhead(lines, toPaperLine, opt) {
 export function* walkLines(lines, opt) {
   if (!lines || !lines.length) return;
 
-  const { screenToPageMatrix, origin } = opt;
+  const { screenToPageMatrix } = opt;
   // assume the pen always start from HOME position with UP state
-  const context = { pos: origin, pen: MOTION_PEN_UP };
   const toPaperLine = ([p0, p1]) => transformLine(p0, p1, screenToPageMatrix);
-  // move to starting point
-  const firstLine = lines[0];
-  yield {
-    line: toPaperLine([context.pos, firstLine[0]]),
-    pen: MOTION_PEN_UP,
-  };
   const planAheadPx = mm2px(opt.planAhead);
   let reduced = 0;
   for (let i = 0, len = lines.length; i < len; ) {
@@ -151,13 +146,6 @@ export function* walkLines(lines, opt) {
     reduced += result.reduced ?? 0;
   }
   logger.debug(`Reduced lines ${reduced}`);
-  const lastLine = lines[lines.length - 1];
-  context.post = lastLine[1];
-  // homing
-  yield {
-    line: toPaperLine([context.pos, origin]),
-    pen: MOTION_PEN_UP,
-  };
 }
 
 export const defaultPlanOptions = {
@@ -166,6 +154,85 @@ export const defaultPlanOptions = {
   flatLineError: 0.1, // unit mm
 };
 
+export function revertLineGroup(lingGroup) {
+  return lingGroup.reverse().map(([p0, p1]) => [p1, p0]);
+}
+
+export function reorderLineGroups(lineGroups) {
+  const rtree = createRTree(2, 4);
+  const entryMap = {};
+  let pointId = 1;
+
+  function createEntry(point, groupId) {
+    const entry = {
+      id: pointId,
+      mbr: pointAsMbr(point),
+      groupId,
+    };
+    entryMap[pointId] = entry;
+    pointId += 1;
+    return entry;
+  }
+
+  lineGroups.forEach((lineGroup, idx) => {
+    const startEntry = createEntry(lineGroup[0][0], idx);
+    const endPointEntry = createEntry(lineGroup[lineGroup.length - 1][1], idx);
+    startEntry.pairId = endPointEntry.id;
+    rtree.insert(startEntry);
+    endPointEntry.pairId = startEntry.id;
+    endPointEntry.isEndPoint = true;
+    rtree.insert(endPointEntry);
+  });
+
+  const context = { pos: [0, 0] };
+  const sortedGroups = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const id = rtree.nnSearch(context.pos);
+    if (!id) {
+      break;
+    }
+    const entry = entryMap[id];
+    rtree.remove(entry);
+    const pairEntry = entryMap[entry.pairId];
+    rtree.remove(pairEntry);
+    const selectedGroup = { id: entry.groupId };
+    if (entry.isEndPoint) {
+      selectedGroup.revert = true;
+    }
+    sortedGroups.push(selectedGroup);
+    context.pos = pairEntry.mbr.p0;
+  }
+
+  return sortedGroups.map((g) => {
+    return g.revert ? revertLineGroup(lineGroups[g.id]) : lineGroups[g.id];
+  });
+}
+
 export default function plan(lines, opt = {}) {
-  return [...walkLines(lines, { ...defaultPlanOptions, ...opt })];
+  const mergedOptions = { ...defaultPlanOptions, ...opt };
+  mergedOptions.lindGroupId = 0;
+  let lastLineGroupId = null;
+  let lineGroups = [];
+  let lineGroup = null;
+  for (const groupedLine of walkLines(lines, mergedOptions)) {
+    if (lastLineGroupId !== groupedLine.lineGroupId) {
+      lineGroup = [];
+      lineGroups.push(lineGroup);
+      lastLineGroupId = groupedLine.lineGroupId;
+    }
+    lineGroup.push(groupedLine.line);
+  }
+  lineGroups = reorderLineGroups(lineGroups, mergedOptions);
+  const motions = [];
+
+  let lastPoint = [0, 0];
+  for (const lg of lineGroups) {
+    const firstPoint = lg[0][0];
+    motions.push({ line: [lastPoint, firstPoint], pen: MOTION_PEN_UP });
+    motions.push(...lg.map((line) => ({ line, pen: MOTION_PEN_DOWN })));
+    lastPoint = lg[lg.length - 1][1];
+  }
+  motions.push({ line: [lastPoint, [0, 0]], pen: MOTION_PEN_UP });
+  return motions;
 }

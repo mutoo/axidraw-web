@@ -18,7 +18,6 @@ export default function* pathToLines(svgPath, opt) {
   let currPos;
   let startPos; // store the start position of last Move command
   let prevBezier; // store prev control points for connected beziers
-  opt.inPath = true;
   for (const cmd of svgPathParser(pathDef)) {
     switch (cmd[0]) {
       // move command
@@ -120,5 +119,4 @@ export default function* pathToLines(svgPath, opt) {
       default:
     }
   }
-  opt.inPath = false;
 }

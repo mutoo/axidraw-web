@@ -45,7 +45,7 @@ const Workspace = observer(({ margin = 20 }) => {
       <Page />
       <Setup />
       <Planning strokeWidth={strokeWidth} />
-      <Debug debugRtree={true} />
+      <Debug debugRtree={false} />
       <Gizmo />
     </svg>
   );

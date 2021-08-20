@@ -34,6 +34,7 @@ export function* svgContainerToLines(svg, opt) {
           // and the rect may have rounded corners make it composed by lines and arcs.
           const path = elementToPath(svgEl);
           if (path) {
+            opt.elementId += 1;
             yield* pathToLines(path, opt);
           }
         }

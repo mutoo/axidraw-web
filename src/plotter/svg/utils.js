@@ -6,11 +6,8 @@ export function getAttrVal(svgEl, attr) {
   return svgEl[attr]?.baseVal.value ?? 0;
 }
 
-export function attachIds(line, { groups, elementId, pathId, inPath }) {
-  return {
-    line,
-    groupId: groups.join('-'),
-    elementId,
-    pathId: inPath ? pathId : 0,
-  };
+export function attachIds(line, { groups, elementId }) {
+  line.groupId = groups.join('-');
+  line.elementId = elementId;
+  return line;
 }

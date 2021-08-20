@@ -65,7 +65,7 @@ const Setup = observer(({ ...props }) => {
       if (!imported) {
         return;
       }
-      planning.updateLines(svgToLines(imported).map((l) => l.line));
+      planning.updateLines(svgToLines(imported));
     }
   }, [planning.phase]);
   return (

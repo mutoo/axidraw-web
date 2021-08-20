@@ -1,6 +1,6 @@
 import { createSVGElement, getAttrVal } from './utils';
 
-export default function* elementToPath(svgEl) {
+export default function elementToPath(svgEl) {
   let pathDef = '';
   switch (svgEl.nodeName) {
     case 'rect':
