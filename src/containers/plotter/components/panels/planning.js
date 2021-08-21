@@ -4,6 +4,8 @@ import Alert from 'components/ui/alert/alert';
 import { observer } from 'mobx-react-lite';
 import { mm2px } from 'math/svg';
 import { saveAs } from 'file-saver';
+import classNames from 'classnames';
+import formStyles from 'components/ui/form.css';
 import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
@@ -19,6 +21,7 @@ const Planning = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
   const [connectedError, setConnectedError] = useState(0.2);
   const [flatLineError, setFlatLineError] = useState(0.1);
+  const [allowReorder, setAllowReorder] = useState(true);
   const planningButtonRef = useRef(null);
   useLayoutEffect(() => {
     // when switch to planning phase, extract svg to lines.
@@ -58,6 +61,7 @@ const Planning = observer(({ ...props }) => {
                   : [mm2px(page.size.height), 0],
               connectedError,
               flatLineError,
+              allowReorder,
             });
           }}
         >
@@ -81,6 +85,20 @@ const Planning = observer(({ ...props }) => {
             value={flatLineError}
             onChange={(e) => setFlatLineError(parseFloat(e.target.value))}
           />
+          <label
+            className={classNames(formStyles.checkboxLabel, 'col-start-2')}
+            htmlFor="allow-reorder"
+          >
+            <input
+              type="checkbox"
+              id="allow-reorder"
+              checked={allowReorder}
+              onChange={(e) => {
+                setAllowReorder(e.target.checked);
+              }}
+            />
+            <span>Optimizing order</span>
+          </label>
           <div className="col-start-2 grid grid-cols-2 gap-4">
             <Button submit ref={planningButtonRef}>
               Re-plan

@@ -81,7 +81,7 @@ export function* planAhead(lines, toPaperLine, opt) {
   const { connectedError } = opt;
 
   if (lines.length === 1) {
-    yield { line: toPaperLine(lines[0]), lineGroupId: opt.lindGroupId };
+    yield { line: toPaperLine(lines[0]), groupId: opt.lindGroupId };
     return { skip: 1 };
   }
 
@@ -107,7 +107,7 @@ export function* planAhead(lines, toPaperLine, opt) {
 
   const simplified = simplifyLines(toFlatten, opt);
   for (const line of simplified.lines) {
-    yield { line: toPaperLine(line), lineGroupId: opt.lindGroupId };
+    yield { line: toPaperLine(line), groupId: opt.lindGroupId };
   }
 
   if (gap) {
@@ -152,6 +152,7 @@ export const defaultPlanOptions = {
   connectedError: 0.2, // unit mm
   planAhead: 10, // unit mm
   flatLineError: 0.1, // unit mm
+  allowReorder: false,
 };
 
 export function revertLineGroup(lingGroup) {
@@ -215,17 +216,19 @@ export default function plan(lines, opt = {}) {
   let lastLineGroupId = null;
   let lineGroups = [];
   let lineGroup = null;
-  for (const groupedLine of walkLines(lines, mergedOptions)) {
-    if (lastLineGroupId !== groupedLine.lineGroupId) {
+  for (const line of walkLines(lines, mergedOptions)) {
+    if (lastLineGroupId !== line.groupId) {
       lineGroup = [];
       lineGroups.push(lineGroup);
-      lastLineGroupId = groupedLine.lineGroupId;
+      lastLineGroupId = line.groupId;
     }
-    lineGroup.push(groupedLine.line);
+    lineGroup.push(line.line);
   }
-  lineGroups = reorderLineGroups(lineGroups, mergedOptions);
-  const motions = [];
+  if (mergedOptions.allowReorder) {
+    lineGroups = reorderLineGroups(lineGroups, mergedOptions);
+  }
 
+  const motions = [];
   let lastPoint = [0, 0];
   for (const lg of lineGroups) {
     const firstPoint = lg[0][0];
