@@ -229,7 +229,16 @@ export default function plan(lines, opt = {}) {
   let lastPoint = [0, 0];
   for (const lg of lineGroups) {
     const firstPoint = lg[0][0];
-    motions.push({ line: [lastPoint, firstPoint], pen: MOTION_PEN_UP });
+    if (!isSamePoint(lastPoint, firstPoint)) {
+      motions.push({
+        line: [lastPoint, firstPoint],
+        pen:
+          distSq(lastPoint, firstPoint) >
+          opt.connectedError * opt.connectedError
+            ? MOTION_PEN_UP
+            : MOTION_PEN_DOWN,
+      });
+    }
     motions.push(...lg.map((line) => ({ line, pen: MOTION_PEN_DOWN })));
     lastPoint = lg[lg.length - 1][1];
   }
