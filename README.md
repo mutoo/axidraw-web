@@ -1,6 +1,6 @@
 # Axidraw-Web
 
-This project is work-in-progress actively!
+This project is work-in-progress!
 
 ![screenshot](./docs/screenshot-setup.png)
 
@@ -24,7 +24,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] SVG path parser
 - [x] SVG elements to line segments
 - [x] Motion Planning (simple)
-- [ ] Motion Planning (reorder)
+- [x] Motion Planning (reorder)
 - [x] Plotting (constant speed)
 - [x] Plotting (acceleration mode)
 - [x] Plotting control (pause/resume/stop)
@@ -116,4 +116,4 @@ MIT
 
 Thanks [Evil Mad Scientist](https://www.evilmadscientist.com/) for providing such a great machine to play with.
 
-This project also inspired by [saxi](https://github.com/nornagon/saxi) initially.
+This project is initially inspired by [saxi](https://github.com/nornagon/saxi). That I want to build a Web App like this without install a node project locally.

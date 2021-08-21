@@ -55,6 +55,12 @@
         ]
       }
     ],
+    "no-unused-vars": [
+      1,
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "no-param-reassign": 0,
     "no-restricted-syntax": 0,
     "no-bitwise": [
