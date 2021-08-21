@@ -30,6 +30,9 @@ export const initialContext = {
 async function* plot({
   device,
   speedMode,
+  servoMin,
+  servoMax,
+  servoRate,
   penUpMoveSpeed,
   penDownMoveSpeed,
   penDownMoveAccel,
@@ -40,30 +43,55 @@ async function* plot({
   // this async generator would keep working-in-progress status
   // allow user to pause/resume to work.
   let context = null;
-  const servoMin = 16000;
-  const servoMax = 20000;
-  const servoRate = 400;
-  const servoDelay = servoTime(servoMin, servoMax, servoRate);
+  const servo = {
+    min: servoMin.get(),
+    max: servoMax.get(),
+    rate: servoRate.get(),
+  };
 
   const reset = async () => {
     context = { ...initialContext };
     await device.executeCommand(commands.r);
-    await device.executeCommand(commands.sc, 4, servoMax);
-    await device.executeCommand(commands.sc, 5, servoMin);
-    await device.executeCommand(commands.sc, 10, servoRate);
-    await device.executeCommand(commands.sp, 1, servoDelay);
+    await device.executeCommand(commands.sc, 4, servoMin.get());
+    await device.executeCommand(commands.sc, 5, servoMax.get());
+    await device.executeCommand(commands.sc, 10, servoRate.get());
+    await device.executeCommand(
+      commands.sp,
+      1,
+      servoTime(servo.min, servo.max, servo.rate),
+    );
     await device.executeCommand(commands.sr, 60e3);
   };
   await reset();
   let bufferTime = 0;
   try {
     for (let i = 0, len = motions.length; i < len; i += 1) {
+      // adjust servo config when changed
+      if (servo.min !== servoMin.get()) {
+        await device.executeCommand(commands.sc, 4, servoMin.get());
+        servo.min = servoMin.get();
+        logger.debug(`update servo min: ${servo.min}`);
+      }
+      if (servo.max !== servoMax.get()) {
+        await device.executeCommand(commands.sc, 5, servoMax.get());
+        servo.max = servoMax.get();
+        logger.debug(`update servo max: ${servo.max}`);
+      }
+      if (servo.rate !== servoRate.get()) {
+        await device.executeCommand(commands.sc, 10, servoRate.get());
+        servo.rate = servoRate.get();
+        logger.debug(`update servo rate: ${servo.rate}`);
+      }
       const { line, pen } = motions[i];
       let action = control.get();
       const shouldPause = await device.executeCommand(commands.qb);
       if (shouldPause || action === PLOTTER_ACTION_PAUSE) {
         logger.debug(`action: pause`);
-        await device.executeCommand(commands.sp, 1, servoDelay);
+        await device.executeCommand(
+          commands.sp,
+          1,
+          servoTime(servo.min, servo.max, servo.rate),
+        );
         context.pen = MOTION_PEN_UP;
         action = yield PLOTTER_STATUS_PAUSED;
       }
@@ -81,7 +109,11 @@ async function* plot({
         : line;
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
-        await device.executeCommand(commands.sp, targetPen, servoDelay);
+        await device.executeCommand(
+          commands.sp,
+          targetPen,
+          servoTime(servo.min, servo.max, servo.rate),
+        );
         context.pen = targetPen;
         context.rate = 0;
       }

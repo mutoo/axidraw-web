@@ -107,7 +107,7 @@ const Plotting = observer(({ ...props }) => {
                   max="100000"
                   value={work.penDownMoveAccel}
                   onChange={(e) =>
-                    work.setPenDownMoveAccel(parseFloat(e.target.value))
+                    work.setPenDownMoveAccel(parseInt(e.target.value, 10))
                   }
                 />
                 <label htmlFor="pen-down-accel">Cornering</label>
@@ -119,7 +119,7 @@ const Plotting = observer(({ ...props }) => {
                   max="2"
                   value={work.cornering}
                   onChange={(e) =>
-                    work.setCornering(parseFloat(e.target.value))
+                    work.setCornering(parseInt(e.target.value, 10))
                   }
                 />
               </>
@@ -137,7 +137,7 @@ const Plotting = observer(({ ...props }) => {
               max="20000"
               value={work.penDownMoveSpeed}
               onChange={(e) =>
-                work.setPenDownMoveSpeed(parseFloat(e.target.value))
+                work.setPenDownMoveSpeed(parseInt(e.target.value, 10))
               }
             />
             <label htmlFor="pen-up-speed">Pen Up</label>
@@ -149,8 +149,29 @@ const Plotting = observer(({ ...props }) => {
               max="20000"
               value={work.penUpMoveSpeed}
               onChange={(e) =>
-                work.setPenUpMoveSpeed(parseFloat(e.target.value))
+                work.setPenUpMoveSpeed(parseInt(e.target.value, 10))
               }
+            />
+            <h4 className="col-span-2">Pen Servo Control</h4>
+            <label htmlFor="pen-down-speed">Pen Down</label>
+            <input
+              id="pen-down-speed"
+              type="number"
+              min="12000"
+              step="100"
+              max={work.servoMin}
+              value={work.servoMax}
+              onChange={(e) => work.setServoMax(parseInt(e.target.value, 10))}
+            />
+            <label htmlFor="pen-up-speed">Pen Up</label>
+            <input
+              id="pen-up-speed"
+              type="number"
+              min={work.servoMax}
+              step="100"
+              max="32000"
+              value={work.servoMin}
+              onChange={(e) => work.setServoMin(parseInt(e.target.value, 10))}
             />
             <div className="col-start-2">
               {work.plotterStatus === PLOTTER_STATUS_STANDBY && (

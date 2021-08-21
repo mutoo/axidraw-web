@@ -17,12 +17,12 @@ const createWork = () =>
     async setDevice(device) {
       this.device.set(device);
       if (device) {
-        const servoMin = 16000;
-        const servoMax = 20000;
-        const servoRate = 400;
+        const servoMin = this.servoMin.get();
+        const servoMax = this.servoMax.get();
+        const servoRate = this.servoRate.get();
         const servoDelay = servoTime(servoMin, servoMax, servoRate);
-        await device.executeCommand(commands.sc, 4, servoMax);
-        await device.executeCommand(commands.sc, 5, servoMin);
+        await device.executeCommand(commands.sc, 4, servoMin); // sp 1, pen up
+        await device.executeCommand(commands.sc, 5, servoMax); // sp 0, pen down
         await device.executeCommand(commands.sc, 10, servoRate);
         await device.executeCommand(commands.sp, 1, servoDelay);
       }
@@ -35,6 +35,20 @@ const createWork = () =>
     speedMode: PLOTTER_SPEED_MODE_ACCELERATING,
     setSpeedMode(mode) {
       this.speedMode = mode;
+    },
+    // pen up position, for some reason it's large than servoMax
+    servoMin: observable.box(20000),
+    async setServoMin(value) {
+      this.servoMin.set(value);
+    },
+    // pen up position, for some reason it's smaller than servoMax
+    servoMax: observable.box(16000),
+    async setServoMax(value) {
+      this.servoMax.set(value);
+    },
+    servoRate: observable.box(400),
+    async setServoRate(value) {
+      this.servoRate.set(value);
     },
     penDownMoveAccel: observable.box(40000), // steps per second squared
     penDownMoveSpeed: observable.box(5000), // steps per second
@@ -64,6 +78,9 @@ const createWork = () =>
         device,
         motions,
         speedMode: this.speedMode,
+        servoMin: this.servoMin,
+        servoMax: this.servoMax,
+        servoRate: this.servoRate,
         penDownMoveAccel: this.penDownMoveAccel,
         penUpMoveSpeed: this.penUpMoveSpeed,
         penDownMoveSpeed: this.penDownMoveSpeed,
