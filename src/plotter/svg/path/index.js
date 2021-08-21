@@ -23,10 +23,14 @@ export const pathInterpreters = {
   Z,
 };
 
-export default function* svgPathParser(pathDef = 'M 0 0', toAbsolute = true) {
+export function svgPathParser(pathDef = 'M 0 0') {
+  return parsePath(pathDef);
+}
+
+export default function* svgPathNormalizer(parsedPath, toAbsolute = true) {
   // create a context to walk through the path
   const context = { x: 0, y: 0, startX: 0, startY: 0, toAbsolute };
-  for (const command of parsePath(pathDef)) {
+  for (const command of parsedPath) {
     const interpreter = pathInterpreters[command[0].toUpperCase()];
     yield* interpreter.execute(command, context);
   }

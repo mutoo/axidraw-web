@@ -1,24 +1,30 @@
 import arcToLines from './arc-to-lines';
 import bezierToLines from './bezier-to-lines';
 import { quadToCubicBezierControlPoints, transformLine } from './math';
-import svgPathParser from './path';
+import svgPathNormalizer, { svgPathParser } from './path';
 import { attachIds } from './utils';
 
-export default function* pathToLines(svgPath, opt) {
-  const pathDef = svgPath.getAttribute('d');
-  if (!pathDef) {
-    // discard path element with no path definition
-    return;
+export default function* pathToLines(path, opt) {
+  let parsedPath = null;
+  if (path.parsed) {
+    parsedPath = path;
+  } else {
+    const pathDef = path.getAttribute('d');
+    if (!pathDef) {
+      // discard path element with no path definition
+      return;
+    }
+    parsedPath = svgPathParser(pathDef);
   }
 
   // the CTM(current transformation matrix) is a matrix that transform this
   // element from its local space to svg world space
-  const ctm = svgPath.getCTM();
+  const ctm = path.getCTM();
   let prevPos = [0, 0];
   let currPos;
   let startPos; // store the start position of last Move command
   let prevBezier; // store prev control points for connected beziers
-  for (const cmd of svgPathParser(pathDef)) {
+  for (const cmd of svgPathNormalizer(parsedPath)) {
     switch (cmd[0]) {
       // move command
       case 'M':

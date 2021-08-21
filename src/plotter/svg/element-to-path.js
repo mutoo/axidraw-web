@@ -1,7 +1,8 @@
-import { createSVGElement, getAttrVal } from './utils';
+import { getAttrVal } from './utils';
 
 export default function elementToPath(svgEl) {
-  let pathDef = '';
+  // we parse this manually to save time
+  const parsedPath = [];
   switch (svgEl.nodeName) {
     case 'rect':
       {
@@ -16,12 +17,18 @@ export default function elementToPath(svgEl) {
         if (rx === 0 || ry === 0) {
           /* it's a normal rectangle */
           // we goes the rect counter-clock-wise
-          //  1-(-h)-4
+          //  1-(-w)-4
           //  |      |
-          //  v     -v
+          //  h     -h
           //  |      |
-          //  2-( h)-3
-          pathDef += `M${x} ${y} v${h} h${w} v${-h} h${-w}`;
+          //  2-( w)-3
+          parsedPath.push(
+            ['M', [x, y]],
+            ['v', h],
+            ['h', w],
+            ['v', -h],
+            ['h', -w],
+          );
         } else {
           /* it's a rounded rectangle */
           w -= 2 * rx;
@@ -29,25 +36,26 @@ export default function elementToPath(svgEl) {
           // rotation = 0
           // large-arc = 0
           // sweep = 0
-          pathDef +=
+          parsedPath.push(
             // start point
-            `M${x} ${y + ry}` +
+            ['M', [x, y + ry]],
             // left border
-            `v${h} ` +
+            ['v', h],
             // bottom left radius
-            `a${rx} ${ry} 0 0 0 ${rx} ${ry} ` +
+            ['a', [rx, ry, 0, 0, 0, [rx, ry]]],
             // bottom border
-            `h${w} ` +
+            ['h', w],
             // bottom right radius
-            `a${rx} ${ry} 0 0 0 ${rx} ${-ry} ` +
+            ['a', [rx, ry, 0, 0, 0, [rx, -ry]]],
             // right border
-            `v${-w} ` +
+            ['v', -h],
             // top right radius
-            `a${rx} ${ry} 0 0 0 ${-rx} ${-ry} ` +
+            ['a', [rx, ry, 0, 0, 0, [-rx, -ry]]],
             // top border
-            `h${-w}` +
+            ['h', -w],
             // top left radius
-            `a${rx} ${ry} 0 0 0 ${-rx} ${ry} `;
+            ['a', [rx, ry, 0, 0, 0, [-rx, ry]]],
+          );
         }
       }
       break;
@@ -63,28 +71,28 @@ export default function elementToPath(svgEl) {
           // it won't be drawn at all if circle or ellipse has no radius
           return null;
         }
-        pathDef +=
+        parsedPath.push(
           // start point
-          `M${cx} ${cy - ry}` +
+          ['M', [cx, cy - ry]],
           // rotation = 0
           // large-arc = 1
           // sweep = 0
-          `a${rx} ${ry} 0 0 0 0 ${ry * 2}` +
+          ['a', [rx, ry, 0, 0, 0, [0, ry * 2]]],
           // we split a circle/ellipse into two arc
           // to ensure the linear approximation is working correctly
-          `a${rx} ${ry} 0 0 0 0 ${-ry * 2}`;
+          ['a', [rx, ry, 0, 0, 0, [0, -ry * 2]]],
+        );
       }
       break;
     default:
       throw new Error(`Can't generate path definition from ${svgEl.nodeName}`);
   }
-  // create svg path with generated path definition
-  const path = createSVGElement('path');
-  path.setAttribute('d', pathDef);
+
   // the new path element would not be inserted to the DOM, so it won't have
   // a calculated CTM(current transformation matrix).
   // we have to proxy the getCTM to current svg element, so that when generates
   // lines from this path, it would get a correct matrix.
-  path.getCTM = () => svgEl.getCTM();
-  return path;
+  parsedPath.getCTM = () => svgEl.getCTM();
+  parsedPath.parsed = true;
+  return parsedPath;
 }

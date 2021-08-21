@@ -32,10 +32,10 @@ export function* svgContainerToLines(svg, opt) {
           // then extract lines from path.
           // since the circles and ellipses are basically ARCs
           // and the rect may have rounded corners make it composed by lines and arcs.
-          const path = elementToPath(svgEl);
-          if (path) {
+          const parsedPath = elementToPath(svgEl);
+          if (parsedPath) {
             opt.elementId += 1;
-            yield* pathToLines(path, opt);
+            yield* pathToLines(parsedPath, opt);
           }
         }
         break;
