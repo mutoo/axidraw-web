@@ -1,14 +1,12 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {
   RTREE_TYPE_NODE_INTERNAL,
   RTREE_TYPE_NODE_LEAF,
 } from 'plotter/rtree/consts';
 import { observer } from 'mobx-react-lite';
-import PlotterContext from '../../context';
 import { mm2px } from '../../../../math/svg';
 import styles from './debug.css';
-import { PLANNING_PHASE_PLANNING } from '../../presenters/planning';
 
 function LeafNode({ node }) {
   return (
@@ -59,22 +57,12 @@ TreeNode.propTypes = {
   node: PropTypes.object,
 };
 
-const Debug = observer(({ debugRtree, ...props }) => {
-  const { planning } = useContext(PlotterContext);
-
-  return (
-    <g {...props}>
-      {planning.phase === PLANNING_PHASE_PLANNING &&
-        debugRtree &&
-        planning.rtree.root && (
-          <TreeNode key={planning.forceRefresh} node={planning.rtree.root} />
-        )}
-    </g>
-  );
+const DebugRtree = observer(({ root, ...props }) => {
+  return <g {...props}>{root && <TreeNode node={root} />}</g>;
 });
 
-Debug.propTypes = {
-  debugRtree: PropTypes.bool,
+DebugRtree.propTypes = {
+  root: PropTypes.object,
 };
 
-export default Debug;
+export default DebugRtree;
