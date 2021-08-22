@@ -19,6 +19,7 @@ import {
   estimateExitRate,
   mergeAccMotions,
 } from './motion/const-acceleration';
+import { distSq } from '../math/geom';
 
 export const initialContext = {
   a1: 0,
@@ -107,6 +108,13 @@ async function* plot({
             [0, 0],
           ]
         : line;
+
+      if (distSq(targetLine[0], targetLine[1]) === 0) {
+        // ignore the motion with zero length
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
       if (context.pen !== targetPen) {
         logger.debug(`pen ${targetPen === MOTION_PEN_UP ? 'up' : 'down'}`);
         await device.executeCommand(
@@ -186,7 +194,7 @@ async function* plot({
           exitRate,
           accelRate,
         );
-        const { LMParams, remaining } = accMotion2LMParams(
+        const { LMParams, remaining, endRate } = accMotion2LMParams(
           mergeAccMotions(accMotions),
           deltaA1,
           deltaA2,
@@ -214,7 +222,10 @@ async function* plot({
         remainingA1 = remaining.a1;
         remainingA2 = remaining.a2;
         t = accMotions.reduce((s, m) => s + m.t, 0) * 1000;
-        context.rate = exitRate;
+        context.rate = endRate;
+      }
+      if (remainingA1 || remainingA2) {
+        logger.debug(`remaining: ${remainingA1}, ${remainingA2}`);
       }
       context.a1 = targetAA.a1 - remainingA1;
       context.a2 = targetAA.a2 - remainingA2;

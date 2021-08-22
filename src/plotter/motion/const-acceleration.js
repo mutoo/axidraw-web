@@ -1,6 +1,7 @@
 import { mm2steps, s2rate, xyDist2aaSteps } from 'math/ebb';
 import { MOTION_PEN_UP } from '../consts';
 import { logger } from '../utils';
+import { distSq } from '../../math/geom';
 
 // a very inspiring algorithm from Sonny Jeon
 // https://onehossshay.wordpress.com/2011/09/24/improving_grbl_cornering_algorithm/
@@ -29,15 +30,19 @@ export const estimateExitRate = (
   };
   const currentMotion = motions[fromIdx];
   if (currentMotion.pen === MOTION_PEN_UP) return 0;
-  const followingMotions = [currentMotion];
+  const maybeFollowingMotions = [currentMotion];
   for (let i = 1; i < opt.lookingForward; i += 1) {
     const followingMotion = motions[fromIdx + i];
     if (followingMotion.pen === MOTION_PEN_UP) {
       break;
     }
-    followingMotions.push(followingMotion);
+    maybeFollowingMotions.push(followingMotion);
   }
-  if (followingMotions.length === 1) {
+  const followingMotions = maybeFollowingMotions.filter((motion) => {
+    const { line } = motion;
+    return distSq(line[0], line[1]) > 0;
+  });
+  if (followingMotions.length <= 1) {
     return 0;
   }
   const context = { exitRate: 0 };
@@ -70,17 +75,18 @@ export const accelMotion = (s, v0, vm, vt, accel) => {
     const requiredStepsToCatchup = ((v0 + vt) * catchupTime) / 2;
     const remainingSteps = (s - requiredStepsToCatchup) | 0;
     if (remainingSteps < 0) {
-      // TODO: handle this smarter
-      throw new Error("Don't have enough room to accelerating");
+      logger.error(`don't have enough room to acc: ${remainingSteps}`);
+      // we don't stop here because the error might due to previous remaining steps
+      // and the error might be very small (around <10 steps
     }
     const catchupMotion = {
-      s: requiredStepsToCatchup,
+      s: Math.min(s, requiredStepsToCatchup),
       t: catchupTime,
       v0,
       vt,
       dir,
     };
-    if (remainingSteps === 0) {
+    if (remainingSteps <= 0) {
       // noice! the acceleration/deceleration just cover all the steps to catchup
       return [catchupMotion];
     }
@@ -196,6 +202,7 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
   const sin = deltaA2 / deltaAA;
   let remainingA1 = deltaA1;
   let remainingA2 = deltaA2;
+  let endRate = 0;
   const LMParams = [];
   for (const accMotion of accMotions) {
     const initRate = s2rate(accMotion.v0);
@@ -232,10 +239,12 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
     });
     remainingA1 -= step1;
     remainingA2 -= step2;
+    endRate = accMotion.vt;
   }
 
   return {
     LMParams,
+    endRate,
     remaining: {
       a1: remainingA1,
       a2: remainingA2,
