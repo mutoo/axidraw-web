@@ -50,12 +50,14 @@ async function* plot({
     rate: servoRate.get(),
   };
 
-  const reset = async () => {
+  const reset = async (resetRC = true) => {
     context = { ...initialContext };
     await device.executeCommand(commands.r);
-    await device.executeCommand(commands.sc, 4, servoMin.get());
-    await device.executeCommand(commands.sc, 5, servoMax.get());
-    await device.executeCommand(commands.sc, 10, servoRate.get());
+    if (resetRC) {
+      await device.executeCommand(commands.sc, 4, servoMin.get());
+      await device.executeCommand(commands.sc, 5, servoMax.get());
+      await device.executeCommand(commands.sc, 10, servoRate.get());
+    }
     await device.executeCommand(
       commands.sp,
       1,
@@ -63,7 +65,7 @@ async function* plot({
     );
     await device.executeCommand(commands.sr, 60e3);
   };
-  await reset();
+  await reset(true);
   let bufferTime = 0;
   try {
     for (let i = 0, len = motions.length; i < len; i += 1) {
@@ -244,7 +246,7 @@ async function* plot({
   } catch (e) {
     logger.error(e);
   } finally {
-    await reset();
+    await reset(false);
     logger.debug(`finished plotting`);
   }
   return PLOTTER_STATUS_STANDBY;

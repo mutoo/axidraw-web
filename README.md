@@ -76,7 +76,7 @@ The cert generation script will also provide extra DNS including your hostname, 
 # e.g. your hostname is raspberry-pi.local
 # and your LAN ip is 192.168.3.14
 https://raspberry-pi.local:8443
-http://192.168.3.14.nip.io:8433
+https://192.168.3.14.nip.io:8433
 ```
 
 This very handy when you run the web server on Raspberry PI or other computer.
