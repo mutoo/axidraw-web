@@ -230,6 +230,7 @@ export const accMotion2LMParams = (accMotions, deltaA1, deltaA2) => {
       `low-level-move: ${step1}, ${step2} with v0 ${initRate1}, ${initRate2} acc ${accel1}, ${accel2}`,
     );
     LMParams.push({
+      time: accMotion.t * 1000,
       initRate1,
       step1,
       accel1,

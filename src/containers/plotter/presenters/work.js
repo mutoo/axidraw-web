@@ -1,5 +1,6 @@
 import { makeAutoObservable, observable } from 'mobx';
 import plot from 'plotter/plotter';
+import estimate from 'plotter/estimator';
 import {
   PLOTTER_ACTION_PAUSE,
   PLOTTER_ACTION_STOP,
@@ -69,6 +70,20 @@ const createWork = () =>
     control: observable.box(null),
     plotterStatus: PLOTTER_STATUS_STANDBY,
     plottingInProgress: observable.box(null, { deep: false }),
+    estimate({ motions }) {
+      if (!motions) return 0;
+      return estimate({
+        motions,
+        speedMode: this.speedMode,
+        servoMin: this.servoMin,
+        servoMax: this.servoMax,
+        servoRate: this.servoRate,
+        penDownMoveAccel: this.penDownMoveAccel,
+        penUpMoveSpeed: this.penUpMoveSpeed,
+        penDownMoveSpeed: this.penDownMoveSpeed,
+        cornering: this.cornering,
+      });
+    },
     async plot({ motions }) {
       const device = this.device.get();
       if (!device) {

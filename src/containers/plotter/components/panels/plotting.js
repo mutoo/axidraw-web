@@ -16,11 +16,13 @@ import PlotterContext from '../../context';
 import {
   PLANNING_PHASE_PLANNING,
   PLANNING_PHASE_PLOTTING,
+  PLANNING_PHASE_SETUP,
 } from '../../presenters/planning';
 import SimpleDebugger from './simple-debugger';
 import Panel from './panel';
 import styles from './plotting.css';
 import { trackEvent } from '../../utils';
+import Estimating from './esimating';
 
 const Plotting = observer(({ ...props }) => {
   const { planning, work } = useContext(PlotterContext);
@@ -40,7 +42,7 @@ const Plotting = observer(({ ...props }) => {
         <section className="space-y-4">
           <h3>Plotting</h3>
           <Alert type="warn">Please connect to device before plotting.</Alert>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <Button
               onClick={() => {
                 planning.setPhase(PLANNING_PHASE_PLANNING);
@@ -48,6 +50,14 @@ const Plotting = observer(({ ...props }) => {
               }}
             >
               Back to planning
+            </Button>
+            <Button
+              onClick={() => {
+                planning.setPhase(PLANNING_PHASE_SETUP);
+                trackEvent('go to', PLANNING_PHASE_SETUP);
+              }}
+            >
+              Start new plot
             </Button>
           </div>
         </section>
@@ -119,7 +129,7 @@ const Plotting = observer(({ ...props }) => {
                   max="2"
                   value={work.cornering.get()}
                   onChange={(e) =>
-                    work.setCornering(parseInt(e.target.value, 10))
+                    work.setCornering(parseFloat(e.target.value))
                   }
                 />
               </>
@@ -217,6 +227,7 @@ const Plotting = observer(({ ...props }) => {
           </form>
         </section>
       )}
+      <Estimating />
       {device && work.plotterStatus === PLOTTER_STATUS_STANDBY && (
         <SimpleDebugger device={device} />
       )}
