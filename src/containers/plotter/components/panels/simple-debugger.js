@@ -1,10 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as commands from 'communication/ebb';
 import formStyles from 'components/ui/form.css';
 import Button from 'components/ui/button/button';
 import Alert from 'components/ui/alert/alert';
+import { reaction } from 'mobx';
 import { trackEvent } from '../../utils';
+import PlotterContext from '../../context';
 
 const frequentlyCommands = [
   {
@@ -31,6 +33,7 @@ const frequentlyCommands = [
 ];
 
 const SimpleDebugger = ({ device }) => {
+  const { work } = useContext(PlotterContext);
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
     async (cmd, params = []) => {
@@ -47,6 +50,25 @@ const SimpleDebugger = ({ device }) => {
     },
     [device],
   );
+  useEffect(() => {
+    const dispose = reaction(
+      () => ({
+        servoMin: work.servoMin.get(),
+        servoMax: work.servoMax.get(),
+        servoRate: work.servoRate.get(),
+      }),
+      async ({ servoMin, servoMax, servoRate }) => {
+        if (!device) return;
+        await device.executeCommand(commands.sc, 4, servoMin);
+        await device.executeCommand(commands.sc, 5, servoMax);
+        await device.executeCommand(commands.sc, 10, servoRate);
+      },
+    );
+    return () => {
+      dispose();
+    };
+  }, []);
+
   return (
     <form className={formStyles.root}>
       <h3>Simple Debugger</h3>
