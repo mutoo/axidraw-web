@@ -1,3 +1,15 @@
 .root {
-  @apply font-roboto text-sm text-grey-cc text-center my-8;
+  @apply font-roboto text-sm text-grey-cc text-center mb-8;
+
+  p {
+    @apply leading-6;
+  }
+
+  a {
+    @apply underline;
+  }
+
+  svg {
+    @apply fill-current;
+  }
 }

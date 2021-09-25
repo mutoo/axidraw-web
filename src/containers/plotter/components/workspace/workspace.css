@@ -1,3 +1,5 @@
 .root {
-  @apply w-full h-full;
+  @apply w-full;
+
+  height: calc(100% - 70px);
 }

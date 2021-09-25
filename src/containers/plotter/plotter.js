@@ -9,6 +9,7 @@ import Setup from './components/panels/setup';
 import Planning from './components/panels/planning';
 import Plotting from './components/panels/plotting';
 import PlotterContext from './context';
+import Footer from '../../components/footer/footer';
 
 // eslint-disable-next-line import/no-unresolved
 
@@ -27,6 +28,7 @@ const Plotter = () => {
     <PlotterContext.Provider value={{ planning, page, work }}>
       <main className={styles.workspace}>
         <Workspace />
+        <Footer />
       </main>
       <aside className={styles.panel}>
         <Setup />
