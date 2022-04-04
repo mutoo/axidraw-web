@@ -8,15 +8,38 @@ import {
 import {
   DEVICE_TYPE_USB,
   DEVICE_TYPE_WEBSOCKET,
+  DEVICE_TYPE_VIRTUAL,
 } from 'communication/device/consts';
 import formStyles from 'components/ui/form.css';
 import { trackCategoryEvent } from 'configureGA';
 import Button from '../ui/button/button';
 import Alert from '../ui/alert/alert';
+import { PAGE_ALIGNMENT_HORIZONTAL_START } from '../../containers/plotter/presenters/page';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
 const trackEvent = trackCategoryEvent('connector');
+
+const DeviceOption = ({ label, type, deviceType, setDeviceType }) => {
+  return (
+    <label className={formStyles.radioLabel}>
+      <input
+        type="radio"
+        value={type}
+        checked={deviceType === type}
+        onChange={() => setDeviceType(type)}
+      />{' '}
+      <span>{label}</span>
+    </label>
+  );
+};
+
+DeviceOption.propTypes = {
+  label: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+  deviceType: PropTypes.string.isRequired,
+  setDeviceType: PropTypes.func.isRequired,
+};
 
 const DeviceConnector = ({ onConnected, onDisconnected }) => {
   const {
@@ -31,6 +54,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
   } = useDeviceConnector();
   const [wsAddress, setWSAddress] = useState(defaultWSAddress);
   const [wsAuth, setWSAuth] = useState('axidraw-web');
+  const [virtualVersion, setVirtualVersion] = useState('2.7.0');
 
   useEffect(() => {
     if (deviceStatus === DEVICE_STATUS_CONNECTED) {
@@ -47,24 +71,24 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
           <p>Connect to AxiDraw via USB or WebSocket.</p>
-          <label className={formStyles.radioLabel}>
-            <input
-              type="radio"
-              value={DEVICE_TYPE_USB}
-              checked={deviceType === DEVICE_TYPE_USB}
-              onChange={() => setDeviceType(DEVICE_TYPE_USB)}
-            />{' '}
-            <span>USB</span>
-          </label>
-          <label className={formStyles.radioLabel}>
-            <input
-              type="radio"
-              value={DEVICE_TYPE_WEBSOCKET}
-              checked={deviceType === DEVICE_TYPE_WEBSOCKET}
-              onChange={() => setDeviceType(DEVICE_TYPE_WEBSOCKET)}
-            />{' '}
-            <span>WebSocket</span>
-          </label>
+          <DeviceOption
+            type={DEVICE_TYPE_USB}
+            label={'USB'}
+            deviceType={deviceType}
+            setDeviceType={setDeviceType}
+          />
+          <DeviceOption
+            type={DEVICE_TYPE_WEBSOCKET}
+            label={'WebSocket'}
+            deviceType={deviceType}
+            setDeviceType={setDeviceType}
+          />
+          <DeviceOption
+            type={DEVICE_TYPE_VIRTUAL}
+            label={'Virtual'}
+            deviceType={deviceType}
+            setDeviceType={setDeviceType}
+          />
           {connectionError && <Alert type={'alert'}>{connectionError}</Alert>}
           {deviceType === DEVICE_TYPE_USB && (
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
@@ -107,6 +131,27 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
                 variant="primary"
                 onClick={() => {
                   connectDevice(wsAddress, wsAuth);
+                }}
+              >
+                Connect
+              </Button>
+            </>
+          )}
+          {deviceType === DEVICE_TYPE_VIRTUAL && (
+            <>
+              <label className={formStyles.inputLabel}>
+                <span>Version:</span>
+                <select
+                  value={virtualVersion}
+                  onChange={(e) => setVirtualVersion(e.target.value)}
+                >
+                  <option>2.7.0</option>
+                </select>
+              </label>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  connectDevice(virtualVersion);
                 }}
               >
                 Connect
