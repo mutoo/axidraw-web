@@ -19,6 +19,7 @@ export const WEBSOCKET_EVENT_MESSAGE = 'axidraw-web-ws-event-message';
 export const VIRTUAL_STATUS_DISCONNECTED = 'axidraw-web-virtual-status-disconnected';
 export const VIRTUAL_STATUS_CONNECTED = 'axidraw-web-virtual-status-connected';
 
+export const VIRTUAL_EVENT_STARTED = 'axidraw-web-virtual-event-started';
 export const VIRTUAL_EVENT_CONNECTED = 'axidraw-web-virtual-event-connected';
 export const VIRTUAL_EVENT_DISCONNECTED = 'axidraw-web-virtual-event-disconnected';
 export const VIRTUAL_EVENT_MESSAGE = 'axidraw-web-virtual-event-message';

@@ -6,6 +6,7 @@ import {
   VIRTUAL_EVENT_CONNECTED,
   VIRTUAL_EVENT_DISCONNECTED,
   VIRTUAL_EVENT_MESSAGE,
+  VIRTUAL_EVENT_STARTED,
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
 } from './consts';
@@ -14,24 +15,28 @@ import { encode } from '../ebb/utils';
 
 export const createVirtualDeviceProxy = ({ version }) => {
   const emitter = new EventEmitter();
+  const proxy = window.open(
+    `virtual.html?ebb=${version}`,
+    '_blank',
+    'popup=1,width=800,height=600',
+  );
   let proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
-  let target = null;
-  window.open(`virtual.html?version=${version}`);
   const onMessage = (event) => {
+    if (event.source !== proxy) {
+      return;
+    }
     switch (event.data.type) {
+      case VIRTUAL_EVENT_STARTED:
+        proxyStatus = VIRTUAL_STATUS_CONNECTED;
+        emitter.emit(VIRTUAL_EVENT_CONNECTED);
+        break;
       case VIRTUAL_EVENT_MESSAGE:
         emitter.emit(VIRTUAL_EVENT_MESSAGE, encode(event.data.data));
         break;
       case VIRTUAL_EVENT_DISCONNECTED:
         proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
-        target = null;
         emitter.emit(VIRTUAL_EVENT_DISCONNECTED);
         window.removeEventListener('message', onMessage);
-        break;
-      case VIRTUAL_EVENT_CONNECTED:
-        proxyStatus = VIRTUAL_STATUS_CONNECTED;
-        target = event.source;
-        emitter.emit(VIRTUAL_EVENT_CONNECTED);
         break;
       default:
       // ignore
@@ -49,12 +54,11 @@ export const createVirtualDeviceProxy = ({ version }) => {
       emitter.on(VIRTUAL_EVENT_DISCONNECTED, listener);
     },
     send(message) {
-      target.postMessage({ type: 'command', command: message });
+      proxy.postMessage({ type: 'command', command: message });
     },
     close() {
       proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
-      target.postMessage({ type: VIRTUAL_EVENT_DISCONNECTED });
-      target = null;
+      proxy.postMessage({ type: VIRTUAL_EVENT_DISCONNECTED });
     },
     get status() {
       return proxyStatus;
