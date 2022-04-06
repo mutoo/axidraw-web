@@ -22,7 +22,7 @@ export async function* executor(commandQueue) {
 }
 
 export default function createVM({ version }) {
-  const initialMotor = { x: 0, y: 0 };
+  const initialMotor = { a1: 0, a2: 0, m1: 1, m2: 1 };
   const initialServo = { min: 0, max: 0, rate: 400 };
   const context = {
     version,
