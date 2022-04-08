@@ -72,8 +72,8 @@ export default function createVM({ version }) {
   const motorDisposer = reaction(
     () => [context.motor.f1, context.motor.f2],
     ([f1, f2]) => {
-      osillatorNodeA1.frequency.value = f1;
-      osillatorNodeA2.frequency.value = f2;
+      osillatorNodeA1.frequency.value = f1 | 0;
+      osillatorNodeA2.frequency.value = f2 | 0;
     },
   );
 
