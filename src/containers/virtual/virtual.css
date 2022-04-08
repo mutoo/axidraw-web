@@ -1,0 +1,13 @@
+.canvas {
+  position: fixed;
+  top: 0;
+  bottom: 230px;
+  width: 100%;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 230px;
+}

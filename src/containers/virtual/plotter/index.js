@@ -50,7 +50,7 @@ export default function createVM({ version }) {
   osillatorNodeServo.type = 'sawtooth';
   osillatorNodeServo.frequency.value = 0;
   const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0.01;
+  gainNode.gain.value = 0.005;
   gainNode.connect(audioCtx.destination);
   osillatorNodeA1.connect(gainNode);
   osillatorNodeA2.connect(gainNode);
