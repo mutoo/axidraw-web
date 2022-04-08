@@ -1,8 +1,14 @@
-.canvas {
+.stage {
   position: fixed;
   top: 0;
   bottom: 230px;
   width: 100%;
+}
+
+.plotter {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .footer {

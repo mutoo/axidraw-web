@@ -4,7 +4,7 @@ import { reaction } from 'mobx';
 import styles from './canvas.css';
 import { aaSteps2xyDist } from '../../../math/ebb';
 
-const Canvas = ({ vm }) => {
+const Canvas = ({ vm, width, height }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -34,8 +34,8 @@ const Canvas = ({ vm }) => {
   return (
     <div className={styles.root}>
       <canvas
-        width={2970}
-        height={2100}
+        width={width}
+        height={height}
         className={styles.canvas}
         ref={canvasRef}
       />
@@ -46,6 +46,8 @@ const Canvas = ({ vm }) => {
 
 Canvas.propTypes = {
   vm: PropTypes.object.isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
 };
 
 export default Canvas;

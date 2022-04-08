@@ -70,7 +70,7 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       <h3>Device</h3>
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
-          <p>Connect to AxiDraw via USB or WebSocket.</p>
+          <p>Connect to AxiDraw via USB, WebSocket or Virtual.</p>
           <DeviceOption
             type={DEVICE_TYPE_USB}
             label={'USB'}

@@ -18,7 +18,7 @@ export const createVirtualDeviceProxy = ({ version }) => {
   const proxy = window.open(
     `virtual.html?ebb=${version}`,
     '_blank',
-    'popup=1,width=800,height=600',
+    'popup=1,width=1024,height=768',
   );
   let proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
   const onMessage = (event) => {

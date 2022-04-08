@@ -1,0 +1,19 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.dot {
+  display: block;
+  border-radius: 50%;
+  background-color: red;
+  width: 50px;
+  height: 50px;
+  transform: translate(-50%, -50%);
+  transition: opacity ease-out 0.1s;
+}
+
+.dotUp {
+  opacity: 0.5;
+}
