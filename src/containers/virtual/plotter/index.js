@@ -8,7 +8,7 @@ export async function* executor(commandQueue) {
   while (true) {
     yield;
     let head = commandQueue[0];
-    if (head) {
+    while (head) {
       const [resolve, cmd] = head;
       // eslint-disable-next-line no-await-in-loop
       const { done, value: result } = await cmd.next();

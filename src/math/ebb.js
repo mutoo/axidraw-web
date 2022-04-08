@@ -53,6 +53,7 @@ export const rsa2t = ({ rate, step, acc }) => {
   const S = step;
   const V = rate2s(rate);
   const A = rate2s(acc * 25000);
+  if (V === 0) return null;
   if (A === 0) return S / V;
   const delta = 2 * A * S + V * V;
   if (delta < 0) return null;
