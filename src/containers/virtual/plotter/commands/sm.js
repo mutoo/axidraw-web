@@ -12,6 +12,7 @@ export default {
     const a2start = context.motor.a2;
     const delta1 = parseInt(s1, 10) || 0;
     const delta2 = parseInt(s2, 10) || 0;
+    yield ENDING_OK_CR_NL;
     if (delta1 === 0 && delta2 === 0) {
       await delay(parseInt(duration, 10) / 1000);
     } else {
@@ -21,6 +22,5 @@ export default {
         parseInt(duration, 10),
       );
     }
-    return ENDING_OK_CR_NL;
   },
 };

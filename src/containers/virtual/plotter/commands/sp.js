@@ -9,7 +9,7 @@ export default {
   title: 'Set pen state',
   async *create(context, value, duration) {
     runInAction(() => {
-      context.pen = value;
+      context.pen = parseInt(value, 10);
     });
     if (duration) {
       await delay(duration);

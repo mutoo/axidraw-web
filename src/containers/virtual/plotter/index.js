@@ -13,8 +13,10 @@ export async function* executor(commandQueue) {
       const [resolve, cmd] = head;
       // eslint-disable-next-line no-await-in-loop
       const { done, value: result } = await cmd.next();
-      if (done) {
+      if (result) {
         resolve(result);
+      }
+      if (done) {
         commandQueue.shift();
       }
       head = commandQueue[0];
@@ -64,8 +66,6 @@ export default function createVM({ version }) {
     ([f1, f2]) => {
       osillator1.frequency.value = f1;
       osillator2.frequency.value = f2;
-      // eslint-disable-next-line no-console
-      console.log(`motor state:${[f1, f2]}, ${gainNode.gain.value}`);
     },
   );
 
