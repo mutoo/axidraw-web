@@ -59,6 +59,7 @@ const VirtualPlotter = () => {
     return () => {
       window.removeEventListener('message', messageHandle);
       window.removeEventListener('beforeunload', disconnect);
+      vm.destroy();
     };
   }, []);
 
