@@ -1,5 +1,6 @@
 import { ENDING_CR } from 'communication/ebb/constants';
-import { observable, reaction, runInAction } from 'mobx';
+import { observable, reaction } from 'mobx';
+import { servoTime } from 'math/ebb';
 import * as commands from './commands';
 
 export async function* executor(commandQueue) {
@@ -26,7 +27,7 @@ export async function* executor(commandQueue) {
 
 export default function createVM({ version }) {
   const initialMotor = { a1: 0, a2: 0, m1: 1, m2: 1 };
-  const initialServo = { min: 0, max: 0, rate: 400 };
+  const initialServo = { min: 12000, max: 16000, rate: 400 };
   const context = observable({
     version,
     pen: 1,
@@ -38,34 +39,41 @@ export default function createVM({ version }) {
   const vm = executor(commandQueue);
   vm.next(); // ready
 
+  const audioCtx = new AudioContext();
+  const osillatorNodeA1 = audioCtx.createOscillator();
+  osillatorNodeA1.type = 'square';
+  osillatorNodeA1.frequency.value = 0;
+  const osillatorNodeA2 = audioCtx.createOscillator();
+  osillatorNodeA2.type = 'square';
+  osillatorNodeA2.frequency.value = 0;
+  const osillatorNodeServo = audioCtx.createOscillator();
+  osillatorNodeServo.type = 'sawtooth';
+  osillatorNodeServo.frequency.value = 0;
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0.01;
+  gainNode.connect(audioCtx.destination);
+  osillatorNodeA1.connect(gainNode);
+  osillatorNodeA2.connect(gainNode);
+  osillatorNodeServo.connect(gainNode);
+  osillatorNodeA1.start();
+  osillatorNodeA2.start();
+  osillatorNodeServo.start();
+
   const penDisposer = reaction(
     () => context.pen,
     (state) => {
-      // eslint-disable-next-line no-console
-      console.log(`pen state:${state}`);
+      const { min, max, rate } = context.servo;
+      osillatorNodeServo.frequency.value = rate;
+      const t = servoTime(min, max, rate) / 1000;
+      osillatorNodeServo.frequency.setValueAtTime(0, audioCtx.currentTime + t);
     },
   );
-
-  const audioCtx = new AudioContext();
-  const osillator1 = audioCtx.createOscillator();
-  osillator1.type = 'square';
-  const osillator2 = audioCtx.createOscillator();
-  osillator2.type = 'square';
-  const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0.01;
-  osillator1.connect(gainNode);
-  osillator2.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  osillator1.frequency.value = 0;
-  osillator2.frequency.value = 0;
-  osillator1.start();
-  osillator2.start();
 
   const motorDisposer = reaction(
     () => [context.motor.f1, context.motor.f2],
     ([f1, f2]) => {
-      osillator1.frequency.value = f1;
-      osillator2.frequency.value = f2;
+      osillatorNodeA1.frequency.value = f1;
+      osillatorNodeA2.frequency.value = f2;
     },
   );
 
@@ -91,8 +99,9 @@ export default function createVM({ version }) {
       vm.next({ abort: true }); // abort
       penDisposer();
       motorDisposer();
-      osillator1.stop();
-      osillator2.stop();
+      osillatorNodeA1.stop();
+      osillatorNodeA2.stop();
+      osillatorNodeServo.stop();
     },
   };
 }
