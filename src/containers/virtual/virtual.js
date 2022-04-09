@@ -13,6 +13,7 @@ import createVM from './plotter';
 import Canvas from './components/canvas';
 import styles from './virtual.css';
 import PenHolder from './components/pen-holder';
+import { logger } from './utils';
 
 const VirtualPlotter = () => {
   const [deviceStatus, setDeviceStatus] = useState(VIRTUAL_STATUS_DISCONNECTED);
@@ -55,6 +56,7 @@ const VirtualPlotter = () => {
       window.opener.postMessage({
         type: VIRTUAL_EVENT_DISCONNECTED,
       });
+      logger.debug('disconnected.');
     };
     const messageHandle = (event) => {
       switch (event.data.type) {
@@ -64,7 +66,9 @@ const VirtualPlotter = () => {
           disconnect();
           break;
         case 'command':
+          logger.debug(`Received command: ${event.data.command}`);
           vm.execute(event.data.command).then((resp) => {
+            logger.debug(`Respond: ${resp}`);
             window.opener.postMessage({
               type: VIRTUAL_EVENT_MESSAGE,
               data: resp,
@@ -81,6 +85,7 @@ const VirtualPlotter = () => {
       type: VIRTUAL_EVENT_STARTED,
     });
 
+    logger.debug('connected.');
     setDeviceStatus(VIRTUAL_STATUS_CONNECTED);
     setPlotter(vm);
 
