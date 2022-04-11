@@ -5,6 +5,7 @@ import { preventDefault } from 'utils/dom-event';
 import classNames from 'classnames';
 import styles from './page.css';
 import PlotterContext from '../../context';
+import { PLANNING_PHASE_SETUP } from '../../presenters/planning';
 
 const Page = observer(({ ...props }) => {
   const { planning, page } = useContext(PlotterContext);
@@ -15,9 +16,14 @@ const Page = observer(({ ...props }) => {
   return (
     <g
       onDragOver={preventDefault()}
-      onDragEnter={preventDefault(() => setDropping(true))}
+      onDragEnter={preventDefault(() =>
+        setDropping(planning.phase === PLANNING_PHASE_SETUP && true),
+      )}
       onDragLeave={preventDefault(() => setDropping(false))}
       onDrop={preventDefault((e) => {
+        if (planning.phase !== PLANNING_PHASE_SETUP) {
+          return;
+        }
         setDropping(false);
         if (!e.dataTransfer.files.length) {
           return;

@@ -1,4 +1,6 @@
 .root {
+  pointer-events: none;
+
   * {
     stroke: #333 !important;
   }

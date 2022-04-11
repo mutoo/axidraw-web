@@ -240,7 +240,7 @@ async function* plot({
       }
     }
 
-    bufferTime += 3e3;
+    bufferTime += 1e3;
     logger.debug(`pen is homing: ${bufferTime}`);
     await delay(bufferTime);
   } catch (e) {

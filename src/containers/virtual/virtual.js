@@ -19,7 +19,7 @@ const VirtualPlotter = () => {
   const [deviceStatus, setDeviceStatus] = useState(VIRTUAL_STATUS_DISCONNECTED);
   const stageRef = useRef(null);
   const [plotter, setPlotter] = useState(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 2970, height: 2100 });
+  const [canvasSize] = useState({ width: 2970, height: 2100 });
   const [transform, setTransform] = useState(null);
   useEffect(() => {
     const onResize = () => {
@@ -50,6 +50,7 @@ const VirtualPlotter = () => {
       // eslint-disable-next-line no-alert
       alert('Please open virtual plotter from axidraw web device connector!');
       window.close();
+      return () => {};
     }
     const vm = createVM({ version: '2.7.0' });
     const disconnect = () => {

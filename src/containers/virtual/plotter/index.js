@@ -61,9 +61,9 @@ export default function createVM({ version }) {
 
   const penDisposer = reaction(
     () => context.pen,
-    (state) => {
+    () => {
       const { min, max, rate } = context.servo;
-      osillatorNodeServo.frequency.value = rate;
+      osillatorNodeServo.frequency.value = 600;
       const t = servoTime(min, max, rate) / 1000;
       osillatorNodeServo.frequency.setValueAtTime(0, audioCtx.currentTime + t);
     },

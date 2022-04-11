@@ -14,7 +14,6 @@ import formStyles from 'components/ui/form.css';
 import { trackCategoryEvent } from 'configureGA';
 import Button from '../ui/button/button';
 import Alert from '../ui/alert/alert';
-import { PAGE_ALIGNMENT_HORIZONTAL_START } from '../../containers/plotter/presenters/page';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
@@ -163,7 +162,9 @@ const DeviceConnector = ({ onConnected, onDisconnected }) => {
       {deviceStatus === DEVICE_STATUS_CONNECTED && (
         <>
           <div className="grid grid-flow-col items-center gap-4">
-            <p>{deviceType === DEVICE_TYPE_USB ? 'USB' : 'WebSocket'}</p>
+            {deviceType === DEVICE_TYPE_USB && <p>USB</p>}
+            {deviceType === DEVICE_TYPE_WEBSOCKET && <p>WebSocket</p>}
+            {deviceType === DEVICE_TYPE_VIRTUAL && <p>Virtual Plotter</p>}
             <p>EBB v{deviceVersion}</p>
             <Button onClick={() => disconnectDevice()}>Disconnect</Button>
           </div>
