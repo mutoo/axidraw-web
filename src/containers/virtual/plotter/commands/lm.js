@@ -1,5 +1,6 @@
 import { ENDING_OK_CR_NL } from 'communication/ebb/constants';
 import { rate2s, rsa2t } from 'math/ebb';
+import { runInAction } from 'mobx';
 import { accelMotion } from '../utils';
 
 export const cmd = 'LM';
@@ -18,6 +19,13 @@ export default {
     const d2 = rsa2t({ rate: r2, step: Math.abs(s2), acc: a2 }) || 0;
     const duration = Math.max(d1, d2) * 1000;
     yield ENDING_OK_CR_NL;
+    if (context.mode === 'fast') {
+      runInAction(() => {
+        context.motor.a1 += s1;
+        context.motor.a2 += s2;
+      });
+      return;
+    }
     await accelMotion(
       context,
       [s1, s2],

@@ -11,7 +11,7 @@ export default {
     runInAction(() => {
       context.pen = parseInt(value, 10);
     });
-    if (duration) {
+    if (context.mode !== 'fast' && duration) {
       await delay(duration);
     }
     return ENDING_OK_CR_NL;

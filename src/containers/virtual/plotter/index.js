@@ -34,6 +34,7 @@ export default function createVM({ version }) {
     PRG: 0,
     motor: { ...initialMotor },
     servo: { ...initialServo },
+    mode: 'normal',
   });
   const commandQueue = [];
   const vm = executor(commandQueue);

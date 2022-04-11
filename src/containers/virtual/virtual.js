@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import qs from 'qs';
 import classnames from 'classnames';
 import sheetsStyles from 'components/ui/sheet.css';
 import Footer from 'components/footer/footer';
@@ -52,7 +53,10 @@ const VirtualPlotter = () => {
       window.close();
       return () => {};
     }
-    const vm = createVM({ version: '2.7.0' });
+    const options = qs.parse(window.location.search);
+    const vm = createVM({
+      version: options.ebb || '2.7.0',
+    });
     const disconnect = () => {
       window.opener.postMessage({
         type: VIRTUAL_EVENT_DISCONNECTED,

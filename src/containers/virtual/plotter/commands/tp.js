@@ -11,7 +11,7 @@ export default {
     runInAction(() => {
       context.pen = 1 - context.pen;
     });
-    if (duration) {
+    if (context.mode !== 'fast' && duration) {
       await delay(duration);
     }
     return ENDING_OK_CR_NL;
