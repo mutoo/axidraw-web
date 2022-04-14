@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { reaction } from 'mobx';
 import classNames from 'classnames';
+import Carriage from 'assets/svg/pen-holder.svg';
 import styles from './pen-holder.css';
 import { aaSteps2xyDist } from '../../../math/ebb';
 
@@ -35,6 +36,7 @@ const PenHolder = ({ vm }) => {
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
     >
       <span className={classNames(styles.dot, pen && styles.dotUp)} />
+      <img className={styles.carriage} src={Carriage} />
     </div>
   );
 };
