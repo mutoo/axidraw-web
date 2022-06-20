@@ -17,5 +17,5 @@ if (process.env.NODE_ENV === 'development') {
   Logger.get('device').setLevel(Logger.INFO);
   Logger.get('ebb').setLevel(Logger.INFO);
   Logger.get('plotter').setLevel(Logger.INFO);
-  Logger.get('virtual').setLevel(Logger.DEBUG);
+  Logger.get('virtual').setLevel(Logger.INFO);
 }

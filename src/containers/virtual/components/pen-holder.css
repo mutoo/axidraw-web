@@ -26,4 +26,9 @@
   height: 3322px;
   max-width: none;
   transform: translate(0, -100%);
+  transition: opacity ease-out 0.5s;
+}
+
+.carriageHidden {
+  opacity: 0;
 }

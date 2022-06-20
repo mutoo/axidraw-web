@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import qs from 'qs';
-import classnames from 'classnames';
-import sheetsStyles from 'components/ui/sheet.css';
 import Footer from 'components/footer/footer';
 import {
   VIRTUAL_EVENT_DISCONNECTED,
@@ -104,6 +102,12 @@ const VirtualPlotter = () => {
   return (
     <>
       <div className={styles.stage} ref={stageRef}>
+        <div className={styles.frame} style={transform}>
+          <div
+            className={styles.board}
+            style={{ width: canvasSize.width, height: canvasSize.height }}
+          />
+        </div>
         <Canvas
           vm={plotter}
           width={canvasSize.width}
@@ -114,9 +118,6 @@ const VirtualPlotter = () => {
         </div>
       </div>
       <div className={styles.footer}>
-        <div className={classnames(sheetsStyles.root)}>
-          virtual plotter: {deviceStatus}
-        </div>
         <Footer />
       </div>
     </>

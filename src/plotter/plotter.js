@@ -145,8 +145,8 @@ async function* plot({
       if (speedMode === PLOTTER_SPEED_MODE_CONSTANT) {
         const absDeltaA1 = Math.abs(deltaA1);
         const absDeltaA2 = Math.abs(deltaA2);
-        const mt1 = absDeltaA1 * 1310;
-        const mt2 = absDeltaA2 * 1310;
+        const mt1 = (absDeltaA1 / 1.31) * 1000; // minimum speed: 1.31 steps/second
+        const mt2 = (absDeltaA2 / 1.31) * 1000;
 
         t = Math.ceil((deltaAA / penRate) * 1000);
         if (t > mt1 && t > mt2) {
@@ -238,6 +238,14 @@ async function* plot({
         logger.debug(`stop plotting`);
         break;
       }
+    }
+
+    if (context.a1 || context.a2) {
+      // reset the final error
+      const blockDist = Math.abs(context.a1) + Math.abs(context.a2);
+      const t = Math.ceil((blockDist / penUpMoveSpeed.get()) * 1000);
+      bufferTime += t;
+      await device.executeCommand(commands.sm, t, -context.a1, -context.a2);
     }
 
     bufferTime += 1e3;

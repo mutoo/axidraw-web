@@ -36,7 +36,13 @@ const PenHolder = ({ vm }) => {
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}
     >
       <span className={classNames(styles.dot, pen && styles.dotUp)} />
-      <img className={styles.carriage} src={Carriage} />
+      <img
+        className={classNames(styles.carriage, {
+          [styles.carriageHidden]: pos.x === 0 && pos.y === 0,
+        })}
+        src={Carriage}
+        alt="pen holder"
+      />
     </div>
   );
 };
