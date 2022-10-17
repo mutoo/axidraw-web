@@ -23,13 +23,13 @@ export default function* pathToLines(path, opt) {
   let prevPos = [0, 0];
   let currPos;
   let startPos; // store the start position of last Move command
-  let prevBezier; // store prev control points for connected beziers
+  let prevCmd; // store prev cmd, useful to get control points for connected beziers
   for (const cmd of svgPathNormalizer(parsedPath)) {
     switch (cmd[0]) {
       // move command
       case 'M':
         prevPos = cmd[1];
-        // also set down the startPos for Z command to return back
+        // also set down the startPos for Z command to return
         startPos = prevPos;
         break;
       // line command
@@ -60,17 +60,21 @@ export default function* pathToLines(path, opt) {
           );
           const bezier = ['C', ...controlPoints, cmd[2]];
           prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
-          prevBezier = cmd;
         }
         break;
       // simple quadratic bezier command
       case 'T':
         {
-          if (!prevBezier || (prevBezier[0] !== 'Q' && prevBezier[0] !== 'T')) {
-            throw new Error(`invalid T command can only follow by Q or T.`);
+          let cx1;
+          let cy1;
+          // the previous T was converted to Q in following code, so no need to
+          // handle T command here
+          if (!prevCmd || prevCmd[0] !== 'Q') {
+            [cx1, cy1] = prevPos;
+          } else {
+            cx1 = 2 * prevPos[0] - prevCmd[1][0];
+            cy1 = 2 * prevPos[1] - prevCmd[1][1];
           }
-          const cx1 = 2 * prevPos[0] - prevBezier[1][0];
-          const cy1 = 2 * prevPos[1] - prevBezier[1][1];
           const controlPoints = quadToCubicBezierControlPoints(
             prevPos,
             [cx1, cy1],
@@ -79,38 +83,39 @@ export default function* pathToLines(path, opt) {
           const bezier = ['C', ...controlPoints, cmd[1]];
           prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
           // convert to Q so that the (cx1, cy1) can be pass to next command
-          prevBezier = ['Q', [cx1, cy1], cmd[1]];
+          prevCmd = ['Q', [cx1, cy1], cmd[1]];
         }
         break;
       case 'C':
-        {
-          const bezier = cmd;
-          prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
-          prevBezier = bezier;
-        }
+        prevPos = yield* bezierToLines(cmd, prevPos, ctm, opt);
         break;
       case 'S':
         {
-          if (!prevBezier) {
-            throw new Error(`invalid S command: ${cmd}`);
+          let cx1;
+          let cy1;
+          if (!prevCmd || (prevCmd[0] !== 'C' && prevCmd[0] !== 'S')) {
+            [cx1, cy1] = prevPos;
+          } else {
+            let pcx2;
+            let pcy2;
+            switch (prevCmd[0]) {
+              case 'C':
+                [pcx2, pcy2] = prevCmd[2];
+                break;
+              case 'S':
+                [pcx2, pcy2] = prevCmd[1];
+                break;
+              default:
+                throw new Error(
+                  `invalid S command following by ${prevCmd[0]}.`,
+                );
+            }
+            cx1 = 2 * prevPos[0] - pcx2;
+            cy1 = 2 * prevPos[1] - pcy2;
           }
-          let pcx2;
-          let pcy2;
-          switch (prevBezier[0]) {
-            case 'C':
-              [pcx2, pcy2] = prevBezier[2];
-              break;
-            case 'S':
-              [pcx2, pcy2] = prevBezier[1];
-              break;
-            default:
-              throw new Error(`invalid S command can only follow by C or S.`);
-          }
-          const cx1 = 2 * prevPos[0] - pcx2;
-          const cy1 = 2 * prevPos[1] - pcy2;
+
           const bezier = ['C', [cx1, cy1], cmd[1], cmd[2]];
           prevPos = yield* bezierToLines(bezier, prevPos, ctm, opt);
-          prevBezier = cmd;
         }
         break;
       case 'A':
@@ -124,5 +129,6 @@ export default function* pathToLines(path, opt) {
         break;
       default:
     }
+    prevCmd = cmd;
   }
 }
