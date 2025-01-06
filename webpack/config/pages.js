@@ -34,5 +34,14 @@ export const generatePages = () => ({
       },
       ...shareOptions,
     }),
+    new HtmlWebpackPlugin({
+      filename: 'virtual.html',
+      chunks: ['virtual'],
+      template: './src/pages/sub.html',
+      templateParameters: {
+        title: 'Virtual Plotter',
+      },
+      ...shareOptions,
+    }),
   ],
 });

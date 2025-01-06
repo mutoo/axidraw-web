@@ -1,3 +1,5 @@
+import { HIGH_DPI_XY } from 'communication/ebb/constants';
+
 /**
  * This function transform x,y coordination to two-axis coordination with matrix
  * | 1,  1 |
@@ -6,8 +8,6 @@
  * @param y
  * @returns {{a1: number, a2: number}}
  */
-import { HIGH_DPI_XY } from '../communication/ebb/constants';
-
 export const xy2aa = ({ x, y }) => ({
   a1: x + y,
   a2: x - y,
@@ -53,7 +53,10 @@ export const rsa2t = ({ rate, step, acc }) => {
   const S = step;
   const V = rate2s(rate);
   const A = rate2s(acc * 25000);
-  if (A === 0) return S / V;
+  if (A === 0) {
+    if (V === 0) return null;
+    return S / V;
+  }
   const delta = 2 * A * S + V * V;
   if (delta < 0) return null;
   const t0 = (Math.sqrt(delta) - V) / A;
@@ -82,6 +85,11 @@ export const mm2steps = (mm, mode = 1) => {
   return (stepsPerMm * mm) | 0;
 };
 
+export const steps2mm = (steps, mode) => {
+  const stepsPerMm = HIGH_DPI_XY / 2 ** (mode - 1) / 25.4;
+  return steps / stepsPerMm;
+};
+
 /**
  * calculator axis steps {a1, a2} from {x, y} coordinate
  * @param x x component in mm
@@ -93,6 +101,12 @@ export const xyDist2aaSteps = ({ x, y }, mode = 1) => {
   const xSteps = mm2steps(x, mode);
   const ySteps = mm2steps(y, mode);
   return xy2aa({ x: xSteps, y: ySteps });
+};
+
+export const aaSteps2xyDist = ({ a1, a2 }, mode = 1) => {
+  const a1mm = steps2mm(a1, mode);
+  const a2mm = steps2mm(a2, mode);
+  return aa2xy({ a1: a1mm, a2: a2mm });
 };
 
 export const aaStepsToLMParams = ({ a1, a2 }, t, clear = 3) => {

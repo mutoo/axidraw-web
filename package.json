@@ -1,6 +1,6 @@
 {
   "name": "axidraw-web",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "server/index.js",
   "license": "MIT",
   "engines": {
@@ -25,6 +25,7 @@
   "dependencies": {
     "@serialport/parser-regex": "^9.0.7",
     "express": "^4.17.1",
+    "qs": "^6.10.3",
     "serialport": "^9.2.0",
     "ws": "^7.4.6"
   },

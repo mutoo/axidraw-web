@@ -31,6 +31,7 @@ const createWork = () =>
       if (!device && pit) {
         pit.return();
         this.plottingInProgress.set(null);
+        this.plotterStatus = PLOTTER_STATUS_STANDBY;
       }
     },
     speedMode: PLOTTER_SPEED_MODE_ACCELERATING,

@@ -1,0 +1,34 @@
+.stage {
+  position: fixed;
+  top: 50px;
+  bottom: 100px;
+  width: 100%;
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: white;
+  box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.25);
+}
+
+.plotter {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.footer {
+  position: fixed;
+  width: 100%;
+  height: 100px;
+  padding-top: 30px;
+  bottom: 0;
+}

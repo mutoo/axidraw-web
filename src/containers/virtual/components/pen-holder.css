@@ -1,0 +1,34 @@
+.root {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.dot {
+  display: block;
+  border-radius: 50%;
+  background-color: red;
+  width: 25px;
+  height: 25px;
+  transform: translate(-50%, -50%);
+  transition: opacity ease-out 0.3s;
+}
+
+.dotUp {
+  opacity: 0;
+}
+
+.carriage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 712px;
+  height: 3322px;
+  max-width: none;
+  transform: translate(0, -100%);
+  transition: opacity ease-out 0.5s;
+}
+
+.carriageHidden {
+  opacity: 0;
+}

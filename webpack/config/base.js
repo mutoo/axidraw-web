@@ -13,6 +13,7 @@ export default merge([
       plotter: './src/index.js',
       debugger: './src/debugger.js',
       composer: './src/composer.js',
+      virtual: './src/virtual.js',
     },
     resolve: {
       modules: [path.resolve(__dirname, '../../src'), 'node_modules'],
