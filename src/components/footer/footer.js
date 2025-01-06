@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <div className={styles.root}>
       <p>
-        AxiDraw Web &copy; 2021-2022{' '}
+        AxiDraw Web &copy; 2021-2025{' '}
         <a href={'https://mutoo.im/'} target={'_blank'} rel="noreferrer">
           mutoo.im
         </a>

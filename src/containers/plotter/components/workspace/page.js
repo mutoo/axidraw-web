@@ -17,7 +17,7 @@ const Page = observer(({ ...props }) => {
     <g
       onDragOver={preventDefault()}
       onDragEnter={preventDefault(() =>
-        setDropping(planning.phase === PLANNING_PHASE_SETUP && true),
+        setDropping(planning.phase === PLANNING_PHASE_SETUP),
       )}
       onDragLeave={preventDefault(() => setDropping(false))}
       onDrop={preventDefault((e) => {

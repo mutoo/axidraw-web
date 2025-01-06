@@ -17,7 +17,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] EBB Communication via WebUSB
 - [x] EBB Communication via WebSocket
 - [x] EBB Command Debugger
-- [x] EBB Virtual Machine
+- [x] EBB Virtual Plotter
 
 ### Plotter App
 
