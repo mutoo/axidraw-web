@@ -14,7 +14,7 @@ FILENAME_CERT_CERT=localhost.crt
 mkdir -p $CERT_DIR
 cd $CERT_DIR
 
-cat >> $FILENAME_CA_CNF <<EOF
+cat > $FILENAME_CA_CNF <<EOF
 [req]
 prompt = no
 distinguished_name = req_distinguished_name
@@ -48,7 +48,7 @@ if [ ! -f "$FILENAME_CERT_KEY" ]; then
   openssl genrsa -out $FILENAME_CERT_KEY 2048
 fi
 
-cat >> $FILENAME_CERT_CNF <<EOF
+cat > $FILENAME_CERT_CNF <<EOF
 [req]
 prompt = no
 distinguished_name = req_distinguished_name
@@ -71,7 +71,7 @@ openssl req \
   -out $FILENAME_CERT_CSR
 
 # create ext config
-cat >> $FILENAME_CERT_EXT <<EOF
+cat > $FILENAME_CERT_EXT <<EOF
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
@@ -79,7 +79,7 @@ subjectAltName = @alt_names
 [alt_names] 
 DNS.1 = localhost
 DNS.2 = $(hostname)
-DNS.3 = $(ipconfig getifaddr en0).nip.io
+DNS.3 = *.nip.io
 EOF
 
 # signed cert

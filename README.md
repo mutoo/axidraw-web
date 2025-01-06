@@ -17,6 +17,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] EBB Communication via WebUSB
 - [x] EBB Communication via WebSocket
 - [x] EBB Command Debugger
+- [x] EBB Virtual Machine
 
 ### Plotter App
 
@@ -106,7 +107,7 @@ it will run a dev server at `https://localhost:8443`, which will popup automatic
 
 What if you plug in the axidraw on a Raspberry PI? No problem! This app also provide a proxy mode via WebSocket, so that you can run a web server to communicate the axidraw and your browsers in different computers.
 
-N.B. The serialport permission has to be set up so that the server can communicate with the device.
+N.B. The serialport/usb permission has to be set up so that the server can communicate with the device.
 
 ## License
 
