@@ -47,7 +47,7 @@ export const beatsMap = {
 export const parseNote = (note) => {
   const parsed = note.match(/^([whqes]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/);
   if (!parsed) throw new Error(`Can not parse note: ${note}`);
-  // eslint-disable-next-line no-unused-vars
+   
   const [_, beatsSymbol, nodeName, nodeLevel] = parsed;
   const beats = beatsSymbol.split('').reduce((sum, d) => sum + beatsMap[d], 0);
   return { beats, frequency: noteToPitch(nodeName, parseInt(nodeLevel, 10)) };
@@ -71,7 +71,7 @@ export const composeSong = (song) => {
     j: 0,
   };
   const { channel1, channel2 } = song;
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const note1 = channel1[context.i];
     const note2 = channel2[context.j];

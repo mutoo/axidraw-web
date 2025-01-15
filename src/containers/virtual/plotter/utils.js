@@ -23,7 +23,6 @@ export async function linearMotion(context, destination, duration) {
       context.motor.a1 = a1;
       context.motor.a2 = a2;
     });
-    // eslint-disable-next-line no-await-in-loop
     await delay(Math.min(duration - elapsed, interval));
     elapsed += interval;
   }
@@ -53,7 +52,6 @@ export async function accelMotion(context, dir, vel, accel, duration) {
       context.motor.f1 = (Math.abs(a1start + d1 - a1o) * 1000) / interval;
       context.motor.f2 = (Math.abs(a2start + d2 - a2o) * 1000) / interval;
     });
-    // eslint-disable-next-line no-await-in-loop
     await delay(Math.min(duration - elapsed, interval));
     elapsed += interval;
   }
