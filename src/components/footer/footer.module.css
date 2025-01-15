@@ -1,0 +1,16 @@
+.root {
+  @apply text-sm text-center mb-8;
+  /* @apply font-roboto text-grey-cc; */
+
+  p {
+    @apply leading-6;
+  }
+
+  a {
+    @apply underline;
+  }
+
+  svg {
+    @apply fill-current;
+  }
+}

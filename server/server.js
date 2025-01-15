@@ -17,7 +17,7 @@ try {
   options.key = fs.readFileSync('server/cert/localhost.key');
   options.cert = fs.readFileSync('server/cert/localhost.crt');
 } catch (e) {
-  // eslint-disable-next-line no-console
+   
   console.error('Please create and install the SSL cert first.');
   process.exit(1);
 }

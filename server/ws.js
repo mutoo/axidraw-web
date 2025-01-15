@@ -34,7 +34,7 @@ export default function setupWebSocket(app, server) {
           try {
             const { device } = data;
             port = await connectToDevice(device, (resp) => {
-              // eslint-disable-next-line no-console
+               
               console.log(`EBB: ${resp}`);
               wsSend({ type: 'ebb', resp });
             });
@@ -45,14 +45,14 @@ export default function setupWebSocket(app, server) {
             wsStatus = WEBSOCKET_STATUS_STANDBY;
             wsSend({ type: 'ready' });
           } catch (e) {
-            // eslint-disable-next-line no-console
+             
             console.log('Failed to connect EBB');
             ws.close(3001, e.toString());
           }
           break;
         case 'command':
           if (port) {
-            // eslint-disable-next-line no-console
+             
             console.log(`Client: ${data.command}`);
             port.write(data.command);
           } else {
@@ -60,19 +60,19 @@ export default function setupWebSocket(app, server) {
           }
           break;
         default:
-          // eslint-disable-next-line no-console
+           
           console.log(`Unknown message type: ${data.type}`);
           ws.close(3003, 'Unknown message.');
       }
     });
     ws.on('error', (e) => {
-      // eslint-disable-next-line no-console
+       
       console.error(e.toString());
       ws.close(3005, `Internal Error: ${e.toString()}`);
     });
     ws.on('close', () => {
       if (port) {
-        // eslint-disable-next-line no-console
+         
         console.log('Disconnect from client, close EBB');
         port.write('R\r');
         port.close();
