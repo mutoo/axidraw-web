@@ -2,16 +2,20 @@ import { reaction } from 'mobx';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
-import { Command } from '@/communication/ebb/command';
+import { Command, CommandWithParams } from '@/communication/ebb/command';
 import Alert from '@/components/ui/alert/alert';
 import Button from '@/components/ui/button/button';
 import formStyles from '@/components/ui/form.module.css';
 import { PlotterContext } from '../../context';
 import { trackEvent } from '../../utils';
 
-const frequentlyCommands = [
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const frequentlyCommands: CommandWithParams<Command<any, unknown>>[] = [
   {
     cmd: commands.r,
+    title: 'Reset',
+    params: [],
   },
   {
     cmd: commands.em,
@@ -20,6 +24,8 @@ const frequentlyCommands = [
   },
   {
     cmd: commands.tp,
+    title: 'Toggle Pen',
+    params: [],
   },
   {
     cmd: commands.sp,
@@ -37,13 +43,13 @@ const SimpleDebugger = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const { work } = useContext(PlotterContext);
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
-    async (cmd: Command<unknown>, params: unknown[] = []) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async <T extends any[], R>(cmd: Command<T, R>, params: T) => {
       try {
         const cmdResult = await device.executeCommand(cmd, ...params);
         if (typeof cmdResult === 'object') {
           setResult(JSON.stringify(cmdResult));
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-base-to-string
           setResult(String(cmdResult));
         }
       } catch (err) {
@@ -72,7 +78,7 @@ const SimpleDebugger = ({ device }: { device: IDeviceConnector<unknown> }) => {
     return () => {
       dispose();
     };
-  }, []);
+  }, [device, work.servoMax, work.servoMin, work.servoRate]);
 
   return (
     <form className={formStyles.root}>

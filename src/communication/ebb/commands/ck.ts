@@ -1,6 +1,6 @@
-import { CommandGenerator } from '../command';
+import { CommandGenerator, createCommand } from '../command';
 import { ENDING_OK_CR_NL } from '../constants';
-import { createCommand, readUntil, toInt, transformResult } from '../utils';
+import { readUntil, toInt, transformResult } from '../utils';
 
 export const cmd = 'CK';
 
@@ -31,5 +31,14 @@ export default createCommand(
           return idx < 6 ? toInt(value) : value;
         });
     });
+  },
+  (
+    params: string,
+  ): [number, number, number, number, number, number, string, string] => {
+    const [v1, v2, v3, v4, v5, v6, v7, v8] = params.split(',');
+    const [n1, n2, n3, n4, n5, n6] = [v1, v2, v3, v4, v5, v6].map((p) =>
+      parseInt(p, 10),
+    );
+    return [n1, n2, n3, n4, n5, n6, v7, v8];
   },
 );

@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import { ENDING_CR_NL } from '../constants';
-import { createCommand, readUntil, toInt, transformResult } from '../utils';
+import { noParameters, readUntil, toInt, transformResult } from '../utils';
 
 export const cmd = 'QG';
 
@@ -24,6 +25,7 @@ export default createCommand(
       };
     });
   },
+  noParameters,
   {
     version: '2.6.2',
   },

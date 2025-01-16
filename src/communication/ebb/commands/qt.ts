@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import { ENDING_OK_CR_NL } from '../constants';
-import { createCommand, readUntil, transformResult } from '../utils';
+import { noParameters, readUntil, transformResult } from '../utils';
 
 export const cmd = 'QT';
 
@@ -14,6 +15,7 @@ export default createCommand(
       result.substring(0, result.length - 6),
     );
   },
+  noParameters,
   {
     version: '2.5.4',
   },

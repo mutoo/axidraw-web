@@ -1,6 +1,6 @@
-import { CommandGenerator } from '../command';
+import { CommandGenerator, createCommand } from '../command';
 import { ENDING_CR_NL } from '../constants';
-import { createCommand, readUntil, toInt, transformResult } from '../utils';
+import { noParameters, readUntil, toInt, transformResult } from '../utils';
 
 export const cmd = 'A';
 
@@ -19,6 +19,7 @@ export default createCommand(
       }, {});
     });
   },
+  noParameters,
   {
     version: '2.2.3',
   },

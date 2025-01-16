@@ -1,8 +1,6 @@
-import {
-  CommandGenerator,
-} from '../command';
+import { CommandGenerator, createCommand } from '../command';
 import handleOKMessage from '../messages/ok';
-import { createCommand } from '../utils';
+import { noParameters } from '../utils';
 
 export const cmd = 'R';
 
@@ -16,4 +14,5 @@ export default createCommand(
     dataIn = yield parsed;
     return yield* handleOKMessage(dataIn);
   },
+  noParameters,
 );

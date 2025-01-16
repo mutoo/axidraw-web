@@ -1,7 +1,7 @@
+import { createCommand } from '../command';
 import { ENDING_OK_CR_NL } from '../constants';
 import {
   cmdWithOptionalParams,
-  createCommand,
   readUntil,
   toInt,
   transformResult,
@@ -33,6 +33,10 @@ export default createCommand(
         },
       };
     });
+  },
+  (params: string): [number | undefined] => {
+    const [n] = params.split(',').map(toInt);
+    return [n];
   },
   {
     version: '2.2.7',

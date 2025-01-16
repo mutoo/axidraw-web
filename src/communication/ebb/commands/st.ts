@@ -1,5 +1,5 @@
+import { createCommand } from '../command';
 import handleOKMessage from '../messages/ok';
-import { createCommand } from '../utils';
 
 export const cmd = 'ST';
 
@@ -9,6 +9,9 @@ export default createCommand(
   function* (tag: string) {
     const dataIn = yield `${cmd},${tag}\r`;
     return yield* handleOKMessage(dataIn);
+  },
+  (params: string): [string] => {
+    return [params];
   },
   {
     version: '2.5.5',

@@ -1,6 +1,5 @@
- 
-import { CommandGenerator } from '../command';
-import { createCommand, decode } from '../utils';
+import { CommandGenerator, createCommand } from '../command';
+import { decode, noParameters } from '../utils';
 
 export const cmd = 'RB';
 
@@ -16,6 +15,7 @@ export default createCommand(
       result: null,
     };
   },
+  noParameters,
   {
     version: '2.5.4',
   },

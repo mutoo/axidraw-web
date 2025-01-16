@@ -1,24 +1,8 @@
 import Logger from 'js-logger';
-import { Command, CommandGenerator } from './command';
 
 export const logger = Logger.get('ebb');
 
 export const toInt = (i: string) => parseInt(i, 10);
-
-export const createCommand = <T>(
-  cmd: string,
-  title: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: (...params: any[]) => CommandGenerator<T>,
-  options: { version?: string; execution?: number } = {},
-): Command<T> => {
-  return {
-    cmd,
-    title,
-    create,
-    ...options,
-  };
-};
 
 const decoder = new TextDecoder();
 export const decode = (buffer: number[]) =>
@@ -99,3 +83,5 @@ export const checkVersion = (
   // dMinor === dMinor
   return cPatch <= dPatch;
 };
+
+export const noParameters = (_: string): [] => [];

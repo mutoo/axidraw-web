@@ -1,6 +1,7 @@
+import { createCommand } from '../command';
 import { EXECUTION_FIFO } from '../constants';
 import handleOKMessage from '../messages/ok';
-import { cmdWithOptionalParams, createCommand } from '../utils';
+import { cmdWithOptionalParams } from '../utils';
 
 export const cmd = 'S2';
 
@@ -19,6 +20,12 @@ export default createCommand(
       delay,
     );
     return yield* handleOKMessage(dataIn);
+  },
+  (
+    params: string,
+  ): [number, number, number | undefined, number | undefined] => {
+    const [position, outputPin, rate, delay] = params.split(',').map(Number);
+    return [position, outputPin, rate, delay];
   },
   {
     execution: EXECUTION_FIFO,

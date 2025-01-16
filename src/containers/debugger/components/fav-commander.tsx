@@ -1,22 +1,32 @@
-import React, { useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
-import * as commands from 'communication/ebb';
-import formStyles from 'components/ui/form.css';
-import Button from 'components/ui/button/button';
+import { useCallback, useState } from 'react';
+import { IDeviceConnector } from '@/communication/device/device';
+import * as commands from '@/communication/ebb';
+import { Command, CommandWithParams } from '@/communication/ebb/command';
+import Button from '@/components/ui/button/button';
+import formStyles from '@/components/ui/form.module.css';
 import { trackEvent } from '../utils';
 
-const frequentlyCommands = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const frequentlyCommands: CommandWithParams<Command<any, unknown>>[] = [
   {
     cmd: commands.r,
+    title: 'Reset',
+    params: [],
   },
   {
     cmd: commands.v,
+    title: 'Get version',
+    params: [],
   },
   {
     cmd: commands.qb,
+    title: 'Query button',
+    params: [],
   },
   {
     cmd: commands.tp,
+    title: 'Toggle pen',
+    params: [],
   },
   {
     cmd: commands.sp,
@@ -40,20 +50,16 @@ const frequentlyCommands = [
   },
 ];
 
-const FavCommander = ({ device }) => {
+const FavCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
-    async (cmd, params = []) => {
+    async <T extends unknown[], R>(cmd: Command<T, R>, params: T) => {
       trackEvent('fav', cmd.title);
       try {
         const cmdResult = await device.executeCommand(cmd, ...params);
-        if (typeof cmdResult === 'object') {
-          setResult(JSON.stringify(cmdResult));
-        } else {
-          setResult(cmdResult);
-        }
+        setResult(JSON.stringify(cmdResult));
       } catch (err) {
-        setResult(err.toString());
+        setResult(String(err));
       }
     },
     [device],
@@ -69,7 +75,7 @@ const FavCommander = ({ device }) => {
             <Button
               key={title}
               onClick={() => {
-                sendCommand(cmd.cmd, cmd.params);
+                void sendCommand(cmd.cmd, cmd.params);
               }}
             >
               {title}
@@ -79,14 +85,10 @@ const FavCommander = ({ device }) => {
       </div>
       <label className={formStyles.inputLabel}>
         <span>Result:</span>
-        <textarea rows="3" defaultValue={result} readOnly />
+        <textarea rows={3} defaultValue={result} readOnly />
       </label>
     </form>
   );
-};
-
-FavCommander.propTypes = {
-  device: PropTypes.object.isRequired,
 };
 
 export default FavCommander;
