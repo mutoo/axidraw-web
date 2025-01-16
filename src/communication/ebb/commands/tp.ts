@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import handleOKMessage from '../messages/ok';
-import { cmdWithOptionalParams, createCommand } from '../utils';
+import { cmdWithOptionalParams } from '../utils';
 
 export const cmd = 'TP';
 
@@ -9,6 +10,10 @@ export default createCommand(
   function* (duration?: number) {
     const dataIn = yield cmdWithOptionalParams(cmd, duration);
     return yield* handleOKMessage(dataIn);
+  },
+  (params: string): [number | undefined] => {
+    const [duration] = params.split(',').map(Number);
+    return [duration];
   },
   {
     version: '1.9.0',

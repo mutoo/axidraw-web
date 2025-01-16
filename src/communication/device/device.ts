@@ -28,10 +28,11 @@ export type DevicePicker<T> = (devices: T[]) => Promise<T>;
 export interface IDeviceConnector<C> {
   connectDevice: (config: C) => Promise<void>;
   disconnectDevice: () => Promise<void>;
-  executeCommand: <T>(
-    cmd: Command<T>,
-    ...params: unknown[]
-  ) => Promise<T | undefined>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  executeCommand: <T extends any[], R>(
+    cmd: Command<T, R>,
+    ...params: T
+  ) => Promise<R | undefined>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: string, listener: (...args: any[]) => void): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

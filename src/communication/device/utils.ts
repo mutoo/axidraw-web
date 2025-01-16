@@ -17,14 +17,15 @@ export type PendingCommand<T> = {
   parser: CommandGenerator<T>;
 };
 
-export const executeCommand = async <T>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const executeCommand = async <T extends any[], R>(
   deviceVersion: string,
   sendToDevice: (msg: string) => Promise<void>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   commandQueue: PendingCommand<any>[],
-  command: Command<T>,
-  ...params: unknown[]
-): Promise<T | undefined> => {
+  command: Command<T, R>,
+  ...params: T
+): Promise<R | undefined> => {
   if (command.version) {
     if (!checkVersion(deviceVersion, command.version)) {
       throw new Error(
@@ -40,10 +41,10 @@ export const executeCommand = async <T>(
   if (cmdStatus.done) return Promise.resolve(undefined);
   // otherwise queues this command and waiting msg from communication.device.
   return Promise.race([
-    new Promise<T>((resolve, reject) => {
+    new Promise<R>((resolve, reject) => {
       commandQueue.push({ resolve, reject, parser: cmd });
     }),
-    timeout(60000, `EBB Command timeout: ${command.cmd}`) as Promise<T>,
+    timeout(60000, `EBB Command timeout: ${command.cmd}`) as Promise<R>,
   ]);
 };
 
@@ -65,13 +66,14 @@ export const createDeviceBind = <C>({
   let version = '';
   const emitter = new EventEmitter();
   const commandQueue: PendingCommand<unknown>[] = [];
-  const executedCommandBind = async <T>(
-    cmd: Command<T>,
-    ...params: unknown[]
-  ): Promise<T | undefined> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const executedCommandBind = async <T extends any[], R>(
+    cmd: Command<T, R>,
+    ...params: T
+  ): Promise<R | undefined> => {
     if (!device) throw new Error('Device is not connected yet');
     device.checkStatus(); // ensure the device is ready
-    return executeCommand<T>(
+    return executeCommand<T, R>(
       version,
       (msg) => device!.send(msg),
       commandQueue,

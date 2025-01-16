@@ -76,8 +76,9 @@ async function* plot({
       commands.sp,
       1,
       servoTime(servo.min, servo.max, servo.rate),
+      undefined,
     );
-    await device.executeCommand(commands.sr, 60e3);
+    await device.executeCommand(commands.sr, 60e3, undefined);
   };
   await reset(true);
   let bufferTime = 0;
@@ -108,6 +109,7 @@ async function* plot({
           commands.sp,
           1,
           servoTime(servo.min, servo.max, servo.rate),
+          undefined,
         );
         context.pen = MOTION_PEN_UP;
         action = yield PLOTTER_STATUS_PAUSED;
@@ -137,6 +139,7 @@ async function* plot({
           commands.sp,
           targetPen,
           servoTime(servo.min, servo.max, servo.rate),
+          undefined,
         );
         context.pen = targetPen;
         context.rate = 0;

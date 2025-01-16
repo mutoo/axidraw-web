@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import { ENDING_OK_CR_NL } from '../constants';
-import { createCommand, readUntil, toInt, transformResult } from '../utils';
+import { noParameters, readUntil, toInt, transformResult } from '../utils';
 
 export const cmd = 'QE';
 
@@ -17,6 +18,7 @@ export default createCommand(
         .map(toInt);
     });
   },
+  noParameters,
   {
     version: '2.8.0',
   },

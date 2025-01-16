@@ -7,12 +7,14 @@ import './index.css';
 
 const Plotter = lazy(() => import('./containers/plotter/plotter'));
 const VirtualPlotter = lazy(() => import('./containers/virtual/virtual'));
+const Debugger = lazy(() => import('./containers/debugger/debugger'));
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Plotter />} />
+        <Route path="/debugger" element={<Debugger />} />
         <Route path="/virtual" element={<VirtualPlotter />} />
       </Routes>
     </BrowserRouter>

@@ -28,7 +28,7 @@ const createWork = () =>
         await device.executeCommand(commands.sc, 4, servoMin); // sp 1, pen up
         await device.executeCommand(commands.sc, 5, servoMax); // sp 0, pen down
         await device.executeCommand(commands.sc, 10, servoRate);
-        await device.executeCommand(commands.sp, 1, servoDelay);
+        await device.executeCommand(commands.sp, 1, servoDelay, undefined);
       }
       const pip = this.plottingInProgress.get();
       if (!device && pip) {

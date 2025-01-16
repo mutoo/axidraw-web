@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import handleOKMessage from '../messages/ok';
-import { cmdWithOptionalParams, createCommand } from '../utils';
+import { cmdWithOptionalParams } from '../utils';
 
 export const cmd = 'PC';
 
@@ -26,5 +27,13 @@ export default createCommand(
       period3,
     );
     return yield* handleOKMessage(dataIn);
+  },
+  (
+    params: string,
+  ): [number, number, number, number, number, number, number, number] => {
+    const [len0, period0, len1, period1, len2, period2, len3, period3] = params
+      .split(',')
+      .map((p) => parseInt(p, 10));
+    return [len0, period0, len1, period1, len2, period2, len3, period3];
   },
 );

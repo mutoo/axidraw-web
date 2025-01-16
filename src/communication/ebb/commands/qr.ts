@@ -1,5 +1,6 @@
+import { createCommand } from '../command';
 import { ENDING_OK_CR_NL } from '../constants';
-import { createCommand, readUntil, toInt, transformResult } from '../utils';
+import { noParameters, readUntil, toInt, transformResult } from '../utils';
 
 export const cmd = 'QR';
 
@@ -12,6 +13,7 @@ export default createCommand(
     const parsed = yield* readUntil(ENDING_OK_CR_NL, dataIn);
     return transformResult(parsed, (result) => toInt(result));
   },
+  noParameters,
   {
     version: '2.6.0',
   },
