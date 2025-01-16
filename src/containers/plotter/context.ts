@@ -8,7 +8,7 @@ export const page = createPageSetup();
 export const planning = createPlanning();
 export const work = createWork();
 
-if (import.meta.env.NODE_ENV === 'development') {
+if (import.meta.env.MODE === 'development') {
   setTimeout(() => {
     planning.loadFromUrl(svgPlaceholder);
   });

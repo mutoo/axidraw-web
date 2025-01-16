@@ -14,23 +14,30 @@ import {
 import { IDevice } from './device';
 import { createDeviceBind, logger, PendingCommand } from './utils';
 
-type VMMessage = {
+export type HostMessage = {
   type: string;
   data: string;
+};
+
+export type VMMessage = {
+  type: string;
+  command: string;
 };
 
 export const createVirtualDeviceProxy = ({ version }: { version: string }) => {
   const emitter = new EventEmitter();
   const proxy = window.open(
-    `virtual.html?ebb=${version}`,
+    `/virtual?ebb=${version}`,
     '_blank',
     'popup=1,width=1024,height=768',
   );
+  logger.info('Open virtual device window');
   let proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
-  const onMessage = (event: MessageEvent<VMMessage>) => {
+  const onMessage = (event: MessageEvent<HostMessage>) => {
     if (event.source !== proxy) {
       return;
     }
+    logger.debug(`Received from communication.device: ${event.data.type}`);
     switch (event.data.type) {
       case VIRTUAL_EVENT_STARTED:
         proxyStatus = VIRTUAL_STATUS_CONNECTED;
@@ -61,10 +68,12 @@ export const createVirtualDeviceProxy = ({ version }: { version: string }) => {
     },
     send(message: string) {
       proxy?.postMessage({ type: 'command', command: message });
+      logger.debug(`Send to communication.device: ${message}`);
     },
     close() {
       proxyStatus = VIRTUAL_STATUS_DISCONNECTED;
       proxy?.postMessage({ type: VIRTUAL_EVENT_DISCONNECTED });
+      logger.info('Close virtual device');
     },
     get status() {
       return proxyStatus;
@@ -95,7 +104,6 @@ export const connectDevice =
             }
           },
           send(message) {
-            logger.debug(`Send to communication.device: ${message}`);
             proxy.send(message);
           },
           disconnect() {

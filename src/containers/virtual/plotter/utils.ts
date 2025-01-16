@@ -1,11 +1,15 @@
-/* eslint-disable import/prefer-default-export */
-
-import { delay } from 'utils/time';
 import { runInAction } from 'mobx';
+import { Point2D, Vector2D } from '@/math/geom';
+import { delay } from '@/utils/time';
+import { VirtualPlotterContext } from '.';
 
 const interval = 16; // FPS = 60
 
-export async function linearMotion(context, destination, duration) {
+export async function linearMotion(
+  context: VirtualPlotterContext,
+  destination: Point2D,
+  duration: number,
+) {
   const a1start = context.motor.a1;
   const a2start = context.motor.a2;
   const [a1end, a2end] = destination;
@@ -32,7 +36,13 @@ export async function linearMotion(context, destination, duration) {
   });
 }
 
-export async function accelMotion(context, dir, vel, accel, duration) {
+export async function accelMotion(
+  context: VirtualPlotterContext,
+  dir: Vector2D,
+  vel: Vector2D,
+  accel: Vector2D,
+  duration: number,
+) {
   const a1start = context.motor.a1;
   const a2start = context.motor.a2;
   const [s1, s2] = dir;

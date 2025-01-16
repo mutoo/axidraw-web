@@ -1,6 +1,6 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useContext, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
 import Alert from '@/components/ui/alert/alert';
 import Button from '@/components/ui/button/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -137,16 +137,16 @@ const Planning = observer(({ ...props }) => {
         <h4>Planning Info:</h4>
         <dl className="grid grid-cols-2 gap-4">
           {Object.entries(planning.linesInfo).map((info) => (
-            <>
+            <Fragment key={info[0]}>
               <dt>{info[0]}</dt>
               <dd>{info[1]}</dd>
-            </>
+            </Fragment>
           ))}
           {Object.entries(planning.motionsInfo).map((info) => (
-            <>
+            <Fragment key={info[0]}>
               <dt>{info[0]}</dt>
               <dd>{info[1]}</dd>
-            </>
+            </Fragment>
           ))}
         </dl>
       </section>

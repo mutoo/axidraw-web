@@ -1,4 +1,5 @@
 export type Point2D = [number, number];
+export type Vector2D = Point2D;
 export type Line2D = [Point2D, Point2D];
 
 export const dist = ([x0, y0]: Point2D, [x1, y1]: Point2D) =>
