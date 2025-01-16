@@ -1,25 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
-import qs from 'qs';
-import Footer from 'components/footer/footer';
+import queryString from 'query-string';
+import { useEffect, useRef, useState } from 'react';
 import {
   VIRTUAL_EVENT_DISCONNECTED,
   VIRTUAL_EVENT_MESSAGE,
   VIRTUAL_EVENT_STARTED,
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
-} from 'communication/device/consts';
-import createVM from './plotter';
+} from '@/communication/device/consts';
+import { VMMessage } from '@/communication/device/virtual';
+import Footer from '@/components/footer/footer';
 import Canvas from './components/canvas';
-import styles from './virtual.css';
 import PenHolder from './components/pen-holder';
+import createVM, { IVirtualPlotter } from './plotter';
 import { logger } from './utils';
+import styles from './virtual.module.css';
 
 const VirtualPlotter = () => {
-  const [deviceStatus, setDeviceStatus] = useState(VIRTUAL_STATUS_DISCONNECTED);
-  const stageRef = useRef(null);
-  const [plotter, setPlotter] = useState(null);
+  const [_deviceStatus, setDeviceStatus] = useState(
+    VIRTUAL_STATUS_DISCONNECTED,
+  );
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [vm, setPlotter] = useState<IVirtualPlotter | null>(null);
   const [canvasSize] = useState({ width: 2970, height: 2100 });
-  const [transform, setTransform] = useState(null);
+  const [transform, setTransform] = useState<{ transform: string } | null>(
+    null,
+  );
   useEffect(() => {
     const onResize = () => {
       if (!stageRef.current) return;
@@ -43,25 +48,26 @@ const VirtualPlotter = () => {
     return () => {
       window.removeEventListener('resize', onResize);
     };
-  }, []);
+  }, [canvasSize.height, canvasSize.width]);
   useEffect(() => {
     if (!window.opener) {
-      // eslint-disable-next-line no-alert
       alert('Please open virtual plotter from axidraw web device connector!');
       window.close();
       return () => {};
     }
-    const options = qs.parse(window.location.search);
+    const opener = window.opener as Window;
+    const options = queryString.parse(window.location.search);
+    const version = (options.ebb ?? '2.7.0') as string;
     const vm = createVM({
-      version: options.ebb || '2.7.0',
+      version,
     });
     const disconnect = () => {
-      window.opener.postMessage({
+      opener.postMessage({
         type: VIRTUAL_EVENT_DISCONNECTED,
       });
       logger.debug('disconnected.');
     };
-    const messageHandle = (event) => {
+    const messageHandle = (event: MessageEvent<VMMessage>) => {
       switch (event.data.type) {
         case VIRTUAL_EVENT_DISCONNECTED:
           setDeviceStatus(VIRTUAL_STATUS_DISCONNECTED);
@@ -70,9 +76,9 @@ const VirtualPlotter = () => {
           break;
         case 'command':
           logger.debug(`Received command: ${event.data.command}`);
-          vm.execute(event.data.command).then((resp) => {
+          void vm.execute(event.data.command).then((resp: string) => {
             logger.debug(`Respond: ${resp}`);
-            window.opener.postMessage({
+            opener.postMessage({
               type: VIRTUAL_EVENT_MESSAGE,
               data: resp,
             });
@@ -84,14 +90,13 @@ const VirtualPlotter = () => {
     };
     window.addEventListener('message', messageHandle);
     window.addEventListener('beforeunload', disconnect);
-    window.opener.postMessage({
+    opener.postMessage({
       type: VIRTUAL_EVENT_STARTED,
     });
 
     logger.debug('connected.');
     setDeviceStatus(VIRTUAL_STATUS_CONNECTED);
     setPlotter(vm);
-
     return () => {
       window.removeEventListener('message', messageHandle);
       window.removeEventListener('beforeunload', disconnect);
@@ -102,20 +107,23 @@ const VirtualPlotter = () => {
   return (
     <>
       <div className={styles.stage} ref={stageRef}>
-        <div className={styles.frame} style={transform}>
+        <div className={styles.frame} style={transform as React.CSSProperties}>
           <div
             className={styles.board}
             style={{ width: canvasSize.width, height: canvasSize.height }}
           />
         </div>
-        <Canvas
-          vm={plotter}
-          width={canvasSize.width}
-          height={canvasSize.height}
-        />
-        <div className={styles.plotter} style={transform}>
-          <PenHolder vm={plotter} />
-        </div>
+        {vm && (
+          <Canvas vm={vm} width={canvasSize.width} height={canvasSize.height} />
+        )}
+        {vm && (
+          <div
+            className={styles.plotter}
+            style={transform as React.CSSProperties}
+          >
+            <PenHolder vm={vm} />
+          </div>
+        )}
       </div>
       <div className={styles.footer}>
         <Footer />

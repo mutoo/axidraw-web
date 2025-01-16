@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import classNames from 'clsx';
 import { reaction } from 'mobx';
-import classNames from 'classnames';
-import Carriage from 'assets/svg/pen-holder.svg';
-import styles from './pen-holder.css';
+import { useEffect, useState } from 'react';
+import Carriage from '@/assets/svg/pen-holder.svg';
 import { aaSteps2xyDist } from '../../../math/ebb';
+import { IVirtualPlotter } from '../plotter';
+import styles from './pen-holder.module.css';
 
-const PenHolder = ({ vm }) => {
+const PenHolder = ({ vm }: { vm: IVirtualPlotter }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [pen, setPen] = useState(1);
   useEffect(() => {
-    if (!vm) return () => {};
     const vmCtx = vm.context;
     const posDisposer = reaction(
       () => [vmCtx.motor.a1, vmCtx.motor.a2],
@@ -45,10 +44,6 @@ const PenHolder = ({ vm }) => {
       />
     </div>
   );
-};
-
-PenHolder.propTypes = {
-  vm: PropTypes.object.isRequired,
 };
 
 export default PenHolder;

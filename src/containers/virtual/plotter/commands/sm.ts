@@ -1,18 +1,21 @@
-import { ENDING_OK_CR_NL } from 'communication/ebb/constants';
-import { delay } from 'utils/time';
 import { runInAction } from 'mobx';
+import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
+import { delay } from '@/utils/time';
+import { VirtualPlotterContext } from '..';
+import { CreateCommand } from '../command';
 import { linearMotion } from '../utils';
 
-export const cmd = 'SM';
-
-export default {
-  cmd,
-  title: 'Stepper move',
-  async *create(context, duration, s1, s2) {
+export default CreateCommand(
+  'SM',
+  'Stepper move',
+  async function* (
+    context: VirtualPlotterContext,
+    duration: number,
+    delta1: number = 0,
+    delta2: number = 0,
+  ) {
     const a1start = context.motor.a1;
     const a2start = context.motor.a2;
-    const delta1 = parseInt(s1, 10) || 0;
-    const delta2 = parseInt(s2, 10) || 0;
     yield ENDING_OK_CR_NL;
 
     if (context.mode === 'fast') {
@@ -23,13 +26,13 @@ export default {
     }
 
     if (delta1 === 0 && delta2 === 0) {
-      await delay(parseInt(duration, 10) / 1000);
+      await delay(duration / 1000);
     } else {
       await linearMotion(
         context,
         [a1start + delta1, a2start + delta2],
-        parseInt(duration, 10),
+        duration,
       );
     }
   },
-};
+);

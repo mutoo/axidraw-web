@@ -1,16 +1,28 @@
-import React, { useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
 import { reaction } from 'mobx';
-import styles from './canvas.css';
-import { aaSteps2xyDist } from '../../../math/ebb';
+import { useEffect, useRef } from 'react';
+import { aaSteps2xyDist } from '@/math/ebb';
+import { IVirtualPlotter } from '../plotter';
+import styles from './canvas.module.css';
 
-const Canvas = ({ vm, width, height }) => {
-  const canvasRef = useRef(null);
+const Canvas = ({
+  vm,
+  width,
+  height,
+}: {
+  vm: IVirtualPlotter;
+  width: number;
+  height: number;
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!vm) return () => {};
+    if (!canvasRef.current) return;
     const vmCtx = vm.context;
     const canvasCtx = canvasRef.current.getContext('2d');
+    if (!canvasCtx) {
+      alert('Canvas not supported');
+      return;
+    }
     let prevX = 0;
     let prevY = 0;
 
@@ -42,12 +54,6 @@ const Canvas = ({ vm, width, height }) => {
       <div className={styles.vm} />
     </div>
   );
-};
-
-Canvas.propTypes = {
-  vm: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
 };
 
 export default Canvas;

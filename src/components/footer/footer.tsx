@@ -10,7 +10,7 @@ const Footer = () => {
         </a>
       </p>
       <p>
-        Build: {import.meta.env.NODE_ENV} | Report Issues:{' '}
+        Build: {import.meta.env.MODE} | Report Issues:{' '}
         <a
           href={'https://github.com/mutoo/axidraw-web'}
           target={'_blank'}

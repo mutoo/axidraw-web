@@ -1,6 +1,6 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { ChangeEvent, useContext, useRef } from 'react';
+import { ChangeEvent, Fragment, useContext, useRef } from 'react';
 import Alert from '@/components/ui/alert/alert';
 import Button from '@/components/ui/button/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -178,10 +178,10 @@ const Setup = observer(({ ...props }) => {
             <h4>Svg Info:</h4>
             <dl className="grid grid-cols-2 gap-4">
               {Object.entries(planning.fileInfo).map((info) => (
-                <>
+                <Fragment key={info[0]}>
                   <dt>{info[0]}</dt>
                   <dd>{info[1]}</dd>
-                </>
+                </Fragment>
               ))}
             </dl>
           </>
