@@ -52,7 +52,7 @@ const VirtualPlotter = () => {
   useEffect(() => {
     if (!window.opener) {
       alert('Please open virtual plotter from axidraw web device connector!');
-      window.close();
+      window.location.href = '/';
       return () => {};
     }
     const opener = window.opener as Window;

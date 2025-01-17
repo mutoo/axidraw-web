@@ -27,7 +27,7 @@ export type VMMessage = {
 export const createVirtualDeviceProxy = ({ version }: { version: string }) => {
   const emitter = new EventEmitter();
   const proxy = window.open(
-    `/virtual?ebb=${version}`,
+    `#virtual?ebb=${version}`,
     '_blank',
     'popup=1,width=1024,height=768',
   );
