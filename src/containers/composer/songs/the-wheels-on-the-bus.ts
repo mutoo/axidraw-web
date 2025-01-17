@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { createSong, flat } from '../utils'
+import { createSong, flat } from '../utils';
 
 export default createSong(
   'The wheels on the bus',

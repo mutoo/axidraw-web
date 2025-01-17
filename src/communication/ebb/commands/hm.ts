@@ -16,8 +16,10 @@ export default createCommand(
     );
     return yield* handleOKMessage(dataIn);
   },
-  (params: string): [number, number, number] => {
-    const [stepFrequency, axis1, axis2] = params.split(',').map((p) => parseInt(p, 10));
+  (params: string): [number, number | undefined, number | undefined] => {
+    const [stepFrequency, axis1, axis2] = params
+      .split(',')
+      .map((p) => parseInt(p, 10));
     return [stepFrequency, axis1, axis2];
   },
   {

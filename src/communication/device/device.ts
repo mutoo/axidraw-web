@@ -32,7 +32,7 @@ export interface IDeviceConnector<C> {
   executeCommand: <T extends any[], R>(
     cmd: Command<T, R>,
     ...params: T
-  ) => Promise<R | undefined>;
+  ) => Promise<R>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: string, listener: (...args: any[]) => void): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
