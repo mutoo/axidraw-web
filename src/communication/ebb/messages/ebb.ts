@@ -38,7 +38,7 @@ export default function* handleEBBMessages(
             errorHandler = null;
             cmd.reject(result as string);
           } else {
-            logger.debug(`Received message: ${String(result)}`);
+            logger.debug(`Received message: ${JSON.stringify(result)}`);
             cmd.resolve(result);
           }
           commandQueue.shift();

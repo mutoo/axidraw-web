@@ -25,7 +25,7 @@ export const executeCommand = async <T extends any[], R>(
   commandQueue: PendingCommand<any>[],
   command: Command<T, R>,
   ...params: T
-): Promise<R | undefined> => {
+): Promise<R> => {
   if (command.version) {
     if (!checkVersion(deviceVersion, command.version)) {
       throw new Error(
@@ -38,7 +38,7 @@ export const executeCommand = async <T extends any[], R>(
   // kick off the command, this should always yield a command.
   await sendToDevice(cmdStatus.value as string);
   // if that command is done without taking any response, resolve it immediately.
-  if (cmdStatus.done) return Promise.resolve(undefined);
+  if (cmdStatus.done) return Promise.resolve(cmdStatus.value.result);
   // otherwise queues this command and waiting msg from communication.device.
   return Promise.race([
     new Promise<R>((resolve, reject) => {
@@ -70,7 +70,7 @@ export const createDeviceBind = <C>({
   const executedCommandBind = async <T extends any[], R>(
     cmd: Command<T, R>,
     ...params: T
-  ): Promise<R | undefined> => {
+  ): Promise<R> => {
     if (!device) throw new Error('Device is not connected yet');
     device.checkStatus(); // ensure the device is ready
     return executeCommand<T, R>(
@@ -93,7 +93,7 @@ export const createDeviceBind = <C>({
       });
       await executedCommandBind(r);
       const versionResp = await executedCommandBind(v);
-      version = versionResp!.match(/\d\.\d\.\d/)![0];
+      version = versionResp.match(/\d\.\d\.\d/)![0];
       emitter.emit(DEVICE_EVENT_CONNECTED);
     }
   };
