@@ -4,7 +4,7 @@ import {
   DEVICE_EVENT_CONNECTED,
   DEVICE_EVENT_DISCONNECTED,
   DEVICE_TYPE_USB,
-  DEVICE_TYPE_WEBSOCKET,
+  DEVICE_TYPE_VIRTUAL,
 } from '@/communication/device/consts';
 import { IDeviceConnector } from '@/communication/device/device';
 import { selectFirstDevice } from '@/communication/device/utils';
@@ -20,7 +20,7 @@ export const useDeviceConnector = () => {
   const [deviceStatus, setDeviceStatus] = useState(DEVICE_STATUS_DISCONNECTED);
   const [deviceType, setDeviceType] = useState(
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    supportedWebUSB ? DEVICE_TYPE_USB : DEVICE_TYPE_WEBSOCKET,
+    supportedWebUSB ? DEVICE_TYPE_USB : DEVICE_TYPE_VIRTUAL,
   );
   const [deviceVersion, setDeviceVersion] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
