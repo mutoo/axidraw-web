@@ -1,8 +1,9 @@
 import classNames from 'clsx';
+import { Tangent } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
-import Alert from '@/components/ui/alert/alert';
-import Button from '@/components/ui/button/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { saveFile } from '@/utils/file';
 import { PlotterContext } from '../../context';
@@ -33,6 +34,7 @@ const Planning = observer(({ ...props }) => {
           page, then it will plan the motion for AxiDraw to plot the picture.
         </p>
         <Button
+          variant={'secondary'}
           onClick={() => {
             planning.setPhase(PLANNING_PHASE.SETUP);
             trackEvent('go to', PLANNING_PHASE[PLANNING_PHASE.SETUP]);
@@ -91,13 +93,14 @@ const Planning = observer(({ ...props }) => {
                 setAllowReorder(e.target.checked);
               }}
             />
-            <span>Optimizing order</span>
+            <span>Optimize plotting order</span>
           </label>
           <div className="col-start-2 grid grid-cols-2 gap-4">
-            <Button submit ref={planningButtonRef}>
+            <Button variant={'secondary'} type="submit" ref={planningButtonRef}>
               Re-plan
             </Button>
             <Button
+              variant="secondary"
               onClick={() => {
                 const blob = new Blob(
                   [
@@ -122,11 +125,16 @@ const Planning = observer(({ ...props }) => {
         </form>
       </section>
       <section className="grid grid-cols-1 gap-4">
-        <Alert type="info">
-          Adjust parameters above and redo the planning until you are satisfied.
+        <Alert variant="default">
+          <Tangent className="h-4 w-4" />
+          <AlertTitle>Info</AlertTitle>
+          <AlertDescription>
+            Adjust parameters above and redo the planning until you are
+            satisfied.
+          </AlertDescription>
         </Alert>
         <Button
-          variant="primary"
+          variant="default"
           onClick={() => {
             planning.setPhase(PLANNING_PHASE.PLOTTING);
             trackEvent('go to', PLANNING_PHASE[PLANNING_PHASE.PLOTTING]);

@@ -1,6 +1,7 @@
+import { Timer } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useContext, useEffect, useRef, useState } from 'react';
-import Alert from '@/components/ui/alert/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatTime } from '@/utils/time';
 import { PlotterContext } from '../../context';
 
@@ -24,8 +25,12 @@ const Estimating = observer(() => {
   if (!time) return null;
   return (
     <section className="grid grid-cols-1 gap-4">
-      <Alert type="info">
-        Estimated total plotting time: {formatTime(time / 1000)}
+      <Alert variant="default">
+        <Timer className="h-4 w-4" />
+        <AlertTitle>Time</AlertTitle>
+        <AlertDescription>
+          Estimated plotting time: {formatTime(time / 1000)}
+        </AlertDescription>
       </Alert>
     </section>
   );

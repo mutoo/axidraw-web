@@ -1,14 +1,14 @@
+import { Bug } from 'lucide-react';
 import { reaction } from 'mobx';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { Command, CommandWithParams } from '@/communication/ebb/command';
-import Alert from '@/components/ui/alert/alert';
-import Button from '@/components/ui/button/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { PlotterContext } from '../../context';
 import { trackEvent } from '../../utils';
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const frequentlyCommands: CommandWithParams<Command<any, unknown>>[] = [
@@ -83,13 +83,21 @@ const SimpleDebugger = ({ device }: { device: IDeviceConnector<unknown> }) => {
   return (
     <form className={formStyles.root}>
       <h3>Simple Debugger</h3>
-      <Alert type="info">Debug AxiDraw before plotting here.</Alert>
+      <Alert variant="default">
+        <Bug className="h-4 w-4" />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          You may do a quick debug for the device before plotting using beblow
+          commands.
+        </AlertDescription>
+      </Alert>
       <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
         {frequentlyCommands.map((cmd) => {
           const title = cmd.title || cmd.cmd.title;
           return (
             <Button
               key={title}
+              type={'button'}
               onClick={() => {
                 void sendCommand(cmd.cmd, cmd.params);
                 trackEvent('debug', title);
@@ -101,7 +109,7 @@ const SimpleDebugger = ({ device }: { device: IDeviceConnector<unknown> }) => {
         })}
       </div>
       <label className={formStyles.inputLabel}>
-        <span>Result:</span>
+        <span>Device Response:</span>
         <textarea rows={3} defaultValue={result} readOnly />
       </label>
     </form>
