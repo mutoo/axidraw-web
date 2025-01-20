@@ -1,10 +1,11 @@
 import classNames from 'clsx';
+import { AlertTriangle } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useContext, useEffect, useState } from 'react';
 import { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
-import Alert from '@/components/ui/alert/alert';
-import Button from '@/components/ui/button/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button} from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import {
   PLOTTER_STATUS_PAUSED,
@@ -41,9 +42,16 @@ const Plotting = observer(({ ...props }) => {
       {!device && (
         <section className="space-y-4">
           <h3>Plotting</h3>
-          <Alert type="warn">Please connect to device before plotting.</Alert>
+          <Alert variant="default">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Device</AlertTitle>
+            <AlertDescription>
+              Please connect to a <b>pen plotter</b> before plotting.
+            </AlertDescription>
+          </Alert>
           <div className="grid grid-cols-2 gap-4">
             <Button
+              variant={'secondary'}
               onClick={() => {
                 planning.setPhase(PLANNING_PHASE.PLANNING);
                 trackEvent('go to', PLANNING_PHASE[PLANNING_PHASE.PLANNING]);
@@ -52,6 +60,7 @@ const Plotting = observer(({ ...props }) => {
               Back to planning
             </Button>
             <Button
+              variant={'secondary'}
               onClick={() => {
                 planning.setPhase(PLANNING_PHASE.SETUP);
                 trackEvent('go to', PLANNING_PHASE[PLANNING_PHASE.SETUP]);
@@ -193,7 +202,7 @@ const Plotting = observer(({ ...props }) => {
             />
             <div className="col-start-2">
               {work.plotterStatus === PLOTTER_STATUS_STANDBY && (
-                <Button variant="primary" submit>
+                <Button variant="default" type="submit">
                   Start
                 </Button>
               )}

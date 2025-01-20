@@ -1,3 +1,4 @@
+import { ToggleLeft } from 'lucide-react';
 import {
   ChangeEvent,
   FormEvent,
@@ -8,8 +9,8 @@ import {
 } from 'react';
 import { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
-import Alert from '@/components/ui/alert/alert';
-import Button from '@/components/ui/button/button';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { delay } from '@/utils/time';
 import * as songs from '../songs';
@@ -67,7 +68,7 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           );
           logger.info('Start playing song');
           setPlaying(true);
-          
+
           // set home
           await device.executeCommand(commands.r);
           await device.executeCommand(commands.em, motorMode, motorMode);
@@ -204,8 +205,8 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         <span>PenDown</span>
       </label>
       <Button
-        variant="primary"
-        submit={!playing}
+        variant="default"
+        type={playing ? 'button' : 'submit'}
         onClick={() => {
           if (playing) {
             vPRG.current = true;
@@ -214,8 +215,12 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
       >
         {playing ? 'Stop' : 'Play'}
       </Button>
-      <Alert type="info">
-        Tip: You could also press the PRG button on device to stop playing.
+      <Alert variant="default">
+        <ToggleLeft className="h-4 w-4" />
+        <AlertTitle>Tip</AlertTitle>
+        <AlertDescription>
+          You could also press the PRG button on device to stop playing.
+        </AlertDescription>
       </Alert>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>

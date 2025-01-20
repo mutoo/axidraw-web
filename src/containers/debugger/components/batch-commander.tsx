@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useState } from 'react';
 import { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { Command } from '@/communication/ebb/command';
-import Button from '@/components/ui/button/button';
+import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { trackEvent } from '../utils';
 
@@ -57,7 +57,7 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           }}
         />
       </label>
-      <Button submit>Send</Button>
+      <Button type="submit">Send</Button>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>
         <textarea rows={3} defaultValue={results} readOnly />

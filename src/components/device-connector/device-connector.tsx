@@ -1,3 +1,4 @@
+import { ChevronsLeftRightEllipsis } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { trackCategoryEvent } from '@/analystic';
 import {
@@ -6,14 +7,15 @@ import {
   DEVICE_TYPE_VIRTUAL,
 } from '@/communication/device/consts';
 import { IDeviceConnector } from '@/communication/device/device';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 import formStyles from '@/components/ui/form.module.css';
 import {
   DEVICE_STATUS_CONNECTED,
   DEVICE_STATUS_DISCONNECTED,
   useDeviceConnector,
 } from '@/hooks/device';
-import Alert from '../ui/alert/alert';
-import Button from '../ui/button/button';
+import { Button } from '../ui/button';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
@@ -100,18 +102,25 @@ const DeviceConnector = ({
             deviceType={deviceType}
             setDeviceType={setDeviceType}
           />
-          {connectionError && <Alert type={'alert'}>{connectionError}</Alert>}
+          {connectionError && (
+            <Alert variant="destructive">
+              <ChevronsLeftRightEllipsis className="h-4 w-4" />
+              <AlertTitle>Connection Issue</AlertTitle>
+              <AlertDescription>{connectionError}</AlertDescription>
+            </Alert>
+          )}
           {deviceType === DEVICE_TYPE_USB && (
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
               <Button
+                variant="secondary"
                 onClick={() => {
                   void connectDevice({ pair: true });
                 }}
               >
-                Pair
+                Pair new device
               </Button>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   void connectDevice({ pair: false });
                 }}
@@ -143,7 +152,7 @@ const DeviceConnector = ({
                 />
               </label>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   void connectDevice({ address: wsAddress, auth: wsAuth });
                 }}
@@ -166,12 +175,12 @@ const DeviceConnector = ({
                 </select>
               </label>
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   void connectDevice({ version: virtualVersion });
                 }}
               >
-                Connect
+                Create
               </Button>
             </>
           )}
@@ -184,7 +193,12 @@ const DeviceConnector = ({
             {deviceType === DEVICE_TYPE_WEBSOCKET && <p>WebSocket</p>}
             {deviceType === DEVICE_TYPE_VIRTUAL && <p>Virtual Plotter</p>}
             <p>EBB v{deviceVersion}</p>
-            <Button onClick={() => void disconnectDevice()}>Disconnect</Button>
+            <Button
+              variant={'secondary'}
+              onClick={() => void disconnectDevice()}
+            >
+              Disconnect
+            </Button>
           </div>
         </>
       )}

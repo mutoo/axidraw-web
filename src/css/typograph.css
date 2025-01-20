@@ -32,11 +32,8 @@
   h4,
   h5,
   h6 {
-    @apply font-condensed font-bold uppercase leading-6 mt-4 mb-2;
-
-    &:first-child {
-      @apply mt-0;
-    }
+    @apply font-bold uppercase;
+    /* @apply font-condensed */
   }
 
   p {

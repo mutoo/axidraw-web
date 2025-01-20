@@ -1,8 +1,10 @@
 import classNames from 'clsx';
+import { CircleArrowRight, Info, TriangleAlert } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { ChangeEvent, Fragment, useContext, useRef } from 'react';
-import Alert from '@/components/ui/alert/alert';
-import Button from '@/components/ui/button/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { PlotterContext } from '../../context';
 import {
@@ -28,8 +30,8 @@ const Setup = observer(({ ...props }) => {
     <Panel active={planning.phase === PLANNING_PHASE.SETUP} {...props}>
       <section>
         <h3>Setup</h3>
-        <p>
-          In this phase, you could{' '}
+        <p className="mb-4">
+          Please{' '}
           <input
             className="hidden"
             type="file"
@@ -42,7 +44,7 @@ const Setup = observer(({ ...props }) => {
             }}
           />
           <Button
-            variant={planning.svgContent ? 'secondary' : 'primary'}
+            variant={planning.svgContent ? 'secondary' : 'default'}
             onClick={() => {
               trackEvent('load svg');
               fileInputRef.current?.click();
@@ -50,9 +52,15 @@ const Setup = observer(({ ...props }) => {
           >
             Load SVG
           </Button>{' '}
-          and set up the page. Or simply <b>Drag & Drop</b> your svg into the
-          page area.
+          and set up the page.
         </p>
+        <Alert variant="default">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Tip</AlertTitle>
+          <AlertDescription>
+            You may simply <b>Drag & Drop</b> your svg into the page area.
+          </AlertDescription>
+        </Alert>
       </section>
       <section className={styles.inputs}>
         <h4 className="col-span-2">Dimension</h4>
@@ -157,14 +165,22 @@ const Setup = observer(({ ...props }) => {
       </section>
       <section className="grid grid-cols-1 gap-4">
         {planning.svgContent ? (
-          <Alert type="info">
-            Plan the motion before sending it to the plotter.
+          <Alert variant="default">
+            <CircleArrowRight className="h-4 w-4" />
+            <AlertTitle>Planning</AlertTitle>
+            <AlertDescription>
+              Plan the motion before sending it to the plotter.
+            </AlertDescription>
           </Alert>
         ) : (
-          <Alert type="warn">Load SVG first.</Alert>
+          <Alert variant="destructive">
+            <TriangleAlert className="h-4 w-4" />
+            <AlertTitle>Blocked</AlertTitle>
+            <AlertDescription>Please load a SVG first.</AlertDescription>
+          </Alert>
         )}
         <Button
-          variant={planning.svgContent ? 'primary' : 'secondary'}
+          variant={planning.svgContent ? 'default' : 'secondary'}
           disabled={!planning.svgContent}
           onClick={() => {
             planning.setPhase(PLANNING_PHASE.PLANNING);
