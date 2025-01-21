@@ -62,7 +62,7 @@
   }
   body {
     @apply overscroll-none min-h-screen;
-    /* @apply font-roboto; */
+    @apply font-roboto;
 
     background: linear-gradient(to left, #fff, #ece9e6);
   }

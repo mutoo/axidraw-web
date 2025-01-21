@@ -9,6 +9,7 @@ import {
 } from '@/communication/device/consts';
 import { VMMessage } from '@/communication/device/virtual';
 import Footer from '@/components/footer/footer';
+import { useToast } from '@/hooks/use-toast';
 import Canvas from './components/canvas';
 import PenHolder from './components/pen-holder';
 import createVM, { IVirtualPlotter } from './plotter';
@@ -16,6 +17,7 @@ import { logger } from './utils';
 import styles from './virtual.module.css';
 
 const VirtualPlotter = () => {
+  const { toast } = useToast();
   const [_deviceStatus, setDeviceStatus] = useState(
     VIRTUAL_STATUS_DISCONNECTED,
   );
@@ -66,6 +68,10 @@ const VirtualPlotter = () => {
         type: VIRTUAL_EVENT_DISCONNECTED,
       });
       logger.debug('disconnected.');
+      toast({
+        title: 'Disconnected',
+        description: 'The virtual plotter has been disconnected.',
+      });
     };
     const messageHandle = (event: MessageEvent<VMMessage>) => {
       switch (event.data.type) {
@@ -97,12 +103,18 @@ const VirtualPlotter = () => {
     logger.debug('connected.');
     setDeviceStatus(VIRTUAL_STATUS_CONNECTED);
     setPlotter(vm);
+
+    toast({
+      title: 'Ready',
+      description: 'Please return to the main window to start plotting.',
+    });
+
     return () => {
       window.removeEventListener('message', messageHandle);
       window.removeEventListener('beforeunload', disconnect);
       vm.destroy();
     };
-  }, []);
+  }, [toast]);
 
   return (
     <>

@@ -11,7 +11,7 @@
   }
 
   input[disabled] {
-    /* @apply bg-form-bg-disabled; */
+    background-color: var(--muted);
   }
 }
 
@@ -25,6 +25,6 @@
   input[disabled],
   select[disabled],
   textarea[disabled] {
-    /* @apply bg-form-bg-disabled; */
+    background-color: var(--muted);
   }
 }

@@ -1,3 +1,4 @@
+import { version } from '../../../package.json';
 import styles from './footer.module.css';
 
 const Footer = () => {
@@ -10,7 +11,7 @@ const Footer = () => {
         </a>
       </p>
       <p>
-        Build: {import.meta.env.MODE} | Report Issues:{' '}
+        Build: {version}-{import.meta.env.MODE} | Report Issues:{' '}
         <a
           href={'https://github.com/mutoo/axidraw-web'}
           target={'_blank'}

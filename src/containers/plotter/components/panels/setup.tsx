@@ -3,7 +3,6 @@ import { CircleArrowRight, Info, TriangleAlert } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { ChangeEvent, Fragment, useContext, useRef } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { PlotterContext } from '../../context';
@@ -29,7 +28,7 @@ const Setup = observer(({ ...props }) => {
   return (
     <Panel active={planning.phase === PLANNING_PHASE.SETUP} {...props}>
       <section>
-        <h3>Setup</h3>
+        <h3 className='mb-4'>Setup</h3>
         <p className="mb-4">
           Please{' '}
           <input

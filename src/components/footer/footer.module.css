@@ -1,6 +1,7 @@
 .root {
   @apply text-sm text-center mb-8;
-  /* @apply font-roboto text-grey-cc; */
+  
+  color: hsl(0 0% 63.9%);
 
   p {
     @apply leading-6;

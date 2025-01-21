@@ -33,7 +33,7 @@
   h5,
   h6 {
     @apply font-bold uppercase;
-    /* @apply font-condensed */
+    @apply font-condensed
   }
 
   p {
