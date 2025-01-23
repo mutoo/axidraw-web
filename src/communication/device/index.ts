@@ -6,7 +6,8 @@ import {
 import { DevicePicker } from './device';
 import createUSBDevice from './usb';
 import createVirtualDevice from './virtual';
-import createWSDevice, { WSDevice } from './websocket';
+import { WSDevice } from './webscoket-type';
+import createWSDevice from './websocket';
 
 export default function createDevice(
   type: string,

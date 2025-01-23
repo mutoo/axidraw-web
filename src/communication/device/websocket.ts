@@ -13,15 +13,7 @@ import {
 } from './consts';
 import { DevicePicker, IDevice } from './device';
 import { createDeviceBind, logger, PendingCommand } from './utils';
-
-export type WSDevice = { path: string };
-type ServerMessage =
-  | { type: 'ready' }
-  | {
-      type: 'devices';
-      devices: WSDevice[];
-    }
-  | { type: 'ebb'; resp: { data: number[] } };
+import { ClientMessage, ServerMessage, WSDevice } from './webscoket-type';
 
 export const createWSDeviceProxy = (
   address: string,
@@ -32,8 +24,7 @@ export const createWSDeviceProxy = (
   const ws = new WebSocket(address);
   let proxyStatus = WEBSOCKET_STATUS_DISCONNECTED;
   ws.binaryType = 'arraybuffer';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const wsSend = (data: any) => {
+  const wsSend = (data: ClientMessage) => {
     ws.send(JSON.stringify(data));
   };
   ws.onopen = () => {
@@ -58,7 +49,7 @@ export const createWSDeviceProxy = (
       case 'ebb':
         emitter.emit(
           WEBSOCKET_EVENT_MESSAGE,
-          Uint8Array.from(message.resp.data),
+          Uint8Array.from(message.response),
         );
         break;
       default:

@@ -70,7 +70,7 @@ You will need to build the project first, and then run the server with a self-si
 ```
 $ pnpm build
 $ bash ./scripts/create-cert.sh
-$ node server/index.js
+$ pnpm run server
 ```
 
 ### Self-signed cert

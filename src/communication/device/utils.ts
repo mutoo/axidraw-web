@@ -7,7 +7,7 @@ import v from '../ebb/commands/v';
 import { checkVersion } from '../ebb/utils';
 import { DEVICE_EVENT_CONNECTED, DEVICE_EVENT_DISCONNECTED } from './consts';
 import { IDevice, IDeviceConnector } from './device';
-import { WSDevice } from './websocket';
+import { WSDevice } from './webscoket-type';
 
 export const logger = Logger.get('device');
 
