@@ -2,6 +2,7 @@
   "name": "axidraw-web",
   "private": true,
   "version": "0.2.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "test": "vitest",
@@ -26,6 +27,7 @@
     "query-string": "^9.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-ga4": "^2.1.0",
     "react-router": "^7.1.1",
     "serialport": "^13.0.0",
     "tailwind-merge": "^2.6.0",
