@@ -1,0 +1,17 @@
+.root {
+  @apply text-sm text-center mb-8;
+  
+  color: hsl(0 0% 63.9%);
+
+  p {
+    @apply leading-6;
+  }
+
+  a {
+    @apply underline;
+  }
+
+  svg {
+    @apply fill-current;
+  }
+}

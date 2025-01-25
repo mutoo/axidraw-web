@@ -1,0 +1,39 @@
+name: Axidraw Web Deployment
+run-name: ${{ github.actor }} is deploying Axidraw Web to GitHub Pages
+on:
+  push:
+    branches:
+      - master
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      - name: Build
+        run: pnpm build
+      - name: Upload static files as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: Build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: action/deploy-pages@v4
