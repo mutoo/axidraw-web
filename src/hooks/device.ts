@@ -37,11 +37,11 @@ export const useDeviceConnector = () => {
     }
   }, [deviceType, deviceStatus]);
 
-  // clear connection error
+  // clear connection error, but keep the reason a device disconnected for
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setConnectionError(null);
-  }, [device, deviceType, setDeviceStatus]);
+  }, [deviceType]);
 
   // auto disconnect previous device
   useEffect(
@@ -76,6 +76,7 @@ export const useDeviceConnector = () => {
   const connectDevice = useCallback(
     async (config: unknown) => {
       if (device && deviceStatus === DEVICE_STATUS_DISCONNECTED) {
+        setConnectionError(null);
         try {
           await device.connectDevice(config);
         } catch (e) {

@@ -86,7 +86,10 @@ export const createDeviceBind = <C>({
       // this will create a new device instance
       device = await connectDevice(commandQueue, config);
       device.onDisconnected((e: string) => {
-        commandQueue.length = 0;
+        // nothing will answer them now
+        commandQueue.splice(0).forEach(({ reject }) => {
+          reject(e || 'Device is disconnected.');
+        });
         device = null;
         version = '';
         emitter.emit(DEVICE_EVENT_DISCONNECTED, e);
