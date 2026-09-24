@@ -112,18 +112,3 @@ export function minDist(
   else if (ry > ty) ry = ty;
   return (px - rx) ** 2 + (py - ry) ** 2;
 }
-
-export function minMaxDist(
-  [px, py]: Point2D,
-  { p0: [sx, sy], p1: [tx, ty] }: MBR,
-) {
-  const mx = (sx + tx) / 2;
-  const rmx = px <= mx ? sx : tx;
-  const rMx = px >= mx ? sx : tx;
-  const my = (sy + ty) / 2;
-  const rmy = py <= my ? sy : ty;
-  const rMy = py >= my ? sy : ty;
-  const dx = (px - rmx) ** 2 + (py - rMy) ** 2;
-  const dy = (py - rmy) ** 2 + (px - rMx) ** 2;
-  return Math.min(dx, dy);
-}

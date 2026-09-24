@@ -7,7 +7,6 @@ import {
   canCoverMbr,
   mergeMbrs,
   minDist,
-  minMaxDist,
 } from './utils';
 
 export type NodeType = 'rtree-type-node-internal' | 'rtree-type-node-leaf';
@@ -223,28 +222,29 @@ export const createRTree = <T extends DataNode>(
     root = node;
   }
 
-  function remove(
+  // the first leaf holding an entry that matcher accepts, and its index there
+  function findLeaf(
     node: InternalEntry<T>,
     entryMbr: MBR,
     matcher: (entry: T) => boolean,
-  ) {
-    if (node.type === 'rtree-type-node-internal') {
-      node.entries
-        .filter((n) => canCoverMbr(n.mbr, entryMbr))
-        .forEach((n) => {
-          remove(n, entryMbr, matcher);
-        });
-    } else {
-      const entryIdx = node.entries.findIndex(matcher);
-      if (entryIdx === -1) {
-        // not found
-        return;
-      }
-      node.entries.splice(entryIdx, 1);
-      condenseTree(node);
+  ): { leaf: LeafNode<T>; idx: number } | null {
+    if (node.type === 'rtree-type-node-leaf') {
+      const idx = node.entries.findIndex(matcher);
+      return idx === -1 ? null : { leaf: node, idx };
     }
+    for (const subNode of node.entries) {
+      if (canCoverMbr(subNode.mbr, entryMbr)) {
+        const found = findLeaf(subNode, entryMbr, matcher);
+        if (found) return found;
+      }
+    }
+    return null;
   }
 
+  // Branch and bound as in Roussopoulos et al. (1995), without their
+  // MINMAXDIST pruning: when branches are visited in MINDIST order, pruning
+  // those farther than the best entry so far already drops all it would
+  // (Cheung and Fu, 1998).
   function nnSearch(
     node: InternalEntry<T>,
     p: Point2D,
@@ -252,9 +252,7 @@ export const createRTree = <T extends DataNode>(
   ) {
     if (node.type === 'rtree-type-node-leaf') {
       node.entries.forEach((entry) => {
-        const [x0, y0] = p;
-        const [x1, y1] = entry.mbr.p0;
-        const distSq = (x0 - x1) ** 2 + (y0 - y1) ** 2;
+        const distSq = minDist(p, entry.mbr);
         // among equally near entries take the smallest id, so the result
         // doesn't depend on how the tree happens to be split
         if (
@@ -268,27 +266,13 @@ export const createRTree = <T extends DataNode>(
         }
       });
     } else {
-      let branches = node.entries
-        .map((subNode) => ({
-          minDist: minDist(p, subNode.mbr),
-          minMaxDist: minMaxDist(p, subNode.mbr),
-          subNode,
-        }))
-        .sort((d0, d1) => d0.minMaxDist - d1.minMaxDist);
-      // H1: an MBR M with MINDIST(P,M) grater than the MINMAXDIST(P,M0)
-      // of another MBR M0, is discarded because it cannot contain the NN.
-      branches = branches
-        .filter((d) => d === branches[0] || d.minDist <= branches[0].minMaxDist)
-        .sort((d0, d1) => d0.minDist - d1.minDist);
-      for (let i = 0; i < branches.length; i += 1) {
-        const branch = branches[i];
-        if (branch.minDist > nearest.distSq) {
-          // H3: ever MBR M with MINDIST(P, M) greater than the actual distance
-          // from P to a give object O is discarded because it cannot enclose
-          // an object nearer than O.
-          break;
-        }
-        const subNode = branch.subNode;
+      const branches = node.entries
+        .map((subNode) => ({ distSq: minDist(p, subNode.mbr), subNode }))
+        .sort((b0, b1) => b0.distSq - b1.distSq);
+      for (const { distSq, subNode } of branches) {
+        // a branch exactly as far as the best entry may still hold an
+        // equally near one with a smaller id
+        if (distSq > nearest.distSq) break;
         nnSearch(subNode, p, nearest);
       }
     }
@@ -305,9 +289,15 @@ export const createRTree = <T extends DataNode>(
       }
       insert(root, entry);
     },
-    remove(entryMbr: MBR, matcher: (entry: T) => boolean) {
-      if (!root) return;
-      remove(root, entryMbr, matcher);
+    // removes one entry that matcher accepts, searching where entryMbr lies;
+    // returns whether there was one
+    remove(entryMbr: MBR, matcher: (entry: T) => boolean): boolean {
+      if (!root) return false;
+      const found = findLeaf(root, entryMbr, matcher);
+      if (!found) return false;
+      found.leaf.entries.splice(found.idx, 1);
+      condenseTree(found.leaf);
+      return true;
     },
     // the entry nearest to p; of equally near entries, the one with the
     // smallest id

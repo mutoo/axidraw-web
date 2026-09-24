@@ -1,9 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import type { Point2D } from '@/math/geom';
-import type { DataNode, LeafNode } from '../index';
+import type { DataNode, InternalEntry, LeafNode } from '../index';
 import { createRTree } from '../index';
 import type { MBR } from '../utils';
 import { pointAsMbr } from '../utils';
+
+const countEntries = (node: InternalEntry<DataNode> | null): number => {
+  if (!node) return 0;
+  if (node.type === 'rtree-type-node-leaf') return node.entries.length;
+  return node.entries.reduce((n, child) => n + countEntries(child), 0);
+};
 
 describe('rtree', () => {
   describe('insert', () => {
@@ -62,8 +68,21 @@ describe('rtree', () => {
       const entry = { id: 0, mbr: pointAsMbr([10, 10]) };
       rtree.insert(entry);
       expect(rtree.root!.entries.length).toBe(1);
-      rtree.remove(entry.mbr, () => false);
+      expect(rtree.remove(entry.mbr, () => false)).toBe(false);
       expect(rtree.root!.entries.length).toBe(1);
+    });
+    it('removes one matching entry per call', () => {
+      const rtree = createRTree(2, 4);
+      const mbr = pointAsMbr([10, 10]);
+      for (let id = 1; id <= 20; id += 1) {
+        rtree.insert({ id, mbr: pointAsMbr([10, 10]) });
+      }
+      for (let left = 20; left > 0; left -= 1) {
+        expect(countEntries(rtree.root)).toBe(left);
+        expect(rtree.remove(mbr, () => true)).toBe(true);
+      }
+      expect(rtree.root).toBe(null);
+      expect(rtree.remove(mbr, () => true)).toBe(false);
     });
     it('drops emptied nodes and shortens the tree after remove', () => {
       const entries = [
@@ -128,6 +147,15 @@ describe('rtree', () => {
       expect(rtree.nnSearch([14, 14], extractId)).toBe(2);
       expect(rtree.nnSearch([12, 12], extractId)).toBe(3);
       expect(rtree.nnSearch([15, 15], extractId)).toBe(2);
+    });
+
+    it('measures the distance to the whole MBR of an entry', () => {
+      const rtree = createRTree(2, 4);
+      rtree.insert({ id: 1, mbr: { p0: [0, 0], p1: [10, 10] } });
+      rtree.insert({ id: 2, mbr: pointAsMbr([14, 14]) });
+      // inside the rectangle, but far from its corner p0
+      expect(rtree.nnSearch([9, 9], (e) => e.id)).toBe(1);
+      expect(rtree.nnSearch([15, 15], (e) => e.id)).toBe(2);
     });
 
     it('returns the smallest id among equally near entries', () => {
