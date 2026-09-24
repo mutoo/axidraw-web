@@ -39,7 +39,7 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         } catch (err) {
           setResults(String(err));
         }
-      });
+      })();
     },
     [device, batch],
   );
