@@ -88,6 +88,7 @@ export const beats = [
   'q' as const,
   'e' as const,
   's' as const,
+  't' as const,
 ];
 
 export type Beat = (typeof beats)[number];
@@ -98,6 +99,7 @@ export const beatsMap: Record<Beat, number> = {
   q: 1,
   e: 0.5,
   s: 0.25,
+  t: 0.125,
 };
 
 export type NoteWithBeats = {
@@ -107,7 +109,7 @@ export type NoteWithBeats = {
 };
 
 export const parseNote = (note: string): NoteWithBeats => {
-  const parsed = note.match(/^([whqes]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/);
+  const parsed = note.match(/^([whqest]+)([0DA]|[CFG]#?|[EB]b?)(\d)?$/);
   if (!parsed) throw new Error(`Can not parse note: ${note}`);
 
   const [_, beatsSymbol, nodeName, nodeLevel] = parsed;
