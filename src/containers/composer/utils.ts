@@ -7,6 +7,8 @@ export const trackEvent = trackCategoryEvent('composer');
 export const logger = Logger.get('composer');
 
 export const DEFAULT_BPM = 88;
+export const MIN_BPM = 10;
+export const MAX_BPM = 200;
 
 export type RawSong = {
   title: string;
@@ -127,12 +129,18 @@ export const parseNote = (note: string): NoteWithBeats => {
   };
 };
 
+/**
+ * Splits a channel's text into its notes and bar lines.
+ */
+export const tokenizeChannel = (text: string) =>
+  text.split(/[\s,]+|(\|)/).filter(Boolean);
+
 const parseChannel = (text: string) => {
   const notes: NoteWithBeats[] = [];
   // where the bar lines fall, in beats from the start
   const barlines: number[] = [];
   let beats = 0;
-  for (const token of text.split(/[\s,]+|(\|)/).filter(Boolean)) {
+  for (const token of tokenizeChannel(text)) {
     if (token === BAR_LINE) {
       barlines.push(beats);
     } else {

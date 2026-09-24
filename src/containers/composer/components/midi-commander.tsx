@@ -9,6 +9,7 @@ import type { PageSize } from '@/containers/plotter/presenters/page';
 import { randomSeed } from '@/utils/random';
 import type { PlayerStage } from '../player';
 import play from '../player';
+import { parseSongFile, SONG_FILE_EXTENSION } from '../song-file';
 import * as songs from '../songs';
 import type { Placement } from '../stage';
 import { checkPadding, placeSong } from '../stage';
@@ -17,10 +18,13 @@ import {
   DEFAULT_BPM,
   formatChannel,
   logger,
+  MAX_BPM,
+  MIN_BPM,
   parseSong,
   songToSteps,
   trackEvent,
 } from '../utils';
+import SongDropzone from './song-dropzone';
 import SongPreview from './song-preview';
 
 type SongsType = typeof songs;
@@ -37,6 +41,26 @@ const stageLabels: Record<PlayerStage, string> = {
 
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
+
+// a song loaded from a file is picked by its title, after this
+const LOADED = 'loaded:';
+
+/**
+ * Reads song files, or says which one stops them from loading.
+ */
+const readSongFiles = (files: File[]) =>
+  Promise.all(
+    files.map(async (file) => {
+      if (!file.name.toLowerCase().endsWith(SONG_FILE_EXTENSION)) {
+        throw new Error(`${file.name} is not a ${SONG_FILE_EXTENSION} file.`);
+      }
+      try {
+        return parseSongFile(await file.text());
+      } catch (e) {
+        throw new Error(`${file.name}: ${errorMessage(e)}`, { cause: e });
+      }
+    }),
+  );
 
 /**
  * Plans where the pen goes for the song, or says what stops it from playing.
@@ -63,8 +87,10 @@ const placeOnPage = ({
   pageSize: PageSize;
   padding: number;
 }): { placement: Placement; barlines: number } | { problem: string } => {
-  if (!(BPM >= 10 && BPM <= 200)) {
-    return { problem: 'Beats per minute should be from 10 to 200.' };
+  if (!(BPM >= MIN_BPM && BPM <= MAX_BPM)) {
+    return {
+      problem: `Beats per minute should be from ${MIN_BPM} to ${MAX_BPM}.`,
+    };
   }
   if (!(motorMode >= 1 && motorMode <= 5)) {
     return { problem: 'Motor mode should be from 1 to 5.' };
@@ -116,6 +142,10 @@ const MidiCommander = ({
     formatChannel(getSong(songList[0]).channel2),
   );
   const [BPM, setBPM] = useState(() => getSong(songList[0]).bpm ?? DEFAULT_BPM);
+  const [songId, setSongId] = useState<string>(songList[0]);
+  // songs from files, which the Song list shows after its own
+  const [loaded, setLoaded] = useState<RawSong[]>([]);
+  const [loadProblem, setLoadProblem] = useState<string | null>(null);
   const [motorMode, setMotorMode] = useState(1);
   const [penDown, setPenDown] = useState(false);
   const [randomness, setRandomness] = useState(30);
@@ -137,6 +167,33 @@ const MidiCommander = ({
     pageSize,
     padding,
   });
+
+  const showSong = (id: string, song: RawSong) => {
+    setSongId(id);
+    setChannel1(formatChannel(song.channel1));
+    setChannel2(formatChannel(song.channel2));
+    setBPM(song.bpm ?? DEFAULT_BPM);
+  };
+
+  const loadSongs = (files: File[]) => {
+    if (!files.length) return;
+    trackEvent('load song');
+    readSongFiles(files)
+      .then((read) => {
+        // a song loaded again takes the place of the one with its title
+        setLoaded((before) => {
+          const byTitle = new Map(before.map((song) => [song.title, song]));
+          for (const song of read) byTitle.set(song.title, song);
+          return [...byTitle.values()];
+        });
+        const last = read[read.length - 1];
+        showSong(LOADED + last.title, last);
+        setLoadProblem(null);
+      })
+      .catch((err: unknown) => {
+        setLoadProblem(errorMessage(err));
+      });
+  };
 
   const sendCommands = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -175,12 +232,13 @@ const MidiCommander = ({
       <label className={formStyles.inputLabel}>
         <span>Song:</span>
         <select
-          defaultValue={songList[0]}
+          value={songId}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            const song = getSong(e.target.value as SongId);
-            setChannel1(formatChannel(song.channel1));
-            setChannel2(formatChannel(song.channel2));
-            setBPM(song.bpm ?? DEFAULT_BPM);
+            const id = e.target.value;
+            const song = id.startsWith(LOADED)
+              ? loaded.find(({ title }) => LOADED + title === id)
+              : getSong(id as SongId);
+            if (song) showSong(id, song);
           }}
           disabled={playing}
         >
@@ -189,8 +247,25 @@ const MidiCommander = ({
               {getSong(songKey).title}
             </option>
           ))}
+          {loaded.length > 0 && (
+            <optgroup label="Loaded from files">
+              {loaded.map(({ title }) => (
+                <option key={title} value={LOADED + title}>
+                  {title}
+                </option>
+              ))}
+            </optgroup>
+          )}
         </select>
       </label>
+      <SongDropzone disabled={playing} onFiles={loadSongs} />
+      {loadProblem && (
+        <Alert variant="destructive">
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>Can not load the song</AlertTitle>
+          <AlertDescription>{loadProblem}</AlertDescription>
+        </Alert>
+      )}
       <label className={formStyles.inputLabel}>
         <span>Channel 1:</span>
         <textarea
@@ -218,8 +293,8 @@ const MidiCommander = ({
           <span>Beats Per Minute:</span>
           <input
             type="number"
-            min={10}
-            max={200}
+            min={MIN_BPM}
+            max={MAX_BPM}
             value={BPM}
             disabled={playing}
             onChange={(e) => {
