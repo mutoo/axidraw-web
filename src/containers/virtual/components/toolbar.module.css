@@ -1,0 +1,66 @@
+@reference "@/index.css";
+
+.root {
+  @apply flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 text-sm;
+  @apply border-b bg-background/80 backdrop-blur;
+}
+
+.status {
+  @apply flex min-w-0 items-center gap-2;
+}
+
+.light {
+  @apply inline-block size-2.5 shrink-0 rounded-full bg-red-500;
+}
+
+.connecting {
+  @apply animate-pulse bg-amber-500;
+}
+
+.connected {
+  @apply bg-green-500;
+}
+
+/* as wide for every status, so the toolbar doesn't jump */
+.statusLabel {
+  @apply min-w-24 font-medium whitespace-nowrap;
+}
+
+.tools {
+  @apply flex flex-wrap items-center gap-x-2 gap-y-2;
+}
+
+.group {
+  @apply flex items-center gap-1.5 border-l pl-2;
+}
+
+.select {
+  @apply h-8 rounded-md border-input bg-background py-0 pr-7 pl-2 text-sm;
+
+  background-position: right 0.25rem center;
+}
+
+/* as wide whichever size is picked, however long its name */
+.paper {
+  @apply w-54;
+}
+
+.swatch {
+  @apply relative size-5 shrink-0 cursor-pointer rounded-full border border-black/20;
+}
+
+.selected {
+  @apply ring-2 ring-primary ring-offset-2;
+}
+
+.customColor {
+  background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+
+  input {
+    @apply absolute inset-0 size-full cursor-pointer opacity-0;
+  }
+}
+
+.pressed {
+  @apply border-amber-400 bg-amber-100 hover:bg-amber-100;
+}

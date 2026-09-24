@@ -7,14 +7,16 @@ import {
   DEVICE_TYPE_VIRTUAL,
 } from '@/communication/device/consts';
 import type { IDeviceConnector } from '@/communication/device/device';
+import PageSizeSelect from '@/components/page-size-select/page-size-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
 import formStyles from '@/components/ui/form.module.css';
+
 import {
   DEVICE_STATUS_CONNECTED,
   DEVICE_STATUS_DISCONNECTED,
   useDeviceConnector,
 } from '@/hooks/device';
+import { defaultPageSize } from '@/plotter/page-sizes';
 import { Button } from '../ui/button';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
@@ -67,6 +69,7 @@ const DeviceConnector = ({
   const [wsAddress, setWSAddress] = useState(defaultWSAddress);
   const [wsAuth, setWSAuth] = useState('axidraw-web');
   const [virtualVersion, setVirtualVersion] = useState('2.7.0');
+  const [virtualPaper, setVirtualPaper] = useState(defaultPageSize.id);
 
   useEffect(() => {
     if (!device) return;
@@ -174,10 +177,22 @@ const DeviceConnector = ({
                   <option>2.7.0</option>
                 </select>
               </label>
+              <label className={formStyles.inputLabel}>
+                <span>Paper:</span>
+                <PageSizeSelect
+                  value={virtualPaper}
+                  onChange={(size) => {
+                    setVirtualPaper(size.id);
+                  }}
+                />
+              </label>
               <Button
                 variant="default"
                 onClick={() => {
-                  void connectDevice({ version: virtualVersion });
+                  void connectDevice({
+                    version: virtualVersion,
+                    paper: virtualPaper,
+                  });
                 }}
               >
                 Create

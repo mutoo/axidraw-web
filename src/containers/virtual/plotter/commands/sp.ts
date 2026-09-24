@@ -1,8 +1,8 @@
 import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
-import { delay } from '@/utils/time';
 import type { VirtualPlotterContext } from '..';
 import { CreateCommand } from '../command';
+import { play } from '../utils';
 
 export default CreateCommand(
   'SP',
@@ -15,9 +15,7 @@ export default CreateCommand(
     runInAction(() => {
       context.pen = value;
     });
-    if (context.mode !== 'fast' && duration) {
-      await delay(duration);
-    }
+    await play(context, duration);
     yield ENDING_OK_CR_NL;
     return;
   },

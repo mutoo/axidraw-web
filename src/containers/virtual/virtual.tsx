@@ -1,151 +1,187 @@
+import { autorun, reaction } from 'mobx';
+import { observer } from 'mobx-react-lite';
 import queryString from 'query-string';
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router';
 import {
-  VIRTUAL_EVENT_DISCONNECTED,
-  VIRTUAL_EVENT_MESSAGE,
-  VIRTUAL_EVENT_STARTED,
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
 } from '@/communication/device/consts';
-import type { VMMessage } from '@/communication/device/virtual';
-import Footer from '@/components/footer/footer';
 import { useToast } from '@/hooks/use-toast';
+import type { PageSize } from '@/plotter/page-sizes';
+import type { VirtualAxiDraw } from './axidraw';
+import { createVirtualAxiDraw } from './axidraw';
 import Canvas from './components/canvas';
 import PenHolder from './components/pen-holder';
-import type { IVirtualPlotter } from './plotter';
-import createVM from './plotter';
-import { logger } from './utils';
+import StatusBar from './components/status-bar';
+import Toolbar from './components/toolbar';
+import { hostLinkStatusLabel } from './host-link';
 import styles from './virtual.module.css';
 
-const VirtualPlotter = () => {
-  const { toast } = useToast();
-  const [_deviceStatus, setDeviceStatus] = useState(
-    VIRTUAL_STATUS_DISCONNECTED,
+// the space kept around the paper, in px
+const MARGIN = 32;
+
+// fit the paper in the stage
+const fit = (stage: { width: number; height: number }, paper: PageSize) => {
+  // pixels to the mm
+  const scale = Math.max(
+    Math.min(
+      (stage.width - MARGIN * 2) / paper.width,
+      (stage.height - MARGIN * 2) / paper.height,
+    ),
+    0.5,
   );
+  return {
+    scale,
+    left: (stage.width - paper.width * scale) / 2,
+    top: (stage.height - paper.height * scale) / 2,
+  };
+};
+
+// the window this one takes its commands from: the one that opened it, or
+// the page it's framed in
+const findHost = (): Window | null =>
+  (window.opener as Window | null) ??
+  (window.parent !== window ? window.parent : null);
+
+const param = (value: unknown) => (typeof value === 'string' ? value : null);
+
+const Stage = observer(({ axidraw }: { axidraw: VirtualAxiDraw }) => {
   const stageRef = useRef<HTMLDivElement>(null);
-  const [vm, setVm] = useState<IVirtualPlotter | null>(null);
-  const [canvasSize] = useState({ width: 2970, height: 2100 });
-  const [transform, setTransform] = useState<{ transform: string } | null>(
+  const paperRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(
     null,
   );
   useEffect(() => {
-    const onResize = () => {
-      if (!stageRef.current) return;
-      const bbox = stageRef.current.getBoundingClientRect();
-      const canvasRatio = canvasSize.width / canvasSize.height;
-      const stageRatio = bbox.width / bbox.height;
-      let [x, y] = [0, 0];
-      let scale: number;
-      if (canvasRatio < stageRatio) {
-        scale = bbox.height / canvasSize.height;
-        x = (bbox.width - canvasSize.width * scale) / 2;
-      } else {
-        scale = bbox.width / canvasSize.width;
-        y = (bbox.height - canvasSize.height * scale) / 2;
-      }
-      const matrix = new DOMMatrix();
-      matrix.translateSelf(x, y).scaleSelf(scale);
-      setTransform({ transform: matrix.toString() });
-    };
-    window.addEventListener('resize', onResize);
-    onResize();
+    const stage = stageRef.current;
+    if (!stage) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setSize({ width, height });
+    });
+    observer.observe(stage);
     return () => {
-      window.removeEventListener('resize', onResize);
+      observer.disconnect();
     };
-  }, [canvasSize.height, canvasSize.width]);
-  useEffect(() => {
-    if (!window.opener) {
-      alert('Please open virtual plotter from axidraw web device connector!');
-      window.location.href = '/';
-      return () => {};
-    }
-    const opener = window.opener as Window;
-    const options = queryString.parse(window.location.search);
-    const version = (options.ebb ?? '2.7.0') as string;
-    const vm = createVM({
-      version,
-    });
-    const disconnect = () => {
-      opener.postMessage({
-        type: VIRTUAL_EVENT_DISCONNECTED,
-      });
-      logger.debug('disconnected.');
-      toast({
-        title: 'Disconnected',
-        description: 'The virtual plotter has been disconnected.',
-      });
-    };
-    const messageHandle = (event: MessageEvent<VMMessage>) => {
-      switch (event.data.type) {
-        case VIRTUAL_EVENT_DISCONNECTED:
-          setDeviceStatus(VIRTUAL_STATUS_DISCONNECTED);
-          window.removeEventListener('beforeunload', disconnect);
-          disconnect();
-          break;
-        case 'command':
-          logger.debug(`Received command: ${event.data.command}`);
-          void vm.execute(event.data.command).then((resp: string) => {
-            logger.debug(`Respond: ${resp}`);
-            opener.postMessage({
-              type: VIRTUAL_EVENT_MESSAGE,
-              data: resp,
-            });
-          });
-          break;
-        default:
-        // ignore
-      }
-    };
-    window.addEventListener('message', messageHandle);
-    window.addEventListener('beforeunload', disconnect);
-    opener.postMessage({
-      type: VIRTUAL_EVENT_STARTED,
-    });
-
-    logger.debug('connected.');
-    // the VM only exists inside this effect (it owns the AudioContext and the
-    // window listeners), so its state has to be published from here
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDeviceStatus(VIRTUAL_STATUS_CONNECTED);
-    setVm(vm);
-
-    toast({
-      title: 'Ready',
-      description: 'Please return to the main window to start plotting.',
-    });
-
-    return () => {
-      window.removeEventListener('message', messageHandle);
-      window.removeEventListener('beforeunload', disconnect);
-      vm.destroy();
-    };
-  }, [toast]);
-
+  }, []);
+  const { paper } = axidraw;
+  const layout = size && fit(size, paper);
   return (
-    <>
-      <div className={styles.stage} ref={stageRef}>
-        <div className={styles.frame} style={transform as React.CSSProperties}>
-          <div
-            className={styles.board}
-            style={{ width: canvasSize.width, height: canvasSize.height }}
+    <main className={styles.stage} ref={stageRef}>
+      {layout && (
+        <div
+          className={styles.paper}
+          ref={paperRef}
+          style={{
+            left: layout.left,
+            top: layout.top,
+            width: paper.width * layout.scale,
+            height: paper.height * layout.scale,
+          }}
+        >
+          <Canvas
+            drawing={axidraw.drawing}
+            paper={paper}
+            scale={layout.scale}
+          />
+          <PenHolder
+            vm={axidraw.vm}
+            paper={paper}
+            scale={layout.scale}
+            paperRef={paperRef}
           />
         </div>
-        {vm && (
-          <Canvas vm={vm} width={canvasSize.width} height={canvasSize.height} />
-        )}
-        {vm && (
-          <div
-            className={styles.plotter}
-            style={transform as React.CSSProperties}
-          >
-            <PenHolder vm={vm} />
-          </div>
-        )}
-      </div>
-      <div className={styles.footer}>
-        <Footer />
-      </div>
-    </>
+      )}
+    </main>
+  );
+});
+
+const VirtualPlotter = () => {
+  const { toast } = useToast();
+  const { search } = useLocation();
+  // what the main window opened this one with
+  const [options] = useState(() => {
+    const { ebb, paper, session } = queryString.parse(search);
+    return {
+      version: param(ebb) ?? '2.7.0',
+      paper: param(paper),
+      session: param(session),
+    };
+  });
+  const [axidraw, setAxidraw] = useState<VirtualAxiDraw | null>(null);
+
+  useEffect(() => {
+    const host = findHost();
+    if (!host) {
+      alert('Please open virtual plotter from axidraw web device connector!');
+      window.location.href = '/';
+      return;
+    }
+    const axidraw = createVirtualAxiDraw({ ...options, host });
+    // the VM only exists inside this effect (it owns the AudioContext and the
+    // window listeners), so it has to be published from here
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAxidraw(axidraw);
+    return () => {
+      axidraw.dispose();
+    };
+  }, [options]);
+
+  // tell when the main window comes and goes
+  useEffect(() => {
+    if (!axidraw) return;
+    return reaction(
+      () => axidraw.link.status,
+      (status) => {
+        if (status === VIRTUAL_STATUS_CONNECTED) {
+          toast({
+            title: 'Ready',
+            description: 'Please return to the main window to start plotting.',
+          });
+        } else if (status === VIRTUAL_STATUS_DISCONNECTED) {
+          toast({
+            title: 'Disconnected',
+            description: axidraw.link.reason,
+          });
+        }
+      },
+    );
+  }, [axidraw, toast]);
+
+  // and in the title, to tell the window apart from the main one
+  useEffect(() => {
+    if (!axidraw) return;
+    const { title } = document;
+    const dispose = autorun(() => {
+      document.title = `Virtual Plotter · ${hostLinkStatusLabel(axidraw.link.status)}`;
+    });
+    return () => {
+      dispose();
+      document.title = title;
+    };
+  }, [axidraw]);
+
+  // a click here lets this window play the sound, if the main window can't
+  useEffect(() => {
+    if (!axidraw) return;
+    const wake = () => {
+      axidraw.sound.wake();
+    };
+    window.addEventListener('pointerdown', wake);
+    window.addEventListener('keydown', wake);
+    return () => {
+      window.removeEventListener('pointerdown', wake);
+      window.removeEventListener('keydown', wake);
+    };
+  }, [axidraw]);
+
+  if (!axidraw) return null;
+  return (
+    <div className={styles.root}>
+      <Toolbar axidraw={axidraw} />
+      <Stage axidraw={axidraw} />
+      <StatusBar axidraw={axidraw} />
+    </div>
   );
 };
 

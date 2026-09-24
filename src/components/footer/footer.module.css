@@ -17,3 +17,20 @@
     @apply fill-current;
   }
 }
+
+/* on one line, e.g. in a status bar */
+.compact {
+  @apply m-0 flex flex-wrap items-center justify-end gap-x-2 text-xs;
+
+  p {
+    @apply leading-5;
+  }
+
+  p + p::before {
+    content: '· ';
+  }
+
+  svg {
+    @apply size-4 align-text-bottom;
+  }
+}

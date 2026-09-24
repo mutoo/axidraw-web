@@ -1,6 +1,5 @@
-import { observable, reaction } from 'mobx';
+import { observable, runInAction } from 'mobx';
 import { ENDING_CR } from '@/communication/ebb/constants';
-import { servoTime } from '@/math/ebb';
 import type { CommandGenerator } from './command';
 import { default as em } from './commands/em';
 import { default as hm } from './commands/hm';
@@ -14,6 +13,13 @@ import { default as sp } from './commands/sp';
 import { default as sr } from './commands/sr';
 import { default as tp } from './commands/tp';
 import { default as v } from './commands/v';
+import { isFreeMode, movePenByHand, penPosition } from './utils';
+
+// how long the plotter has to go without a command before it's idle
+export const IDLE_DELAY = 3000;
+
+// how long the motors keep humming once a hand stops pushing the carriage
+const HAND_HUM_TIMEOUT = 80;
 
 export type VirtualPlotterContext = {
   version: string;
@@ -36,11 +42,22 @@ export type VirtualPlotterContext = {
     max: number;
     rate: number;
   };
-  mode: string;
+  // how many times faster than real time the plotter moves, Infinity to
+  // finish every move and delay at once
+  speed: number;
+  // no command has come in or run for IDLE_DELAY
+  idle: boolean;
 };
 
 export interface IVirtualPlotter {
   execute(command: string): Promise<string>;
+  // drop the commands that haven't started yet
+  flush(): void;
+  // press the PRG button, which the next QB reports
+  pressButton(): void;
+  // push the carriage to a1, a2 (in 1/16 steps) by hand, in free mode only
+  moveByHand(position: { a1: number; a2: number }): boolean;
+  setSpeed(speed: number): void;
   context: VirtualPlotterContext;
   destroy(): void;
 }
@@ -53,6 +70,8 @@ type CommandQueue = PendingCommand[];
 
 export async function* executor(
   commandQueue: CommandQueue,
+  // called whenever the queue runs empty
+  onDrained?: () => void,
 ): AsyncGenerator<void, void, { abort: boolean }> {
   for (;;) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -72,6 +91,7 @@ export async function* executor(
       }
       head = commandQueue[0];
     }
+    onDrained?.();
   }
 }
 
@@ -82,7 +102,8 @@ export const createVMContext = (version: string): VirtualPlotterContext =>
     PRG: 0,
     motor: { a1: 0, a2: 0, home1: 0, home2: 0, stepMode: 1, f1: 0, f2: 0 },
     servo: { min: 12000, max: 16000, rate: 400 },
-    mode: 'normal',
+    speed: 1,
+    idle: false,
   });
 
 export default function createVM({
@@ -92,50 +113,45 @@ export default function createVM({
 }): IVirtualPlotter {
   const context = createVMContext(version);
   const commandQueue: CommandQueue = [];
-  const vm = executor(commandQueue);
+
+  // the motors hum while a hand pushes the carriage, and stop soon after it
+  // stops moving
+  let lastHandMove = 0;
+  let handTimer: ReturnType<typeof setTimeout> | undefined;
+  const stopHandHum = () => {
+    if (handTimer === undefined) return;
+    clearTimeout(handTimer);
+    handTimer = undefined;
+    runInAction(() => {
+      context.motor.f1 = 0;
+      context.motor.f2 = 0;
+    });
+  };
+
+  let destroyed = false;
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  const waitForIdle = () => {
+    clearTimeout(idleTimer);
+    if (destroyed) return;
+    idleTimer = setTimeout(() => {
+      runInAction(() => {
+        context.idle = true;
+      });
+    }, IDLE_DELAY);
+  };
+  const busy = () => {
+    clearTimeout(idleTimer);
+    stopHandHum();
+    if (context.idle) {
+      runInAction(() => {
+        context.idle = false;
+      });
+    }
+  };
+
+  const vm = executor(commandQueue, waitForIdle);
   void vm.next(); // ready
-
-  // Simulate audio output
-  const audioCtx = new AudioContext();
-  // motor A1
-  const osillatorNodeA1 = audioCtx.createOscillator();
-  osillatorNodeA1.type = 'square';
-  osillatorNodeA1.frequency.value = 0;
-  // motor A2
-  const osillatorNodeA2 = audioCtx.createOscillator();
-  osillatorNodeA2.type = 'square';
-  osillatorNodeA2.frequency.value = 0;
-  // pen servo
-  const osillatorNodeServo = audioCtx.createOscillator();
-  osillatorNodeServo.type = 'sawtooth';
-  osillatorNodeServo.frequency.value = 0;
-  const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0.005;
-  gainNode.connect(audioCtx.destination);
-  osillatorNodeA1.connect(gainNode);
-  osillatorNodeA2.connect(gainNode);
-  osillatorNodeServo.connect(gainNode);
-  osillatorNodeA1.start();
-  osillatorNodeA2.start();
-  osillatorNodeServo.start();
-
-  const penDisposer = reaction(
-    () => context.pen,
-    () => {
-      const { min, max, rate } = context.servo;
-      osillatorNodeServo.frequency.value = 600;
-      const t = servoTime(min, max, rate) / 1000;
-      osillatorNodeServo.frequency.setValueAtTime(0, audioCtx.currentTime + t);
-    },
-  );
-
-  const motorDisposer = reaction(
-    () => [context.motor.f1, context.motor.f2],
-    ([f1, f2]) => {
-      osillatorNodeA1.frequency.value = f1 | 0;
-      osillatorNodeA2.frequency.value = f2 | 0;
-    },
-  );
+  waitForIdle();
 
   const notImplementedCmd = (cmd: string) => ({
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -147,6 +163,7 @@ export default function createVM({
 
   return {
     execute(command: string): Promise<string> {
+      busy();
       return new Promise<string>((resolve) => {
         const [cmdStr, ...params] = command.trim().split(',');
         switch (cmdStr.toLowerCase()) {
@@ -224,16 +241,50 @@ export default function createVM({
         void vm.next(); // kick off
       });
     },
+    flush() {
+      // the head may be running already, and the executor drops it when done
+      commandQueue.splice(1);
+    },
+    pressButton() {
+      runInAction(() => {
+        context.PRG = 1;
+      });
+    },
+    moveByHand(position) {
+      if (!isFreeMode(context)) return false;
+      const now = performance.now();
+      // pointer events come every few ms, and the first one of a push after
+      // a while shouldn't count the wait
+      const dt = Math.min(Math.max(now - lastHandMove, 8), 100);
+      lastHandMove = now;
+      const from = penPosition(context);
+      const stepSize = 2 ** (context.motor.stepMode - 1);
+      runInAction(() => {
+        movePenByHand(context, position);
+        // the carriage turns both motors, which hum at their step rate
+        context.motor.f1 =
+          (Math.abs(position.a1 - from.a1) * 1000) / stepSize / dt;
+        context.motor.f2 =
+          (Math.abs(position.a2 - from.a2) * 1000) / stepSize / dt;
+      });
+      clearTimeout(handTimer);
+      handTimer = setTimeout(stopHandHum, HAND_HUM_TIMEOUT);
+      return true;
+    },
+    setSpeed(speed: number) {
+      if (!(speed > 0)) return;
+      runInAction(() => {
+        context.speed = speed;
+      });
+    },
     get context() {
       return context;
     },
     destroy() {
+      destroyed = true;
       void vm.next({ abort: true }); // abort
-      penDisposer();
-      motorDisposer();
-      osillatorNodeA1.stop();
-      osillatorNodeA2.stop();
-      osillatorNodeServo.stop();
+      clearTimeout(idleTimer);
+      clearTimeout(handTimer);
     },
   };
 }

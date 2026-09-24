@@ -1,4 +1,3 @@
-import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
 import { rate2s, rsa2t } from '@/math/ebb';
 import type { VirtualPlotterContext } from '..';
@@ -22,13 +21,6 @@ export default CreateCommand(
     const d2 = rsa2t({ rate: rate2, step: Math.abs(step2), acc: accel2 }) || 0;
     const duration = Math.max(d1, d2) * 1000;
     yield ENDING_OK_CR_NL;
-    if (context.mode === 'fast') {
-      runInAction(() => {
-        context.motor.a1 += step1;
-        context.motor.a2 += step2;
-      });
-      return;
-    }
     await accelMotion(
       context,
       [step1, step2],

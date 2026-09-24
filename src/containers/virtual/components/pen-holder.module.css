@@ -2,33 +2,50 @@
   position: absolute;
   top: 0;
   left: 0;
-}
-
-.dot {
-  display: block;
-  border-radius: 50%;
-  background-color: red;
-  width: 25px;
-  height: 25px;
-  transform: translate(-50%, -50%);
-  transition: opacity ease-out 0.3s;
-}
-
-.dotUp {
-  opacity: 0;
+  touch-action: none;
+  user-select: none;
 }
 
 .carriage {
   position: absolute;
   top: 0;
   left: 0;
-  width: 712px;
-  height: 3322px;
   max-width: none;
   transform: translate(0, -100%);
-  transition: opacity ease-out 0.5s;
 }
 
-.carriageHidden {
-  opacity: 0;
+.pen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgb(220 38 38 / 0.9);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition:
+    background-color ease-out 0.3s,
+    box-shadow ease-out 0.3s;
+}
+
+.penDown {
+  background-color: rgb(220 38 38);
+}
+
+.free {
+  .carriage,
+  .pen {
+    cursor: grab;
+  }
+
+  .pen {
+    box-shadow: 0 0 0 5px rgb(34 197 94 / 0.4);
+  }
+}
+
+.pushing {
+  .carriage,
+  .pen {
+    cursor: grabbing;
+  }
 }

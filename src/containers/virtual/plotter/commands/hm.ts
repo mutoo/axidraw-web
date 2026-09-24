@@ -1,4 +1,3 @@
-import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
 import type { VirtualPlotterContext } from '..';
 import { CreateCommand } from '../command';
@@ -18,14 +17,6 @@ export default CreateCommand(
     const a1end = p1;
     const a2end = p2;
     yield ENDING_OK_CR_NL;
-
-    if (context.mode === 'fast') {
-      runInAction(() => {
-        context.motor.a1 = a1end;
-        context.motor.a2 = a2end;
-      });
-      return;
-    }
 
     const dist = Math.hypot(a1end - a1start, a2end - a2start);
     const duration = (dist / stepFrequency) * 1000;

@@ -41,9 +41,13 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 
 - [x] Run a virtual AxiDraw in the browser
 - [x] Generate motor sounds as the pen moving
-- [ ] Free-mode Position control
-- [ ] Color control
-- [ ] Size control
+- [x] Free-mode Position control: move the carriage by hand, or with the arrow keys, while it's idle with the pen up
+- [x] Color control: swap pens of any color between plots
+- [x] Size control: pen tips from 0.3 to 2 mm, and paper of any page size
+- [x] Clear the paper, and save it as a PNG or an SVG
+- [x] Show whether the main window is still connected
+- [x] Keep the window, and the drawing on it, when connecting again
+- [x] Plot faster than real time, and press the PRG button
 
 ## Play it on browsers:
 
@@ -54,6 +58,8 @@ The latest version is deployed at https://axidraw.mutoo.im , you don't need to i
 Try the [Debugger](https://axidraw.mutoo.im/#debugger) if you want to play with low-level ebb command.
 
 Try the [Composer](https://axidraw.mutoo.im/#composer) if you wondering how the pen plotter singing.
+
+No AxiDraw at hand? Pick **Virtual Plotter** in the device connector, choose the paper, and plot on a virtual one in a window of its own. See [docs/virtual-plotter.md](docs/virtual-plotter.md) for what it can do.
 
 ## Run locally
 

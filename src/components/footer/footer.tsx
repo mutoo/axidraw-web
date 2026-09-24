@@ -1,9 +1,10 @@
+import classNames from 'clsx';
 import { version } from '../../../package.json';
 import styles from './footer.module.css';
 
-const Footer = () => {
+const Footer = ({ compact = false }: { compact?: boolean }) => {
   return (
-    <div className={styles.root}>
+    <div className={classNames(styles.root, compact && styles.compact)}>
       <p>
         AxiDraw Web &copy; 2021-2026{' '}
         <a href={'https://mutoo.im/'} target={'_blank'} rel="noreferrer">

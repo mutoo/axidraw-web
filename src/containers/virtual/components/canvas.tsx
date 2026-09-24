@@ -1,60 +1,55 @@
-import { reaction } from 'mobx';
 import { useEffect, useRef } from 'react';
-import { aaSteps2xyDist } from '@/math/ebb';
-import type { IVirtualPlotter } from '../plotter';
-import { penPosition } from '../plotter/utils';
+import type { PageSize } from '@/plotter/page-sizes';
+import type { Drawing } from '../drawing';
+import { createDrawingRenderer } from '../drawing';
 import styles from './canvas.module.css';
 
+// the drawing on the paper, drawn sharp at the size it's shown
 const Canvas = ({
-  vm,
-  width,
-  height,
+  drawing,
+  paper,
+  scale,
 }: {
-  vm: IVirtualPlotter;
-  width: number;
-  height: number;
+  drawing: Drawing;
+  paper: PageSize;
+  // pixels to the mm
+  scale: number;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const vmCtx = vm.context;
-    const canvasCtx = canvasRef.current.getContext('2d');
-    if (!canvasCtx) {
-      alert('Canvas not supported');
-      return;
-    }
-    let prevX = 0;
-    let prevY = 0;
-
-    return reaction(
-      () => penPosition(vmCtx),
-      (position) => {
-        const { x, y } = aaSteps2xyDist(position);
-        canvasCtx.beginPath();
-        if (vmCtx.pen === 0) {
-          canvasCtx.lineWidth = 7;
-          canvasCtx.lineCap = 'round';
-          canvasCtx.moveTo(prevX, prevY);
-          canvasCtx.lineTo(x * 10, y * 10);
-          canvasCtx.stroke();
-        }
-        prevX = x * 10;
-        prevY = y * 10;
-      },
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.round(paper.width * scale * ratio);
+    canvas.height = Math.round(paper.height * scale * ratio);
+    ctx.setTransform(
+      canvas.width / paper.width,
+      0,
+      0,
+      canvas.height / paper.height,
+      0,
+      0,
     );
-  }, [vm]);
-  return (
-    <div className={styles.root}>
-      <canvas
-        width={width}
-        height={height}
-        className={styles.canvas}
-        ref={canvasRef}
-      />
-      <div className={styles.vm} />
-    </div>
-  );
+    const renderer = createDrawingRenderer(ctx, drawing);
+    renderer.render();
+    // the pen moves many times a frame: draw what's new once per frame
+    let frame = 0;
+    const unsubscribe = drawing.subscribe(() => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        renderer.render();
+      });
+    });
+    return () => {
+      unsubscribe();
+      cancelAnimationFrame(frame);
+    };
+  }, [drawing, paper, scale]);
+
+  return <canvas className={styles.canvas} ref={canvasRef} />;
 };
 
 export default Canvas;
