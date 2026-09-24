@@ -93,7 +93,8 @@ export default function* pathToLines(
           // convert to Q so that the (cx1, cy1) can be pass to next command
           prevCmd = ['Q' as const, [[cx1, cy1], cmdT[1]]];
         }
-        break;
+        // skip the `prevCmd = cmd` below, which would drop the converted Q
+        continue;
       case 'C':
         prevPos = yield* bezierToLines((cmd as CurveTo)[1], prevPos, ctm, opt);
         break;
@@ -109,14 +110,16 @@ export default function* pathToLines(
             switch (prevCmd[0]) {
               case 'C':
                 {
+                  // C: [ctrl1, ctrl2, end]
                   const comC = prevCmd as SingleCommand<CurveTo>;
-                  [pcx2, pcy2] = comC[1][2];
+                  [pcx2, pcy2] = comC[1][1];
                 }
                 break;
               case 'S':
                 {
+                  // S: [ctrl2, end]
                   const comS = prevCmd as SingleCommand<SmoothCurveTo>;
-                  [pcx2, pcy2] = comS[1][1];
+                  [pcx2, pcy2] = comS[1][0];
                 }
                 break;
               default:
