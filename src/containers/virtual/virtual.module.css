@@ -13,3 +13,7 @@
 
   box-shadow: 0 0 50px 0 rgba(0, 0, 0, 0.25);
 }
+
+.rulers {
+  @apply pointer-events-none absolute top-0 left-0 overflow-visible;
+}

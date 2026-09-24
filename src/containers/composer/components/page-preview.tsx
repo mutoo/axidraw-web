@@ -1,12 +1,17 @@
 import classNames from 'clsx';
 import type { ReactNode } from 'react';
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Rulers, RULER_REACH } from '@/components/ruler/ruler';
+import { RULER_OFF, useRulerChoice } from '@/components/ruler/ruler-choice';
 import { PAGE_ORIENTATION_PORTRAIT } from '@/containers/plotter/presenters/page';
 import type { PageSize } from '@/plotter/page-sizes';
 import { pageSizeLabel } from '@/plotter/page-sizes';
 
 // the desk around the page, in mm
 const DESK = 15;
+// the rulers along the top and left edges, and the desk they lie on, in mm
+const RULER_WIDTH = 16;
+const RULER_DESK = 20;
 
 /**
  * The page with its padding, the origin where the pen starts and ends, and
@@ -30,15 +35,46 @@ const PagePreview = ({
   children?: ReactNode;
 }) => {
   const shadowId = useId();
+  const svgRef = useRef<SVGSVGElement>(null);
+  // how big the view shows, to tell how fine the rulers' marks can be
+  const [shown, setShown] = useState<{ width: number; height: number }>();
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setShown({ width, height });
+    });
+    observer.observe(svg);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+  const [ruler] = useRulerChoice();
   const portrait = orientation === PAGE_ORIENTATION_PORTRAIT;
   // along the plotter's x and y
   const { width, height } = pageSize;
   const view = portrait ? { width: height, height: width } : { width, height };
   const middle = { x: width / 2, y: height / 2 };
+  // the rulers lie along the top and left of the page as it's seen
+  const rulers = ruler !== RULER_OFF;
+  const desk = rulers ? RULER_DESK : DESK;
+  const box = {
+    x: -desk,
+    y: -desk,
+    width:
+      (rulers ? Math.max(view.width, RULER_REACH) : view.width) + desk + DESK,
+    height:
+      (rulers ? Math.max(view.height, RULER_REACH) : view.height) + desk + DESK,
+  };
+  const pxPerMm = shown
+    ? Math.min(shown.width / box.width, shown.height / box.height)
+    : 1;
   return (
     <svg
+      ref={svgRef}
       className={classNames('w-full rounded-md bg-neutral-100', className)}
-      viewBox={`${-DESK} ${-DESK} ${view.width + DESK * 2} ${view.height + DESK * 2}`}
+      viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
       role="img"
       aria-label={`${pageSizeLabel(pageSize)}, ${portrait ? 'portrait' : 'landscape'}`}
     >
@@ -53,6 +89,9 @@ const PagePreview = ({
         fill="white"
         filter={`url(#${shadowId})`}
       />
+      {ruler !== RULER_OFF && (
+        <Rulers variant={ruler} thickness={RULER_WIDTH} pxPerMm={pxPerMm} />
+      )}
       <g
         transform={
           portrait ? `translate(${view.width},0) rotate(90)` : undefined

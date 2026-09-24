@@ -35,7 +35,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 ### Composer
 
 - [x] A singing pen plotter, [it's real.](https://www.instagram.com/p/CP-K1m9J-j1/)
-- [x] Play on any page size
+- [x] Play on any page size, with a 15 cm ruler along the page
 
 ### Virtual AxiDraw
 
@@ -44,6 +44,7 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] Free-mode Position control: move the carriage by hand, or with the arrow keys, while it's idle with the pen up
 - [x] Color control: swap pens of any color between plots
 - [x] Size control: pen tips from 0.3 to 2 mm, and paper of any page size
+- [x] A 15 cm ruler along the top and left edges of the paper, in five styles, or none
 - [x] Clear the paper, and save it as a PNG or an SVG
 - [x] Show whether the main window is still connected
 - [x] Keep the window, and the drawing on it, when connecting again

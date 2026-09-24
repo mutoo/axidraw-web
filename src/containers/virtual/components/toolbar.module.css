@@ -32,6 +32,10 @@
 
 .group {
   @apply flex items-center gap-1.5 border-l pl-2;
+
+  &:first-child {
+    @apply border-l-0 pl-0;
+  }
 }
 
 .select {

@@ -1,5 +1,6 @@
 import { Info, TriangleAlert } from 'lucide-react';
 import PageSizeSelect from '@/components/page-size-select/page-size-select';
+import RulerSelect from '@/components/ruler/ruler-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -80,6 +81,10 @@ const PageSetup = ({
             }}
           />
           <span>Portrait</span>
+        </label>
+        <label className="ml-auto flex items-center gap-2">
+          <span>Ruler:</span>
+          <RulerSelect className="py-1" />
         </label>
       </div>
       <PagePreview

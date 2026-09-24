@@ -7,6 +7,8 @@ import {
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
 } from '@/communication/device/consts';
+import { Rulers, RULER_REACH } from '@/components/ruler/ruler';
+import { RULER_OFF, useRulerChoice } from '@/components/ruler/ruler-choice';
 import { useToast } from '@/hooks/use-toast';
 import type { PageSize } from '@/plotter/page-sizes';
 import type { VirtualAxiDraw } from './axidraw';
@@ -20,21 +22,32 @@ import styles from './virtual.module.css';
 
 // the space kept around the paper, in px
 const MARGIN = 32;
+// how wide the rulers along the paper show, in px
+const RULER_WIDTH = 26;
 
-// fit the paper in the stage
-const fit = (stage: { width: number; height: number }, paper: PageSize) => {
+// fit the paper in the stage, and the rulers along its top and left edges
+const fit = (
+  stage: { width: number; height: number },
+  paper: PageSize,
+  rulers: boolean,
+) => {
+  // the room the rulers take off the paper, in px
+  const inset = rulers ? RULER_WIDTH : 0;
+  // what has to fit, in mm
+  const width = rulers ? Math.max(paper.width, RULER_REACH) : paper.width;
+  const height = rulers ? Math.max(paper.height, RULER_REACH) : paper.height;
   // pixels to the mm
   const scale = Math.max(
     Math.min(
-      (stage.width - MARGIN * 2) / paper.width,
-      (stage.height - MARGIN * 2) / paper.height,
+      (stage.width - MARGIN * 2 - inset) / width,
+      (stage.height - MARGIN * 2 - inset) / height,
     ),
     0.5,
   );
   return {
     scale,
-    left: (stage.width - paper.width * scale) / 2,
-    top: (stage.height - paper.height * scale) / 2,
+    left: (stage.width - inset - width * scale) / 2 + inset,
+    top: (stage.height - inset - height * scale) / 2 + inset,
   };
 };
 
@@ -64,8 +77,9 @@ const Stage = observer(({ axidraw }: { axidraw: VirtualAxiDraw }) => {
       observer.disconnect();
     };
   }, []);
+  const [ruler] = useRulerChoice();
   const { paper } = axidraw;
-  const layout = size && fit(size, paper);
+  const layout = size && fit(size, paper, ruler !== RULER_OFF);
   return (
     <main className={styles.stage} ref={stageRef}>
       {layout && (
@@ -84,6 +98,20 @@ const Stage = observer(({ axidraw }: { axidraw: VirtualAxiDraw }) => {
             paper={paper}
             scale={layout.scale}
           />
+          {ruler !== RULER_OFF && (
+            <svg
+              className={styles.rulers}
+              width={paper.width * layout.scale}
+              height={paper.height * layout.scale}
+              viewBox={`0 0 ${paper.width} ${paper.height}`}
+            >
+              <Rulers
+                variant={ruler}
+                thickness={RULER_WIDTH / layout.scale}
+                pxPerMm={layout.scale}
+              />
+            </svg>
+          )}
           <PenHolder
             vm={axidraw.vm}
             paper={paper}

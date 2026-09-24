@@ -30,6 +30,11 @@ The toolbar, from the left:
   A6 and B4 to B6, US, cards and art paper, and the plot area of each
   AxiDraw, landscape as it lies on the plotter. Another size is a blank
   sheet. That, and **Clear**, can be undone from the toast for 10 seconds.
+- **Ruler**: a 15 cm ruler along the top and the left edges of the paper,
+  from its corner, which is the origin. It's clear, wood, steel, yellow or
+  minimal, or there's none. It marks every mm and numbers every cm when
+  it's shown big enough, and fewer as the paper shrinks. The choice is the
+  same in every window of the app, the composer's too.
 - **Pen**: its color, from the swatches or any other, and its tip, 0.3 to
   2 mm. Changing them is swapping the pen: what's drawn stays as it was,
   and the new pen draws from where the old one stopped. Plot a layer, swap

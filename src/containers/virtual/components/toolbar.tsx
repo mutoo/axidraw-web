@@ -6,6 +6,7 @@ import {
   VIRTUAL_STATUS_CONNECTING,
 } from '@/communication/device/consts';
 import PageSizeSelect from '@/components/page-size-select/page-size-select';
+import RulerSelect from '@/components/ruler/ruler-select';
 import { Button } from '@/components/ui/button';
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/hooks/use-toast';
@@ -96,22 +97,29 @@ const Toolbar = observer(({ axidraw }: { axidraw: VirtualAxiDraw }) => {
     <header className={styles.root}>
       <HostStatus axidraw={axidraw} />
       <div className={styles.tools}>
-        <PageSizeSelect
-          className={classNames(styles.select, styles.paper)}
-          value={paper.id}
-          title={`${pageSizeLabel(paper)}: another size is a blank sheet`}
-          aria-label="Paper size"
-          onChange={(size) => {
-            const previous = axidraw.paper;
-            const removed = axidraw.setPaper(size);
-            offerUndo(`New ${axidraw.paper.name} sheet`, removed, () => {
-              // nothing is lost going back to a sheet that's still blank
-              if (!drawing.isEmpty) return;
-              axidraw.setPaper(previous);
-              drawing.restore(removed);
-            });
-          }}
-        />
+        <div className={styles.group}>
+          <PageSizeSelect
+            className={classNames(styles.select, styles.paper)}
+            value={paper.id}
+            title={`${pageSizeLabel(paper)}: another size is a blank sheet`}
+            aria-label="Paper size"
+            onChange={(size) => {
+              const previous = axidraw.paper;
+              const removed = axidraw.setPaper(size);
+              offerUndo(`New ${axidraw.paper.name} sheet`, removed, () => {
+                // nothing is lost going back to a sheet that's still blank
+                if (!drawing.isEmpty) return;
+                axidraw.setPaper(previous);
+                drawing.restore(removed);
+              });
+            }}
+          />
+          <RulerSelect
+            className={styles.select}
+            title="The rulers along the top and left edges of the paper"
+            aria-label="Ruler"
+          />
+        </div>
         <div className={styles.group} role="group" aria-label="Pen">
           {penColors.map(({ name, value }) => (
             <button
