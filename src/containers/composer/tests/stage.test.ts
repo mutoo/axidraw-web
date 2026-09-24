@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
 import { aaSteps2xyDist } from '@/math/ebb';
+import { createRandom } from '@/utils/random';
 import * as songs from '../songs';
 import {
   checkPadding,
@@ -323,5 +324,46 @@ describe('travel', () => {
 
   it('stays put for no distance', () => {
     expect(travel({ a1: 0, a2: 0 }, 1)).toEqual([]);
+  });
+
+  it('speeds up and slows down on the way', () => {
+    const moves = travel({ a1: 20000, a2: 3000 }, 1);
+    // in motor steps a ms, where 50 mm/s is about 5.65
+    const speeds = moves.map(
+      ({ step1, step2, duration }) => Math.hypot(step1, step2) / duration,
+    );
+    const top = Math.max(...speeds);
+    expect(top).toBeCloseTo(5.65, 1);
+    expect(speeds[0]).toBeLessThan(top / 5);
+    expect(speeds.at(-1)).toBeLessThan(top / 5);
+    const peak = speeds.indexOf(top);
+    for (let i = 1; i <= peak; i += 1) {
+      expect(speeds[i]).toBeGreaterThanOrEqual(speeds[i - 1] - 0.1);
+    }
+  });
+
+  it('only walks as far as it has to go', () => {
+    const [a1, a2] = [1500, 200];
+    for (const mode of [1, 5]) {
+      const moves = travel({ a1, a2 }, mode);
+      moves.forEach(expectValidSM);
+      expect(moves.reduce((sum, { step1 }) => sum + step1, 0)).toBe(a1);
+      expect(moves.reduce((sum, { step2 }) => sum + step2, 0)).toBe(a2);
+    }
+  });
+
+  it('makes moves the EBB takes for any walk', () => {
+    const random = createRandom(1);
+    const anySteps = () => Math.round((random() - 0.5) * 60000);
+    const fewSteps = () => Math.floor(random() * 7) - 3;
+    for (let i = 0; i < 500; i += 1) {
+      const a1 = random() < 0.2 ? fewSteps() : anySteps();
+      const a2 = random() < 0.2 ? fewSteps() : anySteps();
+      const mode = 1 + Math.floor(random() * 5);
+      const moves = travel({ a1, a2 }, mode);
+      moves.forEach(expectValidSM);
+      expect(moves.reduce((sum, { step1 }) => sum + step1, 0)).toBe(a1);
+      expect(moves.reduce((sum, { step2 }) => sum + step2, 0)).toBe(a2);
+    }
   });
 });

@@ -41,6 +41,16 @@ const moves: PlannedStep[] = [
 
 const start = { a1: 20000, a2: 3000 };
 
+// the moves of the walk from the origin to the song
+const walkOut = travel(start, 1);
+
+const asSM = ({ step1, step2, duration }: PlannedStep) => [
+  'SM',
+  duration,
+  step1,
+  step2,
+];
+
 const playWith = async (
   device: IDeviceConnector<unknown>,
   options: Partial<Parameters<typeof play>[0]> = {},
@@ -99,18 +109,13 @@ describe('play', () => {
       ['R'],
       ['EM', 1, 1],
       ['SP', 1, 500, undefined],
-      ['SM', expect.any(Number), start.a1, start.a2],
+      ...walkOut.map(asSM),
       ['SP', 0, 500, undefined],
       ['SM', PAUSE, 0, 0],
-      ...moves.map(({ step1, step2, duration }) => [
-        'SM',
-        duration,
-        step1,
-        step2,
-      ]),
+      ...moves.map(asSM),
       ['SP', 1, 500, undefined],
       ['SM', PAUSE, 0, 0],
-      ['SM', expect.any(Number), -start.a1 + 600, -start.a2 + 100],
+      ...travel({ a1: -start.a1 + 600, a2: -start.a2 + 100 }, 1).map(asSM),
       ['R'],
     ]);
     expectBackAtOrigin(sent);
@@ -124,7 +129,7 @@ describe('play', () => {
       onStage: (stage) => stages.push([stage, performance.now() - t0]),
     });
     // the song starts after the pen is up, has walked and has rested
-    const walk = travel(start, 1)[0].duration;
+    const walk = walkOut.reduce((t, { duration }) => t + duration, 0);
     const playing = 500 + walk + PAUSE;
     // and the pen heads back once the last note has played
     const returning = playing + 2000;
@@ -136,8 +141,9 @@ describe('play', () => {
   });
 
   it('leaves no stage to tell of after a failure', async () => {
-    // the device goes away in the middle of the song
-    const { device } = createDevice({ disconnectAfter: 9 });
+    // the device goes away just after the first note: R, EM, pen up, the
+    // walk, the rest, then a PRG query and the note
+    const { device } = createDevice({ disconnectAfter: walkOut.length + 6 });
     const stages: string[] = [];
     const error = await playWith(device, {
       onStage: (stage) => stages.push(stage),
@@ -194,12 +200,13 @@ describe('play', () => {
 
   it('goes back to the origin when a command fails, then reports it', async () => {
     // after the walk and the rest, the EBB refuses the second note
-    const { device, sent } = createDevice({ failOnSM: 4 });
+    const refused = walkOut.length + 3;
+    const { device, sent } = createDevice({ failOnSM: refused });
     const error = await playWith(device);
     expect(error).toEqual(new Error('!8 Err: unknown'));
     // the refused note never moved the pen
     expectBackAtOrigin(
-      sent.filter((_, i) => i !== sent.indexOf(smMoves(sent)[3])),
+      sent.filter((_, i) => i !== sent.indexOf(smMoves(sent)[refused - 1])),
     );
     expect(sent.at(-1)).toEqual(['R']);
   });

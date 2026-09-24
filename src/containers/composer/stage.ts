@@ -15,6 +15,11 @@ export const pageSizes = plotterPageSizes.filter(
 
 // the pen walks from the origin to the song and back at this speed
 const TRAVEL_SPEED = 50; // mm/s
+// speeding up and slowing down at this rate, which the motors sing as a
+// glide up and down, and which is gentler on them than a sudden start or stop
+const TRAVEL_ACCEL = 100; // mm/s²
+// in moves of about this long
+const RAMP_STEP = 20; // ms
 
 export type AxisSteps = { a1: number; a2: number };
 
@@ -157,32 +162,67 @@ export const placeSong = (
 };
 
 /**
- * Moves that take the pen `delta` steps in a straight line at TRAVEL_SPEED.
- * The EBB rejects an SM that steps an axis less than once every
- * SM_MAX_MS_PER_STEP ms, so an axis with only a few steps to go moves on its
- * own afterwards.
+ * Moves that take the pen `delta` steps in a straight line, speeding up to
+ * TRAVEL_SPEED and slowing down again at TRAVEL_ACCEL, a steady speed in each
+ * move.
+ */
+const walk = (a1: number, a2: number, motorMode: number): PlannedStep[] => {
+  const { x, y } = aaSteps2xyDist({ a1, a2 }, motorMode);
+  const distance = Math.hypot(x, y);
+  // a short walk only gets part way up to speed before slowing down again
+  const top = Math.min(TRAVEL_SPEED, Math.sqrt(TRAVEL_ACCEL * distance));
+  const rampTime = top / TRAVEL_ACCEL;
+  const count = Math.max(1, Math.round((rampTime * 1000) / RAMP_STEP));
+  const ramp = Array.from({ length: count }, (_, i) => ({
+    speed: (top * (i + 0.5)) / count,
+    time: rampTime / count,
+  }));
+  // the two ramps cover top * rampTime between them
+  const steady = distance - top * rampTime;
+  const pieces = [
+    ...ramp,
+    ...(steady > 0 ? [{ speed: top, time: steady / top }] : []),
+    ...[...ramp].reverse(),
+  ];
+  // the steps each move ends at, rounded from how far along the walk it gets
+  let covered = 0;
+  const ends = pieces.map(({ speed, time }) => {
+    covered += speed * time;
+    const along = Math.min(covered / distance, 1);
+    return { a1: Math.round(a1 * along), a2: Math.round(a2 * along) };
+  });
+  return pieces.map(({ time }, i) => ({
+    step1: ends[i].a1 - (i ? ends[i - 1].a1 : 0),
+    step2: ends[i].a2 - (i ? ends[i - 1].a2 : 0),
+    duration: Math.max(1, Math.round(time * 1000)),
+  }));
+};
+
+/**
+ * Moves that take the pen `delta` steps in a straight line, speeding up and
+ * slowing down on the way. The EBB rejects an SM that steps an axis less than
+ * once every SM_MAX_MS_PER_STEP ms, so an axis with only a few steps to go
+ * moves on its own afterwards.
  */
 export const travel = (delta: AxisSteps, motorMode: number): PlannedStep[] => {
   const { a1, a2 } = delta;
   if (!a1 && !a2) return [];
-  const { x, y } = aaSteps2xyDist(delta, motorMode);
-  const duration = Math.max(
-    1,
-    Math.round((Math.hypot(x, y) / TRAVEL_SPEED) * 1000),
-  );
+  const moves = walk(a1, a2, motorMode);
+  const time = moves.reduce((total, { duration }) => total + duration, 0);
+  // twice the time leaves room for the rounding of the steps in each move
   const tooFew = (steps: number) =>
-    steps !== 0 && Math.abs(steps) * SM_MAX_MS_PER_STEP < duration;
+    steps !== 0 && Math.abs(steps) * SM_MAX_MS_PER_STEP < time * 2;
   if (tooFew(a1)) {
     return [
-      { step1: 0, step2: a2, duration },
+      ...walk(0, a2, motorMode),
       { step1: a1, step2: 0, duration: Math.abs(a1) },
     ];
   }
   if (tooFew(a2)) {
     return [
-      { step1: a1, step2: 0, duration },
+      ...walk(a1, 0, motorMode),
       { step1: 0, step2: a2, duration: Math.abs(a2) },
     ];
   }
-  return [{ step1: a1, step2: a2, duration }];
+  return moves;
 };
