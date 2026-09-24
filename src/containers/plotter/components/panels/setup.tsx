@@ -2,7 +2,7 @@ import classNames from 'clsx';
 import { CircleArrowRight, Info, TriangleAlert } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import type { ChangeEvent } from 'react';
-import { Fragment, useContext, useRef } from 'react';
+import { Fragment, use, useRef } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -24,7 +24,7 @@ import Panel from './panel';
 import styles from './setup.module.css';
 
 const Setup = observer(({ ...props }) => {
-  const { planning, page } = useContext(PlotterContext);
+  const { planning, page } = use(PlotterContext);
   const fileInputRef = useRef<HTMLInputElement>(null);
   return (
     <Panel active={planning.phase === PLANNING_PHASE.SETUP} {...props}>
@@ -207,6 +207,5 @@ const Setup = observer(({ ...props }) => {
   );
 });
 
-Setup.propTypes = {};
 
 export default Setup;

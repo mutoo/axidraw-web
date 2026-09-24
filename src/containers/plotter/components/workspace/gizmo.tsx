@@ -1,13 +1,13 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useContext } from 'react';
+import { use } from 'react';
 import { mm2px } from '@/math/svg';
 import { PlotterContext } from '../../context';
 import { PAGE_ORIENTATION_PORTRAIT } from '../../presenters/page';
 import styles from './gizmo.module.css';
 
 const Gizmo = observer(({ ...props }) => {
-  const { page } = useContext(PlotterContext);
+  const { page } = use(PlotterContext);
   return (
     <g
       className={styles.root}

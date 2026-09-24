@@ -1,7 +1,7 @@
 import classNames from 'clsx';
 import { AlertTriangle } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { useContext, useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -23,7 +23,7 @@ import styles from './plotting.module.css';
 import SimpleDebugger from './simple-debugger';
 
 const Plotting = observer(({ ...props }) => {
-  const { planning, work } = useContext(PlotterContext);
+  const { planning, work } = use(PlotterContext);
   const device = work.device.get();
   const plottingInProgress = work.plottingInProgress.get();
   const [connectedDevice, setConnectedDevice] =
@@ -252,6 +252,5 @@ const Plotting = observer(({ ...props }) => {
   );
 });
 
-Plotting.propTypes = {};
 
 export default Plotting;

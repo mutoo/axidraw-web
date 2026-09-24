@@ -1,6 +1,6 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useContext, useLayoutEffect, useRef } from 'react';
+import { use, useLayoutEffect, useRef } from 'react';
 import { mm2px } from '@/math/svg';
 import clean from '@/plotter/cleaner';
 import type { SVGContainer } from '@/plotter/svg/svg-to-lines';
@@ -10,7 +10,7 @@ import { PLANNING_PHASE } from '../../presenters/planning';
 import styles from './setup.module.css';
 
 const Setup = observer(({ ...props }) => {
-  const { planning, page } = useContext(PlotterContext);
+  const { planning, page } = use(PlotterContext);
   const setupContainerRef = useRef<SVGGElement>(null);
   const paddingPx = mm2px(page.padding);
   const widthPx = mm2px(page.width);

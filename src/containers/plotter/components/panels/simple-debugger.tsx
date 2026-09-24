@@ -1,6 +1,6 @@
 import { Bug } from 'lucide-react';
 import { reaction } from 'mobx';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, use, useEffect, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import type { Command, CommandWithParams } from '@/communication/ebb/command';
@@ -40,7 +40,7 @@ const frequentlyCommands: CommandWithParams<Command<any, unknown>>[] = [
 ];
 
 const SimpleDebugger = ({ device }: { device: IDeviceConnector<unknown> }) => {
-  const { work } = useContext(PlotterContext);
+  const { work } = use(PlotterContext);
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

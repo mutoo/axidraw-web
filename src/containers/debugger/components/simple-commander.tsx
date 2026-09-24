@@ -1,4 +1,4 @@
-import type { ChangeEvent, FormEvent } from 'react';
+import type { ChangeEvent, SubmitEvent } from 'react';
 import { useCallback, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
@@ -19,7 +19,7 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   );
   const [result, setResult] = useState('');
   const sendCommand = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    (e: SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       void (async () => {
         trackEvent('simple', cmd);

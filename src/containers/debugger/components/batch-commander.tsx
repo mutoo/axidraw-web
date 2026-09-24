@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { useCallback, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
@@ -11,7 +11,7 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const [batch, setBatch] = useState('');
   const [results, setResults] = useState('');
   const sendCommands = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    (e: SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       void (async () => {
         try {

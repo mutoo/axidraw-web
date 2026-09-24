@@ -1,7 +1,7 @@
 import classNames from 'clsx';
 import { Tangent } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, use, useLayoutEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -13,7 +13,7 @@ import Panel from './panel';
 import styles from './planning.module.css';
 
 const Planning = observer(({ ...props }) => {
-  const { planning, page } = useContext(PlotterContext);
+  const { planning, page } = use(PlotterContext);
   const [connectedError, setConnectedError] = useState(0.2);
   const [flatLineError, setFlatLineError] = useState(0.1);
   const [allowReorder, setAllowReorder] = useState(true);
@@ -161,7 +161,5 @@ const Planning = observer(({ ...props }) => {
     </Panel>
   );
 });
-
-Planning.propTypes = {};
 
 export default Planning;

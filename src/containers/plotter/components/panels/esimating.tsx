@@ -1,16 +1,16 @@
 import { Timer } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { formatTime } from '@/utils/time';
 import { PlotterContext } from '../../context';
 
 const Estimating = observer(() => {
-  const { work, planning } = useContext(PlotterContext);
+  const { work, planning } = use(PlotterContext);
   const [time, setTime] = useState<number>(
     planning.motions ? work.estimate({ motions: planning.motions }) : 0,
   );
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout>(undefined);
   useEffect(() => {
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {

@@ -1,5 +1,5 @@
 import { ToggleLeft } from 'lucide-react';
-import type { ChangeEvent, FormEvent } from 'react';
+import type { ChangeEvent, SubmitEvent } from 'react';
 import { useCallback, useRef, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
@@ -37,7 +37,7 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const vPRGRef = useRef(false);
   const [results, setResults] = useState('');
   const sendCommands = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    (e: SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       void (async () => {
         try {

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { useContext, useLayoutEffect, useRef, useState } from 'react';
+import { use, useLayoutEffect, useRef, useState } from 'react';
 import { mm2px, normalizedDiagonalLength } from '@/math/svg';
 import { PlotterContext } from '../../context';
 import Gizmo from './gizmo';
@@ -10,7 +10,7 @@ import ShadowDef from './shadow-def';
 import styles from './workspace.module.css';
 
 const Workspace = observer(({ margin = 20 }: { margin?: number }) => {
-  const { page, planning } = useContext(PlotterContext);
+  const { page, planning } = use(PlotterContext);
   const marginPx = mm2px(margin);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);

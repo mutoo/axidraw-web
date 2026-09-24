@@ -1,6 +1,6 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useContext, useState } from 'react';
+import { use, useState } from 'react';
 import { mm2px } from '@/math/svg';
 import { preventDefault } from '@/utils/dom-event';
 import { PlotterContext } from '../../context';
@@ -8,7 +8,7 @@ import { PLANNING_PHASE } from '../../presenters/planning';
 import styles from './page.module.css';
 
 const Page = observer(({ ...props }) => {
-  const { planning, page } = useContext(PlotterContext);
+  const { planning, page } = use(PlotterContext);
   const widthPx = mm2px(page.width);
   const heightPx = mm2px(page.height);
   const paddingPx = mm2px(page.padding);
@@ -62,7 +62,5 @@ const Page = observer(({ ...props }) => {
     </g>
   );
 });
-
-Page.propTypes = {};
 
 export default Page;

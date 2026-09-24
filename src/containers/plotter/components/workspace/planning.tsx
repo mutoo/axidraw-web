@@ -1,6 +1,6 @@
 import classNames from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { useContext } from 'react';
+import { use } from 'react';
 import { px2mm } from '@/math/svg';
 import { PlotterContext } from '../../context';
 import { PLANNING_PHASE } from '../../presenters/planning';
@@ -8,7 +8,7 @@ import styles from './planning.module.css';
 
 const Planning = observer(
   ({ strokeWidth, ...props }: { strokeWidth: number }) => {
-    const { planning, page } = useContext(PlotterContext);
+    const { planning, page } = use(PlotterContext);
     const scale = px2mm(1);
     return (
       <g
