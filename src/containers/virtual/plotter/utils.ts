@@ -5,6 +5,28 @@ import type { VirtualPlotterContext } from '.';
 
 const interval = 16; // FPS = 60
 
+// where the pen is, in 1/16 steps
+export const penPosition = ({ motor }: VirtualPlotterContext) => {
+  const stepSize = 2 ** (motor.stepMode - 1);
+  return {
+    a1: motor.home1 + motor.a1 * stepSize,
+    a2: motor.home2 + motor.a2 * stepSize,
+  };
+};
+
+// change the step counters or step mode without moving the pen
+export const keepPenInPlace = (
+  context: VirtualPlotterContext,
+  update: () => void,
+) => {
+  const { a1, a2 } = penPosition(context);
+  update();
+  const { motor } = context;
+  const stepSize = 2 ** (motor.stepMode - 1);
+  motor.home1 = a1 - motor.a1 * stepSize;
+  motor.home2 = a2 - motor.a2 * stepSize;
+};
+
 export async function linearMotion(
   context: VirtualPlotterContext,
   destination: Point2D,

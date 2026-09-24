@@ -20,10 +20,14 @@ export type VirtualPlotterContext = {
   pen: number;
   PRG: number;
   motor: {
+    // the global step counters, as QS reports them
     a1: number;
     a2: number;
-    m1: number;
-    m2: number;
+    // where the pen is when the step counters are (0, 0), in 1/16 steps
+    home1: number;
+    home2: number;
+    // the step mode both motors share: 1 for 1/16 steps ... 5 for full steps
+    stepMode: number;
     f1: number;
     f2: number;
   };
@@ -71,21 +75,22 @@ export async function* executor(
   }
 }
 
+export const createVMContext = (version: string): VirtualPlotterContext =>
+  observable({
+    version,
+    pen: 1,
+    PRG: 0,
+    motor: { a1: 0, a2: 0, home1: 0, home2: 0, stepMode: 1, f1: 0, f2: 0 },
+    servo: { min: 12000, max: 16000, rate: 400 },
+    mode: 'normal',
+  });
+
 export default function createVM({
   version,
 }: {
   version: string;
 }): IVirtualPlotter {
-  const initialMotor = { a1: 0, a2: 0, m1: 1, m2: 1, f1: 0, f2: 0 };
-  const initialServo = { min: 12000, max: 16000, rate: 400 };
-  const context: VirtualPlotterContext = observable({
-    version,
-    pen: 1,
-    PRG: 0,
-    motor: { ...initialMotor },
-    servo: { ...initialServo },
-    mode: 'normal',
-  });
+  const context = createVMContext(version);
   const commandQueue: CommandQueue = [];
   const vm = executor(commandQueue);
   void vm.next(); // ready

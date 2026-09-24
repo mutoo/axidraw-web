@@ -2,6 +2,7 @@ import { reaction } from 'mobx';
 import { useEffect, useRef } from 'react';
 import { aaSteps2xyDist } from '@/math/ebb';
 import type { IVirtualPlotter } from '../plotter';
+import { penPosition } from '../plotter/utils';
 import styles from './canvas.module.css';
 
 const Canvas = ({
@@ -27,9 +28,9 @@ const Canvas = ({
     let prevY = 0;
 
     return reaction(
-      () => [vmCtx.motor.a1, vmCtx.motor.a2],
-      ([a1, a2]) => {
-        const { x, y } = aaSteps2xyDist({ a1, a2 }, vmCtx.motor.m1);
+      () => penPosition(vmCtx),
+      (position) => {
+        const { x, y } = aaSteps2xyDist(position);
         canvasCtx.beginPath();
         if (vmCtx.pen === 0) {
           canvasCtx.lineWidth = 7;

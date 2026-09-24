@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Carriage from '@/assets/svg/pen-holder.svg';
 import { aaSteps2xyDist } from '../../../math/ebb';
 import type { IVirtualPlotter } from '../plotter';
+import { penPosition } from '../plotter/utils';
 import styles from './pen-holder.module.css';
 
 const PenHolder = ({ vm }: { vm: IVirtualPlotter }) => {
@@ -12,9 +13,9 @@ const PenHolder = ({ vm }: { vm: IVirtualPlotter }) => {
   useEffect(() => {
     const vmCtx = vm.context;
     const posDisposer = reaction(
-      () => [vmCtx.motor.a1, vmCtx.motor.a2],
-      ([a1, a2]) => {
-        const { x, y } = aaSteps2xyDist({ a1, a2 }, vmCtx.motor.m1);
+      () => penPosition(vmCtx),
+      (position) => {
+        const { x, y } = aaSteps2xyDist(position);
         setPos({ x: x * 10, y: y * 10 });
       },
     );
