@@ -31,7 +31,7 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           const command = commands[cmd] as Command<unknown[], unknown>;
           const cmdResult = await device.executeCommand(
             command,
-            command.parseParams(paramsStr),
+            ...command.parseParams(paramsStr),
           );
           setResult(JSON.stringify(cmdResult));
         } catch (err) {

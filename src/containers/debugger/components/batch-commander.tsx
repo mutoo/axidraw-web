@@ -24,14 +24,16 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
             const parts = cmdWithParams.split(',');
             const maybeCmd = parts.shift();
             if (!maybeCmd) continue;
-            const cmdId = maybeCmd as keyof typeof commands;
+            const cmdId = maybeCmd.toLowerCase() as keyof typeof commands;
             const params = parts.join(',');
             // eslint-disable-next-line import-x/namespace
-            const command = commands[cmdId] as Command<unknown[], unknown>;
+            const command = commands[cmdId] as
+              Command<unknown[], unknown> | undefined;
+            if (!command) throw new Error(`Unknown command: ${maybeCmd}`);
             // there commands are not concurrent, their are executed one-by-one.
             const result = await device.executeCommand(
               command,
-              command.parseParams(params),
+              ...command.parseParams(params),
             );
             resultStr += JSON.stringify(result);
             resultStr += '\n';
