@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { Point2D } from '@/math/geom';
 import type { DataNode, LeafNode } from '../index';
 import { createRTree } from '../index';
 import type { MBR } from '../utils';
@@ -119,6 +120,39 @@ describe('rtree', () => {
       expect(rtree.nnSearch([14, 14], extractId)).toBe(2);
       expect(rtree.nnSearch([12, 12], extractId)).toBe(3);
       expect(rtree.nnSearch([15, 15], extractId)).toBe(2);
+    });
+
+    it('returns the smallest id among equally near entries', () => {
+      // the 12 integer points 5 away from the origin, 5 copies of each, with
+      // scrambled ids so that equally near entries spread over many leaves
+      const ring: Point2D[] = [
+        [3, 4],
+        [4, 3],
+        [5, 0],
+        [4, -3],
+        [3, -4],
+        [0, -5],
+        [-3, -4],
+        [-4, -3],
+        [-5, 0],
+        [-4, 3],
+        [-3, 4],
+        [0, 5],
+      ];
+      const n = ring.length * 5;
+      const rtree = createRTree(2, 4);
+      for (let i = 0; i < n; i += 1) {
+        rtree.insert({
+          id: ((i * 37) % n) + 1,
+          mbr: pointAsMbr(ring[i % ring.length]),
+        });
+      }
+      for (let id = 1; id <= n; id += 1) {
+        const entry = rtree.nnSearch([0, 0], (e) => e);
+        expect(entry!.id).toBe(id);
+        rtree.remove(entry!.mbr, (e) => e.id === id);
+      }
+      expect(rtree.root).toBe(null);
     });
   });
 });

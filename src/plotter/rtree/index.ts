@@ -268,7 +268,14 @@ export const createRTree = <T extends DataNode>(
         const [x0, y0] = p;
         const [x1, y1] = entry.mbr.p0;
         const distSq = (x0 - x1) ** 2 + (y0 - y1) ** 2;
-        if (distSq < nearest.distSq) {
+        // among equally near entries take the smallest id, so the result
+        // doesn't depend on how the tree happens to be split
+        if (
+          distSq < nearest.distSq ||
+          (distSq === nearest.distSq &&
+            nearest.entry !== null &&
+            entry.id < nearest.entry.id)
+        ) {
           nearest.distSq = distSq;
           nearest.entry = entry;
         }
@@ -315,6 +322,8 @@ export const createRTree = <T extends DataNode>(
       if (!root) return;
       remove(root, entryMbr, matcher);
     },
+    // the entry nearest to p; of equally near entries, the one with the
+    // smallest id
     nnSearch<R>(p: Point2D, extract: (e: T) => R): R | null {
       if (!root) return null;
       const result: {
