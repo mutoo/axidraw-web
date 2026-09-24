@@ -216,7 +216,8 @@ export const defaultPlanOptions: Omit<
 };
 
 export function revertLineGroup(lineGroup: Line2D[]): Line2D[] {
-  return lineGroup.reverse().map(([p0, p1]) => [p1, p0]);
+  // map() makes a new array, so reverse() leaves lineGroup as it was
+  return lineGroup.map(([p0, p1]): Line2D => [p1, p0]).reverse();
 }
 
 export function reorderLineGroups(lineGroups: Line2D[][]): Line2D[][] {

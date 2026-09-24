@@ -176,9 +176,6 @@ split together.
 
 ## Noticed elsewhere
 
-- `revertLineGroup` in `planner.ts` reverses its argument in place. That's
-  harmless in `plan()`, which passes a fresh array, but running
-  `reorderLineGroups` twice on the same groups goes wrong.
 - `DebugRtree` in `containers/plotter/components/workspace/debug.tsx` isn't
   used anywhere.
 - `reorderLineGroups` stops when `nnSearch` returns a falsy id, which only
