@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import type { Command } from '@/communication/ebb/command';
+import { checkVersion } from '@/communication/ebb/utils';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { trackEvent } from '../utils';
@@ -10,6 +11,10 @@ import { trackEvent } from '../utils';
 type CommandsType = typeof commands;
 type CommandId = keyof CommandsType;
 const commandList: CommandId[] = Object.keys(commands) as CommandId[];
+
+// ebb.html documents firmware v3.0+, ebb2.html the v1.8.0 - v2.8.1 command set
+const docsUrl = (version: string) =>
+  `https://evil-mad.github.io/EggBot/${checkVersion(version, '3.0.0') ? 'ebb' : 'ebb2'}.html`;
 
 const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const [cmd, setCmd] = useState<CommandId>('r');
@@ -70,7 +75,7 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           Params
           <a
             // eslint-disable-next-line import-x/namespace
-            href={`http://evil-mad.github.io/EggBot/ebb.html#${commands[cmd].cmd}`}
+            href={`${docsUrl(device.version)}#${commands[cmd].cmd}`}
             target="_blank"
             rel="noreferrer"
           >
