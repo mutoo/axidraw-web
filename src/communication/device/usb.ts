@@ -62,9 +62,7 @@ export const connectDevice =
             TRANSFER_PACKET_SIZE,
           );
           if (response.status !== 'ok') {
-            throw new Error(
-              `Unexpected response status: ${response.status ?? 'unknown'}`,
-            );
+            throw new Error(`Unexpected response status: ${response.status}`);
           }
           if (response.data) {
             messageHandler.next(response.data.buffer);
