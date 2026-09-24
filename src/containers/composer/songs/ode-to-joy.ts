@@ -1,0 +1,43 @@
+import { bars, createSong } from '../utils';
+
+// Beethoven, Symphony No. 9, finale: the melody over a root-and-fifth bass
+export default createSong(
+  'Ode to Joy (Beethoven)',
+  bars([
+    ['qF#5', 'qF#5', 'qG5', 'qA5'],
+    ['qA5', 'qG5', 'qF#5', 'qE5'],
+    ['qD5', 'qD5', 'qE5', 'qF#5'],
+    ['qeF#5', 'eE5', 'hE5'],
+    ['qF#5', 'qF#5', 'qG5', 'qA5'],
+    ['qA5', 'qG5', 'qF#5', 'qE5'],
+    ['qD5', 'qD5', 'qE5', 'qF#5'],
+    ['qeE5', 'eD5', 'hD5'],
+    ['qE5', 'qE5', 'qF#5', 'qD5'],
+    ['qE5', 'eF#5', 'eG5', 'qF#5', 'qD5'],
+    ['qE5', 'eF#5', 'eG5', 'qF#5', 'qE5'],
+    ['qD5', 'qE5', 'hA4'],
+    ['qF#5', 'qF#5', 'qG5', 'qA5'],
+    ['qA5', 'qG5', 'qF#5', 'qE5'],
+    ['qD5', 'qD5', 'qE5', 'qF#5'],
+    ['qeE5', 'eD5', 'hD5'],
+  ]),
+  bars([
+    ['hD3', 'hA3'],
+    ['hA2', 'hE3'],
+    ['hD3', 'hA3'],
+    ['hD3', 'hA2'],
+    ['hD3', 'hA3'],
+    ['hA2', 'hE3'],
+    ['hD3', 'hA3'],
+    ['hA2', 'hD3'],
+    ['hA2', 'hD3'],
+    ['hA2', 'hD3'],
+    ['hA2', 'qD3', 'qA2'],
+    ['qF#3', 'qG#3', 'hA3'],
+    ['hD3', 'hA3'],
+    ['hA2', 'hE3'],
+    ['hD3', 'hA3'],
+    ['hA2', 'hD3'],
+  ]),
+  100,
+);

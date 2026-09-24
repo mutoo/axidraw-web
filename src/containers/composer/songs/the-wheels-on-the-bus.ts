@@ -1,8 +1,8 @@
-import { createSong, flat } from '../utils';
+import { bars, createSong } from '../utils';
 
 export default createSong(
   'The wheels on the bus',
-  flat([
+  bars([
     ['eG4'],
     ['eC5', 'sC5', 'sC5', 'eC5', 'eE5', 'eG5', 'eE5', 'qC5'],
     ['eD5', 'eD5', 'qD5', 'eB4', 'eA4', 'esG4', 'sG4'],

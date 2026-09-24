@@ -1,21 +1,27 @@
-import { ToggleLeft } from 'lucide-react';
+import { Dices, ToggleLeft, TriangleAlert } from 'lucide-react';
 import type { ChangeEvent, SubmitEvent } from 'react';
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
-import * as commands from '@/communication/ebb';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
-import { delay } from '@/utils/time';
+import type { PageSize } from '@/containers/plotter/presenters/page';
+import { randomSeed } from '@/utils/random';
+import type { PlayerStage } from '../player';
+import play from '../player';
 import * as songs from '../songs';
+import type { Placement } from '../stage';
+import { checkPadding, placeSong } from '../stage';
 import type { RawSong } from '../utils';
 import {
-  parseNote,
-  planSteps,
+  DEFAULT_BPM,
+  formatChannel,
+  logger,
+  parseSong,
   songToSteps,
   trackEvent,
-  logger,
 } from '../utils';
+import SongPreview from './song-preview';
 
 type SongsType = typeof songs;
 type SongId = keyof SongsType;
@@ -23,93 +29,145 @@ const songList = Object.keys(songs) as SongId[];
 // eslint-disable-next-line import-x/namespace
 const getSong = (songId: SongId): RawSong => songs[songId];
 
-const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
+const stageLabels: Record<PlayerStage, string> = {
+  travelling: 'Moving to the middle of the page…',
+  playing: 'Playing…',
+  returning: 'Going back to the origin…',
+};
+
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : String(error);
+
+/**
+ * Plans where the pen goes for the song, or says what stops it from playing.
+ */
+const placeOnPage = ({
+  channel1,
+  channel2,
+  BPM,
+  motorMode,
+  randomness,
+  swapChance,
+  seed,
+  pageSize,
+  padding,
+}: {
+  channel1: string;
+  channel2: string;
+  BPM: number;
+  motorMode: number;
+  // as percentages
+  randomness: number;
+  swapChance: number;
+  seed: number;
+  pageSize: PageSize;
+  padding: number;
+}): { placement: Placement; barlines: number } | { problem: string } => {
+  if (!(BPM >= 10 && BPM <= 200)) {
+    return { problem: 'Beats per minute should be from 10 to 200.' };
+  }
+  if (!(motorMode >= 1 && motorMode <= 5)) {
+    return { problem: 'Motor mode should be from 1 to 5.' };
+  }
+  if (!(Number.isInteger(seed) && seed >= 0)) {
+    return { problem: 'Seed should be a whole number.' };
+  }
+  const paddingProblem = checkPadding(pageSize, padding);
+  if (paddingProblem) {
+    return { problem: paddingProblem };
+  }
+  try {
+    const song = parseSong(channel1, channel2);
+    return {
+      placement: placeSong(songToSteps(song, BPM), {
+        page: pageSize,
+        padding,
+        motorMode,
+        randomness: randomness / 100,
+        swapChance: swapChance / 100,
+        seed,
+      }),
+      barlines: song.barlines?.length ?? 0,
+    };
+  } catch (e) {
+    return { problem: errorMessage(e) };
+  }
+};
+
+const MidiCommander = ({
+  device,
+  pageSize,
+  orientation,
+  padding,
+  playing,
+  setPlaying,
+}: {
+  device: IDeviceConnector<unknown>;
+  pageSize: PageSize;
+  orientation: string;
+  padding: number;
+  playing: boolean;
+  setPlaying: (playing: boolean) => void;
+}) => {
   const [channel1, setChannel1] = useState(() =>
-    getSong(songList[0]).channel1.join(', '),
+    formatChannel(getSong(songList[0]).channel1),
   );
   const [channel2, setChannel2] = useState(() =>
-    getSong(songList[0]).channel2.join(', '),
+    formatChannel(getSong(songList[0]).channel2),
   );
-  const [BPM, setBPM] = useState(88);
+  const [BPM, setBPM] = useState(() => getSong(songList[0]).bpm ?? DEFAULT_BPM);
   const [motorMode, setMotorMode] = useState(1);
   const [penDown, setPenDown] = useState(false);
-  const [playing, setPlaying] = useState(false);
-  const vPRGRef = useRef(false);
+  const [randomness, setRandomness] = useState(30);
+  // whether, and how likely, the channels trade motors at a bar line
+  const [swapAtBars, setSwapAtBars] = useState(false);
+  const [swapChance, setSwapChance] = useState(50);
+  const [seed, setSeed] = useState(randomSeed);
+  const [stage, setStage] = useState<PlayerStage | null>(null);
+  const stopRequestedRef = useRef(false);
   const [results, setResults] = useState('');
-  const sendCommands = useCallback(
-    (e: SubmitEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      void (async () => {
-        try {
-          trackEvent('play');
+  const placed = placeOnPage({
+    channel1,
+    channel2,
+    BPM,
+    motorMode,
+    randomness,
+    swapChance: swapAtBars ? swapChance : 0,
+    seed,
+    pageSize,
+    padding,
+  });
 
-          const steps = songToSteps(
-            {
-              channel1: channel1
-                .split(', ')
-                .filter(Boolean)
-                .map((str) => parseNote(str)),
-              channel2: channel2
-                .split(', ')
-                .filter(Boolean)
-                .map((str) => parseNote(str)),
-            },
-            BPM,
-          );
-          logger.info('Start playing song');
-          setPlaying(true);
+  const sendCommands = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (playing || !('placement' in placed)) return;
+    const { start, moves } = placed.placement;
+    trackEvent('play');
+    logger.info('Start playing song');
+    stopRequestedRef.current = false;
+    setResults('');
+    setPlaying(true);
+    void play({
+      device,
+      start,
+      moves,
+      motorMode,
+      penDown,
+      isStopRequested: () => stopRequestedRef.current,
+      onStage: setStage,
+    })
+      .then(() => {
+        logger.info('Song finished');
+      })
+      .catch((err: unknown) => {
+        setResults(errorMessage(err));
+      })
+      .finally(() => {
+        setStage(null);
+        setPlaying(false);
+      });
+  };
 
-          // set home
-          await device.executeCommand(commands.r);
-          await device.executeCommand(commands.em, motorMode, motorMode);
-          await device.executeCommand(
-            commands.sp,
-            penDown ? 0 : 1,
-            500,
-            undefined,
-          );
-
-          for (const step of planSteps(steps)) {
-            const shouldStop = await device.executeCommand(commands.qb);
-            if (shouldStop || vPRGRef.current) {
-              await device.executeCommand(commands.r);
-              await device.executeCommand(commands.sp, 1, 500, undefined);
-              vPRGRef.current = false;
-              return;
-            }
-            await device.executeCommand(
-              commands.sm,
-              step.duration,
-              step.step1,
-              step.step2,
-            );
-          }
-
-          logger.info('Song finished');
-
-          await device.executeCommand(commands.sp, 1, 500, undefined);
-          await delay(2000);
-          const st = await device.executeCommand(commands.qs);
-          const dist = Math.sqrt(st.a1 ** 2 + st.a2 ** 2);
-          const homeStepFreq = 1000;
-          const homeDuration = (dist / homeStepFreq) * 1000;
-          await device.executeCommand(
-            commands.hm,
-            homeStepFreq,
-            undefined,
-            undefined,
-          );
-          await delay(homeDuration);
-          await device.executeCommand(commands.r);
-        } catch (err) {
-          setResults(String(err));
-        } finally {
-          setPlaying(false);
-        }
-      })();
-    },
-    [device, motorMode, BPM, penDown, channel1, channel2],
-  );
   return (
     <form className={formStyles.root} onSubmit={sendCommands}>
       <h3>Midi Commander</h3>
@@ -120,17 +178,15 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           defaultValue={songList[0]}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
             const song = getSong(e.target.value as SongId);
-            setChannel1(song.channel1.join(', '));
-            setChannel2(song.channel2.join(', '));
+            setChannel1(formatChannel(song.channel1));
+            setChannel2(formatChannel(song.channel2));
+            setBPM(song.bpm ?? DEFAULT_BPM);
           }}
           disabled={playing}
         >
           {songList.map((songKey) => (
             <option key={songKey} value={songKey}>
-              {
-                // eslint-disable-next-line import-x/namespace
-                songs[songKey].title
-              }
+              {getSong(songKey).title}
             </option>
           ))}
         </select>
@@ -196,27 +252,144 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         />{' '}
         <span>PenDown</span>
       </label>
+      <div className="grid grid-cols-2 gap-6">
+        <label className={formStyles.inputLabel}>
+          <span>Randomness: {randomness}%</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            value={randomness}
+            disabled={playing}
+            onChange={(e) => {
+              setRandomness(parseInt(e.target.value, 10));
+            }}
+          />
+        </label>
+        <div className={formStyles.inputLabel}>
+          <span>Seed:</span>
+          <div className="flex gap-2">
+            <input
+              className="min-w-0 flex-1"
+              type="number"
+              min={0}
+              aria-label="Seed"
+              value={seed}
+              disabled={playing}
+              onChange={(e) => {
+                setSeed(parseInt(e.target.value, 10));
+              }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              title="Try another seed"
+              aria-label="Try another seed"
+              disabled={playing}
+              onClick={() => {
+                setSeed(randomSeed());
+              }}
+            >
+              <Dices className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 items-end gap-6">
+        <label className={formStyles.checkboxLabel}>
+          <input
+            type="checkbox"
+            disabled={playing}
+            checked={swapAtBars}
+            onChange={(e) => {
+              setSwapAtBars(e.target.checked);
+            }}
+          />
+          <span>Swap channels at bars</span>
+        </label>
+        <label className={formStyles.inputLabel}>
+          <span>Swap chance: {swapChance}%</span>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            value={swapChance}
+            disabled={playing || !swapAtBars}
+            onChange={(e) => {
+              setSwapChance(parseInt(e.target.value, 10));
+            }}
+          />
+        </label>
+      </div>
+      {'problem' in placed ? (
+        <Alert variant="destructive">
+          <TriangleAlert className="h-4 w-4" />
+          <AlertTitle>Can not play</AlertTitle>
+          <AlertDescription>{placed.problem}</AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <SongPreview
+            pageSize={pageSize}
+            orientation={orientation}
+            padding={padding}
+            placement={placed.placement}
+          />
+          {placed.placement.midNoteTurns > 0 ? (
+            <Alert variant="default">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Tight on the page</AlertTitle>
+              <AlertDescription>
+                To stay inside the padding, the pen turns back part-way through
+                a note {placed.placement.midNoteTurns} times. Lower the motor
+                mode or the padding to hear every note as written.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              With seed {seed}, the pen moves within{' '}
+              {placed.placement.width.toFixed(0)} ×{' '}
+              {placed.placement.height.toFixed(0)} mm and keeps to the shaded
+              area.
+              {swapAtBars &&
+                (placed.barlines > 0
+                  ? ` The channels swap at ${placed.placement.swaps} of ${placed.barlines} bar lines.`
+                  : ' Put | between the bars of the notes to let the channels swap there.')}
+            </p>
+          )}
+        </>
+      )}
       <Button
         variant="default"
         type={playing ? 'button' : 'submit'}
+        disabled={stage === 'returning' || (!playing && 'problem' in placed)}
         onClick={() => {
           if (playing) {
-            vPRGRef.current = true;
+            stopRequestedRef.current = true;
+            trackEvent('stop');
           }
         }}
       >
         {playing ? 'Stop' : 'Play'}
       </Button>
+      {stage && (
+        <p className="text-center text-sm text-muted-foreground">
+          {stageLabels[stage]}
+        </p>
+      )}
       <Alert variant="default">
         <ToggleLeft className="h-4 w-4" />
         <AlertTitle>Tip</AlertTitle>
         <AlertDescription>
-          You could also press the PRG button on device to stop playing.
+          You could also press the PRG button on device to stop playing. The pen
+          goes back to the origin either way.
         </AlertDescription>
       </Alert>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>
-        <textarea rows={3} defaultValue={results} readOnly />
+        <textarea rows={3} value={results} readOnly />
       </label>
     </form>
   );
