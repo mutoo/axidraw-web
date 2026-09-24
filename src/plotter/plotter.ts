@@ -1,6 +1,7 @@
 import type { IComputedValue } from 'mobx';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
+import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
 import { aa2xy, servoTime, xyDist2aaSteps } from '@/math/ebb';
 import type { Line2D } from '@/math/geom';
 import { distSq } from '@/math/geom';
@@ -163,8 +164,9 @@ async function* plot({
       if (speedMode === PLOTTER_SPEED_MODE.CONSTANT) {
         const absDeltaA1 = Math.abs(deltaA1);
         const absDeltaA2 = Math.abs(deltaA2);
-        const mt1 = (absDeltaA1 / 1.31) * 1000; // minimum speed: 1.31 steps/second
-        const mt2 = (absDeltaA2 / 1.31) * 1000;
+        // the longest SM each axis allows; slopeSegments relies on the same limit
+        const mt1 = absDeltaA1 * SM_MAX_MS_PER_STEP;
+        const mt2 = absDeltaA2 * SM_MAX_MS_PER_STEP;
 
         t = Math.ceil((deltaAA / penRate) * 1000);
         if (t > mt1 && t > mt2) {

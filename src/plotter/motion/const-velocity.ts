@@ -1,3 +1,5 @@
+import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
+
 export function* slopeSegments({
   t,
   stepLong,
@@ -8,12 +10,12 @@ export function* slopeSegments({
   stepShort: number;
 }) {
   const absStepShort = Math.abs(stepShort);
-  const maxTimeShort = absStepShort * 1310;
+  const maxTimeShort = absStepShort * SM_MAX_MS_PER_STEP;
   const stepShortDir = Math.sign(stepShort);
   const flatT = Math.floor((t - maxTimeShort) / (absStepShort + 1));
   const stepRateLong = stepLong / t;
   const flatStepLong = Math.floor(stepRateLong * flatT);
-  const slopeStopLong = Math.floor(stepRateLong * 1310);
+  const slopeStopLong = Math.floor(stepRateLong * SM_MAX_MS_PER_STEP);
   let remainingStepLong = stepLong;
   /**
    *  |         ____
@@ -36,7 +38,7 @@ export function* slopeSegments({
       // slope segment
       remainingStepLong -= slopeStopLong;
       yield {
-        time: 1310,
+        time: SM_MAX_MS_PER_STEP,
         longStep: slopeStopLong,
         shortStep: stepShortDir,
         remaining: remainingStepLong,

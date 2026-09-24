@@ -1,4 +1,5 @@
 import type { IComputedValue } from 'mobx';
+import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
 import { servoTime, xyDist2aaSteps } from '@/math/ebb';
 import type { Line2D } from '@/math/geom';
 import { distSq } from '@/math/geom';
@@ -88,8 +89,8 @@ function estimate({
       if (speedMode === PLOTTER_SPEED_MODE.CONSTANT) {
         const absDeltaA1 = Math.abs(deltaA1);
         const absDeltaA2 = Math.abs(deltaA2);
-        const mt1 = absDeltaA1 * 1310;
-        const mt2 = absDeltaA2 * 1310;
+        const mt1 = absDeltaA1 * SM_MAX_MS_PER_STEP;
+        const mt2 = absDeltaA2 * SM_MAX_MS_PER_STEP;
 
         t = Math.ceil((deltaAA / penRate) * 1000);
         if (t > mt1 && t > mt2) {
