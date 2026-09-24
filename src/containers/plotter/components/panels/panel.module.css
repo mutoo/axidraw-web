@@ -1,6 +1,14 @@
+@reference "@/index.css";
+
 .root {
-  @apply absolute inset-0 px-8 space-y-8 overflow-y-scroll;
+  @apply absolute inset-0 px-8 overflow-y-scroll;
   @apply hidden;
+
+  /* v3 `space-y-8` semantics (v4 uses :where(& > :not(:last-child)) + margin-bottom) */
+  & > :not([hidden]) ~ :not([hidden]) {
+    margin-top: --spacing(8);
+    margin-bottom: 0;
+  }
 
   &::before,
   &::after {

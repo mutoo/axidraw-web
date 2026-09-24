@@ -1,3 +1,5 @@
+@reference "@/index.css";
+
 .root {
   @apply grid grid-cols-1 gap-4 lg:gap-6;
 }

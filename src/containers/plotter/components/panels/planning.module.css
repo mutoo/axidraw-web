@@ -1,3 +1,5 @@
+@reference "@/index.css";
+
 .form {
   @apply grid gap-4 items-center mb-4;
 

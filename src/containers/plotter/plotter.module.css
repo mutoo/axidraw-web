@@ -1,3 +1,5 @@
+@reference "@/index.css";
+
 .workspace {
   @apply fixed inset-0;
 

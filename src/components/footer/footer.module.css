@@ -1,3 +1,5 @@
+@reference "@/index.css";
+
 .root {
   @apply text-sm text-center mb-8;
   
