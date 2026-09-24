@@ -179,8 +179,9 @@ every song:
   before the first bar line and the bar after the last.
 
 [`stage.test.ts`](../src/containers/composer/tests/stage.test.ts) also plays
-every song on each page size at several motor modes, paddings and tempos,
-and checks that the pen stays inside the padding.
+every song on A4 and on the page size with the least room, at several motor
+modes, paddings and tempos, and checks that the pen stays inside the
+padding.
 
 ## Song files
 

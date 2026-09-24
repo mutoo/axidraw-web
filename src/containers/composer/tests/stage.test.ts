@@ -1,15 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
 import { aaSteps2xyDist } from '@/math/ebb';
+import { findPageSize, pageSizeLabel, pageSizes } from '@/plotter/page-sizes';
 import { createRandom } from '@/utils/random';
 import * as songs from '../songs';
-import {
-  checkPadding,
-  maxPadding,
-  pageSizes,
-  placeSong,
-  travel,
-} from '../stage';
+import { checkPadding, maxPadding, placeSong, travel } from '../stage';
 import type { PlannedStep, Step } from '../utils';
 import { DEFAULT_BPM, parseSong, planSteps, songToSteps } from '../utils';
 
@@ -207,6 +202,14 @@ describe('swapping channels', () => {
   });
 });
 
+// A4, and the page with the least room to play in: every page is played on
+// the same way, and checking one takes a while
+const shortest = pageSizes.reduce((a, b) => (b.height < a.height ? b : a));
+const testedPages = [findPageSize('a4'), shortest].map((page) => ({
+  ...page,
+  label: pageSizeLabel(page),
+}));
+
 describe('placeSong', () => {
   const settings = {
     padding: 10,
@@ -215,7 +218,7 @@ describe('placeSong', () => {
     seed: 1,
   };
 
-  it.each(pageSizes)('starts in the middle of $alias', (page) => {
+  it.each(testedPages)('starts in the middle of $label', (page) => {
     for (const motorMode of [1, 2, 3, 4, 5]) {
       const steps = stepsOfSong(songs.twinkleTwinkleLittleStar, DEFAULT_BPM);
       const { start, path } = placeSong(steps, {
@@ -232,7 +235,7 @@ describe('placeSong', () => {
   });
 
   // the whole point: the pen must never run into the frame
-  describe.each(pageSizes)('on $alias', (page) => {
+  describe.each(testedPages)('on $label', (page) => {
     it.each(Object.entries(songs))(
       'keeps %s inside the padding',
       (id, song) => {
@@ -274,13 +277,15 @@ describe('placeSong', () => {
                     );
                   }
       },
+      // every combination, a few seconds a song
+      30e3,
     );
   });
 
   it('keeps even a very long note inside the padding', () => {
     // 16 beats of C6 at 10 BPM is about 100k full steps
     const steps = stepsOf('wwwwC6', 'wwwwC3', 10);
-    const page = pageSizes[1];
+    const page = findPageSize('a5');
     const { path, moves, midNoteTurns } = placeSong(steps, {
       ...settings,
       page,
@@ -297,7 +302,7 @@ describe('placeSong', () => {
   });
 
   it('checks the padding leaves room to play', () => {
-    const [a4] = pageSizes;
+    const a4 = findPageSize('a4');
     expect(checkPadding(a4, 15)).toBeNull();
     expect(checkPadding(a4, 0)).toBeNull();
     expect(checkPadding(a4, maxPadding(a4))).toBeNull();

@@ -3,6 +3,7 @@ import { CircleArrowRight, Info, TriangleAlert } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import type { ChangeEvent } from 'react';
 import { Fragment, use, useRef } from 'react';
+import PageSizeSelect from '@/components/page-size-select/page-size-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -16,7 +17,6 @@ import {
   PAGE_ALIGNMENT_VERTICAL_BOTTOM,
   PAGE_ORIENTATION_LANDSCAPE,
   PAGE_ORIENTATION_PORTRAIT,
-  pageSizes,
 } from '../../presenters/page';
 import { PLANNING_PHASE } from '../../presenters/planning';
 import { trackEvent } from '../../utils';
@@ -65,24 +65,13 @@ const Setup = observer(({ ...props }) => {
       <section className={styles.inputs}>
         <h4 className="col-span-2">Dimension</h4>
         <label htmlFor="page-size">Page Size: </label>
-        <select
+        <PageSizeSelect
           id="page-size"
-          value={page.size.type}
-          onChange={(e) => {
-            const size = pageSizes.find(
-              (pageSize) => pageSize.type === e.target.value,
-            );
-            if (size) {
-              page.setSize(size);
-            }
+          value={page.size.id}
+          onChange={(size) => {
+            page.setSize(size);
           }}
-        >
-          {pageSizes.map((pageSize) => (
-            <option key={pageSize.type} value={pageSize.type}>
-              {pageSize.alias}
-            </option>
-          ))}
-        </select>
+        />
         <label htmlFor="page-padding">Padding(mm): </label>
         <input
           id="page-padding"

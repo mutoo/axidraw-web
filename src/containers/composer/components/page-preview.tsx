@@ -1,8 +1,9 @@
 import classNames from 'clsx';
 import type { ReactNode } from 'react';
 import { useId } from 'react';
-import type { PageSize } from '@/containers/plotter/presenters/page';
 import { PAGE_ORIENTATION_PORTRAIT } from '@/containers/plotter/presenters/page';
+import type { PageSize } from '@/plotter/page-sizes';
+import { pageSizeLabel } from '@/plotter/page-sizes';
 
 // the desk around the page, in mm
 const DESK = 15;
@@ -39,7 +40,7 @@ const PagePreview = ({
       className={classNames('w-full rounded-md bg-neutral-100', className)}
       viewBox={`${-DESK} ${-DESK} ${view.width + DESK * 2} ${view.height + DESK * 2}`}
       role="img"
-      aria-label={`${pageSize.alias}, ${portrait ? 'portrait' : 'landscape'}`}
+      aria-label={`${pageSizeLabel(pageSize)}, ${portrait ? 'portrait' : 'landscape'}`}
     >
       <defs>
         <filter id={shadowId}>

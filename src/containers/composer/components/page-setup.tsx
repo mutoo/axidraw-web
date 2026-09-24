@@ -1,13 +1,14 @@
 import { Info, TriangleAlert } from 'lucide-react';
+import PageSizeSelect from '@/components/page-size-select/page-size-select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
-import type { PageSize } from '@/containers/plotter/presenters/page';
 import {
   PAGE_ORIENTATION_LANDSCAPE,
   PAGE_ORIENTATION_PORTRAIT,
 } from '@/containers/plotter/presenters/page';
-import { checkPadding, maxPadding, pageSizes } from '../stage';
+import type { PageSize } from '@/plotter/page-sizes';
+import { checkPadding, maxPadding } from '../stage';
 import PagePreview from './page-preview';
 
 const PageSetup = ({
@@ -39,23 +40,7 @@ const PageSetup = ({
       <div className="grid grid-cols-2 gap-6">
         <label className={formStyles.inputLabel}>
           <span>Page Size:</span>
-          <select
-            value={pageSize.type}
-            onChange={(e) => {
-              const size = pageSizes.find(
-                ({ type }) => type === e.target.value,
-              );
-              if (size) {
-                onPageSizeChange(size);
-              }
-            }}
-          >
-            {pageSizes.map(({ type, alias }) => (
-              <option key={type} value={type}>
-                {alias}
-              </option>
-            ))}
-          </select>
+          <PageSizeSelect value={pageSize.id} onChange={onPageSizeChange} />
         </label>
         <label className={formStyles.inputLabel}>
           <span>Padding (mm):</span>

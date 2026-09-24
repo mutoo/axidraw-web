@@ -1,5 +1,5 @@
-import type { PageSize } from '@/containers/plotter/presenters/page';
 import { PAGE_ORIENTATION_PORTRAIT } from '@/containers/plotter/presenters/page';
+import type { PageSize } from '@/plotter/page-sizes';
 import type { Placement, Point } from '../stage';
 import PagePreview from './page-preview';
 

@@ -5,7 +5,7 @@ import type { IDeviceConnector } from '@/communication/device/device';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
-import type { PageSize } from '@/containers/plotter/presenters/page';
+import type { PageSize } from '@/plotter/page-sizes';
 import { randomSeed } from '@/utils/random';
 import type { PlayerStage } from '../player';
 import play from '../player';

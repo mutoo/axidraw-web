@@ -1,9 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { px2mm } from '@/math/svg';
-
-export const PAGE_SIZE_A4 = 'axidraw-web-page-size-a4';
-export const PAGE_SIZE_A5 = 'axidraw-web-page-size-a5';
-export const PAGE_SIZE_A6 = 'axidraw-web-page-size-a6';
+import type { PageSize } from '@/plotter/page-sizes';
+import { defaultPageSize } from '@/plotter/page-sizes';
 
 export const PAGE_ORIENTATION_LANDSCAPE =
   'axidraw-web-page-orientation-landscape';
@@ -23,40 +21,6 @@ export const PAGE_ALIGNMENT_HORIZONTAL_START =
   'axidraw-web-page-alignment-horizontal-start';
 export const PAGE_ALIGNMENT_HORIZONTAL_END =
   'axidraw-web-page-alignment-horizontal-end';
-
-export type PageSize = {
-  type: string;
-  alias: string;
-  width: number;
-  height: number;
-  defaultPadding: number;
-};
-
-export const pageSizes: PageSize[] = [
-  {
-    type: PAGE_SIZE_A4,
-    alias: 'A4 (297mm x 210mm)',
-    width: 297,
-    height: 210,
-    defaultPadding: 15,
-  },
-  {
-    type: PAGE_SIZE_A5,
-    alias: 'A5 (210mm x 148mm)',
-    width: 210,
-    height: 148,
-    defaultPadding: 10,
-  },
-  {
-    type: PAGE_SIZE_A6,
-    alias: 'A6 (148mm x 105mm)',
-    width: 148,
-    height: 105,
-    defaultPadding: 5,
-  },
-];
-
-export const defaultPageSize = pageSizes[0];
 
 const createPageSetup = () =>
   makeAutoObservable({

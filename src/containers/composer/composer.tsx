@@ -10,9 +10,9 @@ import {
   PAGE_ORIENTATION_LANDSCAPE,
   PAGE_ORIENTATION_PORTRAIT,
 } from '@/containers/plotter/presenters/page';
+import { defaultPageSize, pageSizeLabel } from '@/plotter/page-sizes';
 import MidiCommander from './components/midi-commander';
 import PageSetup from './components/page-setup';
-import { pageSizes } from './stage';
 import { trackEvent } from './utils';
 
 enum COMPOSER_PHASE {
@@ -22,9 +22,9 @@ enum COMPOSER_PHASE {
 
 const Composer = () => {
   const [phase, setPhase] = useState(COMPOSER_PHASE.SETUP);
-  const [pageSize, setPageSize] = useState(pageSizes[0]);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
   const [orientation, setOrientation] = useState(PAGE_ORIENTATION_LANDSCAPE);
-  const [padding, setPadding] = useState(pageSizes[0].defaultPadding);
+  const [padding, setPadding] = useState(defaultPageSize.defaultPadding);
   const [device, setDevice] = useState<IDeviceConnector<unknown> | null>(null);
   const [playing, setPlaying] = useState(false);
   const clearDevice = useCallback(() => {
@@ -65,7 +65,7 @@ const Composer = () => {
         >
           <div className="flex items-center justify-between gap-4">
             <p>
-              <b>Page:</b> {pageSize.alias},{' '}
+              <b>Page:</b> {pageSizeLabel(pageSize)},{' '}
               {orientation === PAGE_ORIENTATION_PORTRAIT
                 ? 'portrait'
                 : 'landscape'}

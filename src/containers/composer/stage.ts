@@ -1,17 +1,8 @@
 import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
-import type { PageSize } from '@/containers/plotter/presenters/page';
-import {
-  PAGE_SIZE_A4,
-  PAGE_SIZE_A5,
-  pageSizes as plotterPageSizes,
-} from '@/containers/plotter/presenters/page';
 import { aaSteps2xyDist, mm2steps, xyDist2aaSteps } from '@/math/ebb';
+import type { PageSize } from '@/plotter/page-sizes';
 import type { PlannedStep, Step } from './utils';
 import { planSteps, stepsToNoteEnd } from './utils';
-
-export const pageSizes = plotterPageSizes.filter(
-  ({ type }) => type === PAGE_SIZE_A4 || type === PAGE_SIZE_A5,
-);
 
 // the pen walks from the origin to the song and back at this speed
 const TRAVEL_SPEED = 80; // mm/s

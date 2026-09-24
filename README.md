@@ -29,11 +29,13 @@ Checkout more on the [project board](https://github.com/mutoo/axidraw-web/projec
 - [x] Plotting (constant speed)
 - [x] Plotting (acceleration mode)
 - [x] Plotting control (pause/resume/stop)
+- [x] Page sizes: ISO A1 to A6 and B4 to B6, US, cards and art paper, and the plot area of each AxiDraw, the same in every app
 - [ ] Plot skipping/seeking
 
 ### Composer
 
 - [x] A singing pen plotter, [it's real.](https://www.instagram.com/p/CP-K1m9J-j1/)
+- [x] Play on any page size
 
 ### Virtual AxiDraw
 
