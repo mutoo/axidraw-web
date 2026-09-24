@@ -15,6 +15,11 @@ pen-up travel when reordering is allowed:
 So the tree is filled once, then emptied one nearest point at a time. The
 planner uses `createRTree(2, 4)`.
 
+[`DebugRtree`](../src/containers/plotter/components/workspace/debug.tsx)
+draws a tree over the page: every entry as a dot, leaf nodes outlined in
+green and internal nodes in red. It isn't mounted anywhere on purpose; add
+it to the workspace by hand when debugging the tree.
+
 These notes come from a review in September 2026: what was found, what was
 changed, what was left alone on purpose, and the measurements behind each
 call.
@@ -176,8 +181,6 @@ split together.
 
 ## Noticed elsewhere
 
-- `DebugRtree` in `containers/plotter/components/workspace/debug.tsx` isn't
-  used anywhere.
 - `reorderLineGroups` stops when `nnSearch` returns a falsy id, which only
   works because ids start at 1.
 
