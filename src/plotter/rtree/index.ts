@@ -3,6 +3,7 @@ import type { Point2D } from '@/math/geom';
 import type { MBR } from './utils';
 import {
   batchAddToNode,
+  extendMbr,
   extendMbrPlan,
   canCoverMbr,
   mergeMbrs,
@@ -14,9 +15,10 @@ export type NodeType = 'rtree-type-node-internal' | 'rtree-type-node-leaf';
 export type DataNode = {
   id: number;
   mbr: MBR;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
 };
+
+// x + y of an MBR's centre, doubled
+const diagonalKey = ({ p0, p1 }: MBR) => p0[0] + p1[0] + p0[1] + p1[1];
 
 export type CommonNode = {
   nid: number;
@@ -41,6 +43,13 @@ export const createRTree = <T extends DataNode>(
   minimum: number,
   nodeCapacity: number,
 ) => {
+  // a split shares nodeCapacity + 1 entries between two nodes that each need
+  // at least `minimum`
+  if (minimum < 1 || nodeCapacity < 2 || minimum * 2 > nodeCapacity + 1) {
+    throw new Error(
+      `rtree: minimum ${minimum} doesn't fit node capacity ${nodeCapacity}`,
+    );
+  }
   // reference the root node;
   let root: InternalEntry<T> | null = null;
   let nodeUniqId = 0;
@@ -76,36 +85,13 @@ export const createRTree = <T extends DataNode>(
     if (node.entries.length <= nodeCapacity) {
       return;
     }
-    const nodeMbr = node.mbr;
-    const [cx, cy] = [
-      (nodeMbr.p0[0] + nodeMbr.p1[0]) / 2,
-      (nodeMbr.p0[1] + nodeMbr.p1[1]) / 2,
-    ];
+    // sort along the diagonal, by x + y of the entries' centres, and seed
+    // the two new nodes with the entries at either end
     const toSplit = node.entries.sort(
-      (
-        {
-          mbr: {
-            p0: [e0p0x, e0p0y],
-            p1: [e0p1x, e0p1y],
-          },
-        },
-        {
-          mbr: {
-            p0: [e1p0x, e1p0y],
-            p1: [e1p1x, e1p1y],
-          },
-        },
-      ) => {
-        // sort by the distance too the center of the MBR
-        const e0Dist = (e0p0x + e0p1x) / 2 - cx + (e0p0y + e0p1y) / 2 - cy;
-        const e1Dist = (e1p0x + e1p1x) / 2 - cx + (e1p0y + e1p1y) / 2 - cy;
-        return e0Dist - e1Dist;
-      },
+      (e0, e1) => diagonalKey(e0.mbr) - diagonalKey(e1.mbr),
     );
     const node0 = createNodeFn(toSplit[0]);
-    node0.entries[0].parent = node0;
     const node1 = createNodeFn(toSplit[toSplit.length - 1]);
-    node1.entries[0].parent = node1;
     for (let i = 1; i < toSplit.length - 1; i += 1) {
       const remaining = toSplit.length - 1 - i;
       // if during the assignment of entries, there are n remain entries to be
@@ -135,8 +121,15 @@ export const createRTree = <T extends DataNode>(
         addToNodePlan = addToNodePlan0;
       }
       (addToNodePlan.node.entries as (T | InternalEntry<T>)[]).push(entryToAdd);
-      entryToAdd.parent = addToNodePlan.node;
       addToNodePlan.node.mbr = addToNodePlan.extendedMbr;
+    }
+    // child nodes move to their new parents; data entries don't track theirs
+    for (const half of [node0, node1]) {
+      if (half.type === 'rtree-type-node-internal') {
+        for (const child of half.entries) {
+          child.parent = half;
+        }
+      }
     }
     if (node === root) {
       const newRoot = createNodeOfParent(null, 'rtree-type-node-internal')(
@@ -155,18 +148,20 @@ export const createRTree = <T extends DataNode>(
   function insert(node: InternalEntry<T>, entry: T) {
     // travers the tree from root to appropriate leaf
     if (node.type === 'rtree-type-node-internal') {
-      // at each level, select the node whose node.mbr will require the minimum area
-      // enlargement to cover entry.mbr
-      const sortedCandidates = node.entries
-        .map((subNode) => extendMbrPlan(subNode, entry.mbr))
-        .sort((n0, n1) => {
-          if (n0.cost !== n1.cost) {
-            return n0.cost - n1.cost;
-          }
-          // in case of ties, select the node whose mbr has the minimum area
-          return n0.originalArea - n1.originalArea;
-        });
-      const chosenCandidate = sortedCandidates[0];
+      // at each level, select the node whose node.mbr will require the
+      // minimum area enlargement to cover entry.mbr; in case of ties, the
+      // node whose mbr has the minimum area
+      let chosenCandidate = extendMbrPlan(node.entries[0], entry.mbr);
+      for (let i = 1; i < node.entries.length; i += 1) {
+        const candidate = extendMbrPlan(node.entries[i], entry.mbr);
+        if (
+          candidate.cost < chosenCandidate.cost ||
+          (candidate.cost === chosenCandidate.cost &&
+            candidate.originalArea < chosenCandidate.originalArea)
+        ) {
+          chosenCandidate = candidate;
+        }
+      }
       const split = insert(chosenCandidate.node, entry);
       if (!split) {
         chosenCandidate.node.mbr = chosenCandidate.extendedMbr;
@@ -287,7 +282,13 @@ export const createRTree = <T extends DataNode>(
         root = createNodeOfParent(null, 'rtree-type-node-leaf')(entry);
         return;
       }
+      const oldRoot = root;
       insert(root, entry);
+      // insert() updates the MBRs below the root, and a new root gets its
+      // MBR when it's created
+      if (root === oldRoot) {
+        root.mbr = extendMbr(root.mbr, entry.mbr);
+      }
     },
     // removes one entry that matcher accepts, searching where entryMbr lies;
     // returns whether there was one

@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import type { Point2D } from '@/math/geom';
-import type { DataNode, InternalEntry, LeafNode } from '../index';
+import type { DataNode, InternalEntry, InternalNode, LeafNode } from '../index';
 import { createRTree } from '../index';
 import type { MBR } from '../utils';
-import { pointAsMbr } from '../utils';
+import { mergeMbrs, pointAsMbr } from '../utils';
 
 const countEntries = (node: InternalEntry<DataNode> | null): number => {
   if (!node) return 0;
@@ -12,6 +12,13 @@ const countEntries = (node: InternalEntry<DataNode> | null): number => {
 };
 
 describe('rtree', () => {
+  it('rejects a minimum that a split cannot satisfy', () => {
+    expect(() => createRTree(0, 4)).toThrow();
+    expect(() => createRTree(3, 4)).toThrow();
+    expect(() => createRTree(1, 1)).toThrow();
+    expect(() => createRTree(3, 5)).not.toThrow();
+  });
+
   describe('insert', () => {
     it('insert first entry at root', () => {
       const entry = { id: 0, mbr: pointAsMbr([10, 10]) };
@@ -34,10 +41,37 @@ describe('rtree', () => {
       for (const entry of entries) {
         rtree.insert(entry);
       }
-      expect(rtree.root!.type).toBe('rtree-type-node-internal');
-      expect(rtree.root!.entries.length).toBe(2);
-      expect(rtree.root!.entries[0].type).toEqual('rtree-type-node-leaf');
-      expect(rtree.root!.entries[0].parent).toEqual(rtree.root);
+      const root = rtree.root as InternalNode<DataNode>;
+      expect(root.type).toBe('rtree-type-node-internal');
+      expect(root.entries.length).toBe(2);
+      expect(root.entries[0].type).toEqual('rtree-type-node-leaf');
+      expect(root.entries[0].parent).toEqual(root);
+    });
+    it('leaves the entries as they are', () => {
+      const entries = Array.from({ length: 100 }, (_, id) => ({
+        id,
+        mbr: pointAsMbr([(id * 37) % 100, (id * 61) % 100]),
+      }));
+      const rtree = createRTree(2, 4);
+      for (const entry of entries) {
+        rtree.insert(entry);
+      }
+      for (const entry of entries) {
+        expect(Object.keys(entry)).toEqual(['id', 'mbr']);
+      }
+    });
+    it('keeps the MBR of the root tight', () => {
+      const entries = Array.from({ length: 100 }, (_, id) => ({
+        id,
+        mbr: pointAsMbr([(id * 37) % 100, (id * 61) % 100]),
+      }));
+      const rtree = createRTree(2, 4);
+      entries.forEach((entry, i) => {
+        rtree.insert(entry);
+        expect(rtree.root!.mbr).toEqual(
+          mergeMbrs(entries.slice(0, i + 1).map((e) => e.mbr)),
+        );
+      });
     });
     it('insert 10000 random points', () => {
       const rtree = createRTree(2, 4);

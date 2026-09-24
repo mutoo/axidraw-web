@@ -94,9 +94,7 @@ export function batchAddToNode<T extends DataNode>(
     } else {
       addToNode.entries.push(entryToAdd as T);
     }
-    entryToAdd.parent = addToNode;
-    const extended = extendMbrPlan(addToNode, entryToAdd.mbr);
-    addToNode.mbr = extended.extendedMbr;
+    addToNode.mbr = extendMbr(addToNode.mbr, entryToAdd.mbr);
   }
 }
 
