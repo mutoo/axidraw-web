@@ -26,7 +26,7 @@ export default CreateCommand(
     }
 
     if (delta1 === 0 && delta2 === 0) {
-      await delay(duration / 1000);
+      await delay(duration);
     } else {
       await linearMotion(
         context,
