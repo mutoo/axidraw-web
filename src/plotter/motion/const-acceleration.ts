@@ -63,7 +63,8 @@ export const estimateExitRate = (
     const aa0 = xyDist2aaSteps({ x: x0 - x1, y: y0 - y1 });
     const aa1 = xyDist2aaSteps({ x: x2 - x1, y: y2 - y1 });
     const aaDist1 = Math.sqrt(aa1.a1 ** 2 + aa1.a2 ** 2);
-    const maxEnterRate = Math.sqrt(accel * aaDist1 * 2 + context.exitRate);
+    // fastest entry that can still slow down to exitRate: v0^2 = v^2 + 2as
+    const maxEnterRate = Math.sqrt(accel * aaDist1 * 2 + context.exitRate ** 2);
     const junctionRate = computeJunctionRate(
       [aa0.a1, aa0.a2],
       [aa1.a1, aa1.a2],
@@ -72,7 +73,8 @@ export const estimateExitRate = (
     );
     context.exitRate = Math.min(junctionRate, maxEnterRate, maxPenRate);
   }
-  const maxExitRate = Math.sqrt(accel * deltaAA * 2 + vEnter);
+  // fastest exit reachable from vEnter within this segment: v^2 = v0^2 + 2as
+  const maxExitRate = Math.sqrt(accel * deltaAA * 2 + vEnter ** 2);
   return Math.min(maxExitRate, context.exitRate) | 0;
 };
 
@@ -98,9 +100,7 @@ export const accelMotion = (
     const requiredStepsToCatchup = ((v0 + vt) * catchupTime) / 2;
     const remainingSteps = (s - requiredStepsToCatchup) | 0;
     if (remainingSteps < 0) {
-      logger.error(
-        `don't have enough room to acc: ${remainingSteps}`,
-      );
+      logger.error(`don't have enough room to acc: ${remainingSteps}`);
       // we don't stop here because the error might due to previous remaining steps
       // and the error might be very small (around <10 steps
     }
