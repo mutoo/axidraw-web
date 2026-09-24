@@ -35,8 +35,9 @@ export default createCommand(
     });
   },
   (params: string): [number | undefined] => {
-    const [n] = params.split(',').map(toInt);
-    return [n];
+    // DisableMotors is optional: send a bare "ES" rather than "ES,NaN"
+    const disableMotors = toInt(params);
+    return [Number.isNaN(disableMotors) ? undefined : disableMotors];
   },
   {
     version: '2.2.7',

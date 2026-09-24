@@ -1,6 +1,6 @@
 import { createCommand } from '../command';
 import { ENDING_CR_NL } from '../constants';
-import { noParameters, readUntil, toInt, transformResult } from '../utils';
+import { noParameters, readUntil, transformResult } from '../utils';
 
 export const cmd = 'QG';
 
@@ -9,10 +9,10 @@ export default createCommand(
   'Query general',
   function* () {
     const dataIn = yield `QG\r`;
-    // example response: "3E\r\n"
+    // example response: "3E\r\n", the status byte in hex
     const parsed = yield* readUntil(ENDING_CR_NL, dataIn);
     return transformResult(parsed, (result) => {
-      const results = toInt(result);
+      const results = parseInt(result, 16);
       return {
         fifo: (results & 1) > 0,
         mtr2: (results & 2) > 0,

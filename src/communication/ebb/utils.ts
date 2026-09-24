@@ -19,7 +19,8 @@ export const cmdWithOptionalParams = (
   for (const param of optional) {
     // ignore all following commands if it's undefined
     if (param === undefined) break;
-    cmdWithParams += `,${param}`;
+    // the EBB only takes integers, but e.g. SP delays from servoTime() may not be
+    cmdWithParams += `,${typeof param === 'number' ? Math.round(param) : param}`;
   }
   return `${cmdWithParams}\r`;
 };

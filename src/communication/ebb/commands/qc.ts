@@ -12,17 +12,17 @@ export default createCommand(
     // example response: "0394,0300\r\nOK\r\n"
     const parsed = yield* readUntil(ENDING_OK_CR_NL, dataIn);
     return transformResult(parsed, (result) => {
-      const values = result
+      const [ra0, vPlus] = result
         .substring(0, result.length - 6) // discard \r\nOK\r\n
         .split(',')
-        .map((v) => ((toInt(v) / 1023) * 3.3).toFixed(2));
+        .map((v) => (toInt(v) / 1023) * 3.3);
       return {
         ra0: {
-          voltage: values[0],
-          maxCurrent: (toInt(values[0]) / 1.76).toFixed(2),
+          voltage: ra0.toFixed(2),
+          maxCurrent: (ra0 / 1.76).toFixed(2),
         },
         vPlus: {
-          voltage: (toInt(values[1]) * 9.2 + 0.3).toFixed(2),
+          voltage: (vPlus * 9.2 + 0.3).toFixed(2),
         },
       };
     });
