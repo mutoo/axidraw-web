@@ -1,8 +1,9 @@
 import L from './cmd-l';
-import { MoveTo } from './parser';
+import type { MoveTo } from './parser';
 import { StepAndStoreXY } from './steppers';
 import { transformerXY } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: MoveTo, context: Context) {
   const [cmd, coordinatePair, ...coordinatePairs] = command;

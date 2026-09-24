@@ -1,9 +1,9 @@
 import { Bug } from 'lucide-react';
 import { reaction } from 'mobx';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
-import { Command, CommandWithParams } from '@/communication/ebb/command';
+import type { Command, CommandWithParams } from '@/communication/ebb/command';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';

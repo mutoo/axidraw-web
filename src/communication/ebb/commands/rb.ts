@@ -1,4 +1,5 @@
-import { CommandGenerator, createCommand } from '../command';
+import type { CommandGenerator } from '../command';
+import { createCommand } from '../command';
 import { decode, noParameters } from '../utils';
 
 export const cmd = 'RB';

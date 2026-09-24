@@ -1,13 +1,14 @@
-import { Point2D } from '@/math/geom';
+import type { Point2D } from '@/math/geom';
 import {
   getMidPoint,
   isSufficientlyFlat,
   transformLine,
   transformPoint,
 } from './math';
-import { CurveTo } from './path/parser';
-import { SvgToLinesOptions } from './svg-to-lines';
-import { attachIds, Line2DWithId } from './utils';
+import type { CurveTo } from './path/parser';
+import type { SvgToLinesOptions } from './svg-to-lines';
+import type { Line2DWithId } from './utils';
+import { attachIds } from './utils';
 
 export default function* bezierToLines(
   bezier: CurveTo[1],

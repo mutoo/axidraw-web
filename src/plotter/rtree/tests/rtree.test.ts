@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { createRTree, DataNode, LeafNode } from '../index';
-import { MBR, pointAsMbr } from '../utils';
+import type { DataNode, LeafNode } from '../index';
+import { createRTree } from '../index';
+import type { MBR } from '../utils';
+import { pointAsMbr } from '../utils';
 
 describe('rtree', () => {
   describe('insert', () => {

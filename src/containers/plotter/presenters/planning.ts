@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Line2D } from '@/math/geom';
-import plan, { Motion, PlanOptions } from '@/plotter/planner';
+import type { Line2D } from '@/math/geom';
+import type { Motion, PlanOptions } from '@/plotter/planner';
+import plan from '@/plotter/planner';
 import { toSvgPathDef } from '@/plotter/svg/presentation';
 
 export enum PLANNING_PHASE {

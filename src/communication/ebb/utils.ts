@@ -33,7 +33,7 @@ export const readUntil = function* (
   number[]
 > {
   let buffer = '';
-  let foundEnding = -1;
+  let foundEnding: number;
   let consumed = 0;
   let nextDataIn = dataIn;
   do {

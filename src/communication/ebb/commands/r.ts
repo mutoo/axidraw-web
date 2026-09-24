@@ -1,4 +1,5 @@
-import { CommandGenerator, createCommand } from '../command';
+import type { CommandGenerator } from '../command';
+import { createCommand } from '../command';
 import handleOKMessage from '../messages/ok';
 import { noParameters } from '../utils';
 

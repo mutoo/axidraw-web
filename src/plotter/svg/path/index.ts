@@ -8,7 +8,7 @@ import S from './cmd-s';
 import T from './cmd-t';
 import V from './cmd-v';
 import Z from './cmd-z';
-import {
+import type {
   ClosePath,
   Command,
   CurveTo,
@@ -16,14 +16,14 @@ import {
   HorizontalLineTo,
   LineTo,
   MoveTo,
-  parsePath,
   Path,
   QuadBezierCurveTo,
   SmoothCurveTo,
   SmoothQuadBezierCurveTo,
   VerticalLineTo,
 } from './parser';
-import { Context, SingleCommand } from './utils';
+import { parsePath } from './parser';
+import type { Context, SingleCommand } from './utils';
 
 export function svgPathParser(pathDef = 'M 0 0') {
   return parsePath(pathDef);

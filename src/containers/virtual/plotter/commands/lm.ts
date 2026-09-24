@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
 import { rate2s, rsa2t } from '@/math/ebb';
-import { VirtualPlotterContext } from '..';
+import type { VirtualPlotterContext } from '..';
 import { CreateCommand } from '../command';
 import { accelMotion } from '../utils';
 

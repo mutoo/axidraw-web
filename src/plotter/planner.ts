@@ -1,8 +1,10 @@
-import { dist, distSq, isSamePoint, Line2D, Point2D } from '@/math/geom';
+import type { Line2D, Point2D } from '@/math/geom';
+import { dist, distSq, isSamePoint } from '@/math/geom';
 import { mm2px } from '@/math/svg';
 import { MOTION_PEN_DOWN, MOTION_PEN_UP } from './consts';
 import { createRTree } from './rtree';
-import { MBR, pointAsMbr } from './rtree/utils';
+import type { MBR } from './rtree/utils';
+import { pointAsMbr } from './rtree/utils';
 import { transformLine } from './svg/math';
 import { logger } from './utils';
 

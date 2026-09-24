@@ -1,7 +1,8 @@
-import { FormEvent, useCallback, useState } from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { FormEvent } from 'react';
+import { useCallback, useState } from 'react';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
-import { Command } from '@/communication/ebb/command';
+import type { Command } from '@/communication/ebb/command';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { trackEvent } from '../utils';
@@ -25,7 +26,7 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
             if (!maybeCmd) continue;
             const cmdId = maybeCmd as keyof typeof commands;
             const params = parts.join(',');
-            // eslint-disable-next-line import/namespace
+            // eslint-disable-next-line import-x/namespace
             const command = commands[cmdId] as Command<unknown[], unknown>;
             // there commands are not concurrent, their are executed one-by-one.
             const result = await device.executeCommand(

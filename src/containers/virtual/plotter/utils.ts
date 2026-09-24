@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx';
-import { Point2D, Vector2D } from '@/math/geom';
+import type { Point2D, Vector2D } from '@/math/geom';
 import { delay } from '@/utils/time';
-import { VirtualPlotterContext } from '.';
+import type { VirtualPlotterContext } from '.';
 
 const interval = 16; // FPS = 60
 

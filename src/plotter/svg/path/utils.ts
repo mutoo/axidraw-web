@@ -1,4 +1,4 @@
-import { Command } from './parser';
+import type { Command } from './parser';
 
 export type Context = {
   x: number;

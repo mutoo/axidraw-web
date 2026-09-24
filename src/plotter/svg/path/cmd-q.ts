@@ -1,7 +1,8 @@
-import { QuadBezierCurveTo } from './parser';
+import type { QuadBezierCurveTo } from './parser';
 import { stepXY } from './steppers';
 import { transformerXYPairs } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: QuadBezierCurveTo, context: Context) {
   const [cmd, ...params] = command;

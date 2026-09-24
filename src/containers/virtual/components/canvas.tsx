@@ -1,7 +1,7 @@
 import { reaction } from 'mobx';
 import { useEffect, useRef } from 'react';
 import { aaSteps2xyDist } from '@/math/ebb';
-import { IVirtualPlotter } from '../plotter';
+import type { IVirtualPlotter } from '../plotter';
 import styles from './canvas.module.css';
 
 const Canvas = ({

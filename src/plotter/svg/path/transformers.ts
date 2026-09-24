@@ -1,5 +1,5 @@
-import { Point2D } from '@/math/geom';
-import {
+import type { Point2D } from '@/math/geom';
+import type {
   CurveTo,
   EllipticalArc,
   HorizontalLineTo,
@@ -11,7 +11,7 @@ import {
   SmoothQuadBezierCurveTo,
   VerticalLineTo,
 } from './parser';
-import { Context, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
 
 export const transformerXY = <
   T extends SingleCommand<

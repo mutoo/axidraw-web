@@ -11,8 +11,9 @@ import {
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
 } from './consts';
-import { IDevice } from './device';
-import { createDeviceBind, logger, PendingCommand } from './utils';
+import type { IDevice } from './device';
+import type { PendingCommand } from './utils';
+import { createDeviceBind, logger } from './utils';
 
 export type HostMessage = {
   type: string;

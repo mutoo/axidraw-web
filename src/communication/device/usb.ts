@@ -2,8 +2,9 @@ import EventEmitter from 'events';
 import handleEBBMessages from '../ebb/messages/ebb';
 import { encode } from '../ebb/utils';
 import { DEVICE_EVENT_DISCONNECTED, DEVICE_TYPE_USB } from './consts';
-import { DevicePicker, IDevice } from './device';
-import { createDeviceBind, logger, PendingCommand } from './utils';
+import type { DevicePicker, IDevice } from './device';
+import type { PendingCommand } from './utils';
+import { createDeviceBind, logger } from './utils';
 
 export const TRANSFER_ENDPOINT = 2;
 export const TRANSFER_PACKET_SIZE = 64;

@@ -3,7 +3,7 @@ import { reaction } from 'mobx';
 import { useEffect, useState } from 'react';
 import Carriage from '@/assets/svg/pen-holder.svg';
 import { aaSteps2xyDist } from '../../../math/ebb';
-import { IVirtualPlotter } from '../plotter';
+import type { IVirtualPlotter } from '../plotter';
 import styles from './pen-holder.module.css';
 
 const PenHolder = ({ vm }: { vm: IVirtualPlotter }) => {

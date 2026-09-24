@@ -2,7 +2,7 @@ import classNames from 'clsx';
 import { AlertTriangle } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { useContext, useEffect, useState } from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button} from '@/components/ui/button';

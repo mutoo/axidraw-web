@@ -1,7 +1,8 @@
 import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
-import { VirtualPlotterContext } from '..';
-import { CommandGenerator, CreateCommand } from '../command';
+import type { VirtualPlotterContext } from '..';
+import type { CommandGenerator } from '../command';
+import { CreateCommand } from '../command';
 
 export default CreateCommand(
   'EM',

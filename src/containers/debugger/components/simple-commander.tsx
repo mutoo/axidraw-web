@@ -1,13 +1,8 @@
-import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { ChangeEvent, FormEvent } from 'react';
+import { useCallback, useState } from 'react';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
-import { Command } from '@/communication/ebb/command';
+import type { Command } from '@/communication/ebb/command';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { trackEvent } from '../utils';
@@ -23,9 +18,6 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
     {},
   );
   const [result, setResult] = useState('');
-  useEffect(() => {
-    setParams(paramsHistory[cmd] ?? '');
-  }, [cmd, paramsHistory]);
   const sendCommand = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -34,7 +26,8 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         try {
           const paramsStr = params.trim();
           setParamsHistory({ ...paramsHistory, [cmd]: paramsStr });
-          // eslint-disable-next-line import/namespace
+          setParams(paramsStr);
+          // eslint-disable-next-line import-x/namespace
           const command = commands[cmd] as Command<unknown[], unknown>;
           const cmdResult = await device.executeCommand(
             command,
@@ -57,13 +50,15 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         <select
           defaultValue={cmd}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            setCmd(e.target.value as CommandId);
+            const nextCmd = e.target.value as CommandId;
+            setCmd(nextCmd);
+            setParams(paramsHistory[nextCmd] ?? '');
           }}
         >
           {commandList.map((cmdKey) => (
             <option key={cmdKey} value={cmdKey}>
               {
-                // eslint-disable-next-line import/namespace
+                // eslint-disable-next-line import-x/namespace
                 commands[cmdKey].title
               }
             </option>
@@ -74,7 +69,7 @@ const SimpleCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         <span>
           Params
           <a
-            // eslint-disable-next-line import/namespace
+            // eslint-disable-next-line import-x/namespace
             href={`http://evil-mad.github.io/EggBot/ebb.html#${commands[cmd].cmd}`}
             target="_blank"
             rel="noreferrer"

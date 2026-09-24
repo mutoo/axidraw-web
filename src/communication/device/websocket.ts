@@ -11,9 +11,10 @@ import {
   WEBSOCKET_STATUS_DISCONNECTED,
   WEBSOCKET_STATUS_STANDBY,
 } from './consts';
-import { DevicePicker, IDevice } from './device';
-import { createDeviceBind, logger, PendingCommand } from './utils';
-import { ClientMessage, ServerMessage, WSDevice } from './webscoket-type';
+import type { DevicePicker, IDevice } from './device';
+import type { PendingCommand } from './utils';
+import { createDeviceBind, logger } from './utils';
+import type { ClientMessage, ServerMessage, WSDevice } from './webscoket-type';
 
 export const createWSDeviceProxy = (
   address: string,

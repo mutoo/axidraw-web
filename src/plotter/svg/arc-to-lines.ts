@@ -1,8 +1,10 @@
-import { Point2D, pointToLineDist } from '@/math/geom';
+import type { Point2D } from '@/math/geom';
+import { pointToLineDist } from '@/math/geom';
 import { arcAngleFn, transformLine, transformPoint } from './math';
-import { EllipticalArc } from './path/parser';
-import { SvgToLinesOptions } from './svg-to-lines';
-import { attachIds, Line2DWithId } from './utils';
+import type { EllipticalArc } from './path/parser';
+import type { SvgToLinesOptions } from './svg-to-lines';
+import type { Line2DWithId } from './utils';
+import { attachIds } from './utils';
 
 export default function* arcToLines(
   arc: EllipticalArc[1],

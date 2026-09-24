@@ -1,4 +1,4 @@
-import { Command } from '../ebb/command';
+import type { Command } from '../ebb/command';
 
 export interface IDevice {
   /**

@@ -1,5 +1,5 @@
-import { Point2D } from '@/math/geom';
-import { DataNode, InternalEntry } from '.';
+import type { Point2D } from '@/math/geom';
+import type { DataNode, InternalEntry } from '.';
 
 export type MBR = { p0: Point2D; p1: Point2D };
 

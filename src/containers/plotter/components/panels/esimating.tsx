@@ -10,16 +10,16 @@ const Estimating = observer(() => {
   const [time, setTime] = useState<number>(
     planning.motions ? work.estimate({ motions: planning.motions }) : 0,
   );
-  const timer = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<NodeJS.Timeout>();
   useEffect(() => {
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setTime(
         planning.motions ? work.estimate({ motions: planning.motions }) : 0,
       );
     }, 100);
     return () => {
-      clearTimeout(timer.current);
+      clearTimeout(timerRef.current);
     };
   });
   if (!time) return null;

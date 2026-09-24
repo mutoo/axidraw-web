@@ -1,5 +1,10 @@
-import { ClosePath, Command, HorizontalLineTo, VerticalLineTo } from './parser';
-import { Context, SingleCommand } from './utils';
+import type {
+  ClosePath,
+  Command,
+  HorizontalLineTo,
+  VerticalLineTo,
+} from './parser';
+import type { Context, SingleCommand } from './utils';
 
 export const stepX = (
   param: HorizontalLineTo[1],

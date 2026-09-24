@@ -1,7 +1,7 @@
 import { observable, reaction } from 'mobx';
 import { ENDING_CR } from '@/communication/ebb/constants';
 import { servoTime } from '@/math/ebb';
-import { CommandGenerator } from './command';
+import type { CommandGenerator } from './command';
 import { default as em } from './commands/em';
 import { default as hm } from './commands/hm';
 import { default as lm } from './commands/lm';

@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable } from 'mobx';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { servoTime } from '@/math/ebb';
 import {
@@ -10,8 +10,9 @@ import {
   PLOTTER_STATUS_STANDBY,
 } from '@/plotter/consts';
 import estimate from '@/plotter/estimator';
-import { Motion } from '@/plotter/planner';
-import plot, { PlotterFlow } from '@/plotter/plotter';
+import type { Motion } from '@/plotter/planner';
+import type { PlotterFlow } from '@/plotter/plotter';
+import plot from '@/plotter/plotter';
 
 const createWork = () =>
   makeAutoObservable({

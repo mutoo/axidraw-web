@@ -1,5 +1,5 @@
-import { Line2D } from '@/math/geom';
-import { SvgToLinesOptions } from './svg-to-lines';
+import type { Line2D } from '@/math/geom';
+import type { SvgToLinesOptions } from './svg-to-lines';
 
 export function createSVGElement(type: string) {
   return document.createElementNS('http://www.w3.org/2000/svg', type);

@@ -1,7 +1,8 @@
-import { HorizontalLineTo } from './parser';
+import type { HorizontalLineTo } from './parser';
 import { stepX } from './steppers';
 import { transformerX } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: HorizontalLineTo, context: Context) {
   const [cmd, ...coordinates] = command;

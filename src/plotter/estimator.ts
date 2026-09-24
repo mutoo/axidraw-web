@@ -1,6 +1,7 @@
-import { IComputedValue } from 'mobx';
+import type { IComputedValue } from 'mobx';
 import { servoTime, xyDist2aaSteps } from '@/math/ebb';
-import { distSq, Line2D } from '@/math/geom';
+import type { Line2D } from '@/math/geom';
+import { distSq } from '@/math/geom';
 import {
   MOTION_PEN_DOWN,
   MOTION_PEN_UP,

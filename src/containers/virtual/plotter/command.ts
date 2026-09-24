@@ -1,4 +1,4 @@
-import { VirtualPlotterContext } from '.';
+import type { VirtualPlotterContext } from '.';
 
 export type CommandGenerator = AsyncGenerator<string, void, void>;
 

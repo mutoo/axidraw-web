@@ -1,5 +1,6 @@
 import { mm2steps, s2rate, xyDist2aaSteps } from '@/math/ebb';
-import { distSq, Point2D } from '@/math/geom';
+import type { Point2D } from '@/math/geom';
+import { distSq } from '@/math/geom';
 import { MOTION_PEN_UP } from '../consts';
 import { logger } from '../utils';
 

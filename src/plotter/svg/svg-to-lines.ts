@@ -4,7 +4,7 @@ import elementToPath from './element-to-path';
 import { svgPathParser } from './path';
 import pathToLines from './path-to-lines';
 import pointsToLines from './points-to-lines';
-import { Line2DWithId } from './utils';
+import type { Line2DWithId } from './utils';
 
 export type SVGContainer = SVGSVGElement | SVGGElement | SVGAElement;
 

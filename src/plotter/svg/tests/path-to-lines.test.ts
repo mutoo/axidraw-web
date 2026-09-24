@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
-import { Line2D, Point2D } from '@/math/geom';
+import type { Line2D, Point2D } from '@/math/geom';
 import { svgPathParser } from '../path';
 import pathToLines from '../path-to-lines';
 

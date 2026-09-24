@@ -1,4 +1,5 @@
-import { CommandGenerator, createCommand } from '../command';
+import type { CommandGenerator } from '../command';
+import { createCommand } from '../command';
 import { ENDING_CR_NL } from '../constants';
 import { noParameters, readUntil, toInt, transformResult } from '../utils';
 

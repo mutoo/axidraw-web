@@ -1,3 +1,4 @@
+import type { Consumer, ExtractConsumedType } from './utils';
 import {
   atLeastRe,
   branchesRe,
@@ -9,8 +10,6 @@ import {
   optional,
   optionalRe,
   rule,
-  Consumer,
-  ExtractConsumedType,
 } from './utils';
 
 // The grammar for path data

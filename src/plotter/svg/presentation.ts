@@ -1,4 +1,5 @@
-import { isSamePoint, Line2D, Point2D } from '../../math/geom';
+import type { Line2D, Point2D } from '../../math/geom';
+import { isSamePoint } from '../../math/geom';
 
 export const toSvgLines = (lines: Line2D[]) =>
   lines

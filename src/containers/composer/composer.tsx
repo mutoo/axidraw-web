@@ -1,6 +1,6 @@
 import classnames from 'clsx';
 import { useState } from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
 import Footer from '@/components/footer/footer';
 import formStyles from '@/components/ui/form.module.css';

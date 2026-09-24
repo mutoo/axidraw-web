@@ -1,4 +1,4 @@
-import { Path } from './path/parser';
+import type { Path } from './path/parser';
 import { getAttrVal } from './utils';
 
 export default function elementToPath(

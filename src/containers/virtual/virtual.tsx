@@ -7,12 +7,13 @@ import {
   VIRTUAL_STATUS_CONNECTED,
   VIRTUAL_STATUS_DISCONNECTED,
 } from '@/communication/device/consts';
-import { VMMessage } from '@/communication/device/virtual';
+import type { VMMessage } from '@/communication/device/virtual';
 import Footer from '@/components/footer/footer';
 import { useToast } from '@/hooks/use-toast';
 import Canvas from './components/canvas';
 import PenHolder from './components/pen-holder';
-import createVM, { IVirtualPlotter } from './plotter';
+import type { IVirtualPlotter } from './plotter';
+import createVM from './plotter';
 import { logger } from './utils';
 import styles from './virtual.module.css';
 
@@ -22,7 +23,7 @@ const VirtualPlotter = () => {
     VIRTUAL_STATUS_DISCONNECTED,
   );
   const stageRef = useRef<HTMLDivElement>(null);
-  const [vm, setPlotter] = useState<IVirtualPlotter | null>(null);
+  const [vm, setVm] = useState<IVirtualPlotter | null>(null);
   const [canvasSize] = useState({ width: 2970, height: 2100 });
   const [transform, setTransform] = useState<{ transform: string } | null>(
     null,
@@ -33,7 +34,8 @@ const VirtualPlotter = () => {
       const bbox = stageRef.current.getBoundingClientRect();
       const canvasRatio = canvasSize.width / canvasSize.height;
       const stageRatio = bbox.width / bbox.height;
-      let [x, y, scale] = [0, 0, 1];
+      let [x, y] = [0, 0];
+      let scale: number;
       if (canvasRatio < stageRatio) {
         scale = bbox.height / canvasSize.height;
         x = (bbox.width - canvasSize.width * scale) / 2;
@@ -101,8 +103,11 @@ const VirtualPlotter = () => {
     });
 
     logger.debug('connected.');
+    // the VM only exists inside this effect (it owns the AudioContext and the
+    // window listeners), so its state has to be published from here
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDeviceStatus(VIRTUAL_STATUS_CONNECTED);
-    setPlotter(vm);
+    setVm(vm);
 
     toast({
       title: 'Ready',

@@ -1,4 +1,4 @@
-import { PendingCommand } from '@/communication/device/utils';
+import type { PendingCommand } from '@/communication/device/utils';
 import { decode, logger } from '../utils';
 import handleErrorMessage from './error';
 

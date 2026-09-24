@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { mm2px } from '@/math/svg';
-import {
+import type {
   DataNode,
   InternalEntry,
   InternalNode,

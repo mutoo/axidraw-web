@@ -1,8 +1,9 @@
-import { IComputedValue } from 'mobx';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IComputedValue } from 'mobx';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { aa2xy, servoTime, xyDist2aaSteps } from '@/math/ebb';
-import { distSq, Line2D } from '@/math/geom';
+import type { Line2D } from '@/math/geom';
+import { distSq } from '@/math/geom';
 import { delay } from '@/utils/time';
 import {
   MOTION_PEN_DOWN,

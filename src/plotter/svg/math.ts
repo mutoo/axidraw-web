@@ -1,4 +1,4 @@
-import { Line2D, Point2D } from '@/math/geom';
+import type { Line2D, Point2D } from '@/math/geom';
 
 /**
  * Fast transform point with DOMMatrix:

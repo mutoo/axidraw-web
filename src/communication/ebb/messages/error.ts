@@ -1,4 +1,4 @@
-import { CommandGenerator } from '../command';
+import type { CommandGenerator } from '../command';
 import { ENDING_CR } from '../constants';
 import { readUntil } from '../utils';
 

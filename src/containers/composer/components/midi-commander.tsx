@@ -1,23 +1,17 @@
 import { ToggleLeft } from 'lucide-react';
-import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { ChangeEvent, FormEvent } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import { delay } from '@/utils/time';
 import * as songs from '../songs';
+import type { RawSong } from '../utils';
 import {
   parseNote,
   planSteps,
-  RawSong,
   songToSteps,
   trackEvent,
   logger,
@@ -26,26 +20,22 @@ import {
 type SongsType = typeof songs;
 type SongId = keyof SongsType;
 const songList = Object.keys(songs) as SongId[];
+// eslint-disable-next-line import-x/namespace
+const getSong = (songId: SongId): RawSong => songs[songId];
 
 const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
-  const [songName, setSongName] = useState<SongId>(songList[0]);
-  const [channel1, setChannel1] = useState('');
-  const [channel2, setChannel2] = useState('');
+  const [channel1, setChannel1] = useState(() =>
+    getSong(songList[0]).channel1.join(', '),
+  );
+  const [channel2, setChannel2] = useState(() =>
+    getSong(songList[0]).channel2.join(', '),
+  );
   const [BPM, setBPM] = useState(88);
   const [motorMode, setMotorMode] = useState(1);
   const [penDown, setPenDown] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const vPRG = useRef(false);
+  const vPRGRef = useRef(false);
   const [results, setResults] = useState('');
-  useEffect(() => {
-    // eslint-disable-next-line import/namespace
-    const song: RawSong | undefined = songs[songName];
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (song) {
-      setChannel1(song.channel1.join(', '));
-      setChannel2(song.channel2.join(', '));
-    }
-  }, [songName]);
   const sendCommands = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -81,10 +71,10 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
 
           for (const step of planSteps(steps)) {
             const shouldStop = await device.executeCommand(commands.qb);
-            if (shouldStop || vPRG.current) {
+            if (shouldStop || vPRGRef.current) {
               await device.executeCommand(commands.r);
               await device.executeCommand(commands.sp, 1, 500, undefined);
-              vPRG.current = false;
+              vPRGRef.current = false;
               return;
             }
             await device.executeCommand(
@@ -127,16 +117,18 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
       <label className={formStyles.inputLabel}>
         <span>Song:</span>
         <select
-          defaultValue={songName}
+          defaultValue={songList[0]}
           onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-            setSongName(e.target.value as SongId);
+            const song = getSong(e.target.value as SongId);
+            setChannel1(song.channel1.join(', '));
+            setChannel2(song.channel2.join(', '));
           }}
           disabled={playing}
         >
           {songList.map((songKey) => (
             <option key={songKey} value={songKey}>
               {
-                // eslint-disable-next-line import/namespace
+                // eslint-disable-next-line import-x/namespace
                 songs[songKey].title
               }
             </option>
@@ -209,7 +201,7 @@ const MidiCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
         type={playing ? 'button' : 'submit'}
         onClick={() => {
           if (playing) {
-            vPRG.current = true;
+            vPRGRef.current = true;
           }
         }}
       >

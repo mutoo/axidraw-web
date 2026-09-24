@@ -1,7 +1,8 @@
-import { SmoothQuadBezierCurveTo } from './parser';
+import type { SmoothQuadBezierCurveTo } from './parser';
 import { stepXY } from './steppers';
 import { transformerXY } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: SmoothQuadBezierCurveTo, context: Context) {
   const [cmd, ...coordinatePairs] = command;

@@ -1,7 +1,7 @@
 import { runInAction } from 'mobx';
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
 import { delay } from '@/utils/time';
-import { VirtualPlotterContext } from '..';
+import type { VirtualPlotterContext } from '..';
 import { CreateCommand } from '../command';
 
 export default CreateCommand(

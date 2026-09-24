@@ -1,7 +1,8 @@
 import classNames from 'clsx';
 import { CircleArrowRight, Info, TriangleAlert } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
-import { ChangeEvent, Fragment, useContext, useRef } from 'react';
+import type { ChangeEvent } from 'react';
+import { Fragment, useContext, useRef } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';

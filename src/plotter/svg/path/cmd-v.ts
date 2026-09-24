@@ -1,7 +1,8 @@
-import { VerticalLineTo } from './parser';
+import type { VerticalLineTo } from './parser';
 import { stepY } from './steppers';
 import { transformerY } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: VerticalLineTo, context: Context) {
   const [cmd, ...coordinates] = command;

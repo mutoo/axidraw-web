@@ -3,10 +3,10 @@ import {
   DEVICE_TYPE_VIRTUAL,
   DEVICE_TYPE_WEBSOCKET,
 } from './consts';
-import { DevicePicker } from './device';
+import type { DevicePicker } from './device';
 import createUSBDevice from './usb';
 import createVirtualDevice from './virtual';
-import { WSDevice } from './webscoket-type';
+import type { WSDevice } from './webscoket-type';
 import createWSDevice from './websocket';
 
 export default function createDevice(

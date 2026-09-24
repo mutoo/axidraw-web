@@ -6,7 +6,7 @@ import {
   DEVICE_TYPE_USB,
   DEVICE_TYPE_VIRTUAL,
 } from '@/communication/device/consts';
-import { IDeviceConnector } from '@/communication/device/device';
+import type { IDeviceConnector } from '@/communication/device/device';
 import { selectFirstDevice } from '@/communication/device/utils';
 import * as commands from '@/communication/ebb';
 
@@ -31,12 +31,15 @@ export const useDeviceConnector = () => {
   useEffect(() => {
     // TODO: use a modal to select device from list
     if (deviceStatus !== DEVICE_STATUS_CONNECTED) {
+      // a fresh connector is needed whenever the type changes or it disconnects
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDevice(createDevice(deviceType, selectFirstDevice));
     }
   }, [deviceType, deviceStatus]);
 
   // clear connection error
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setConnectionError(null);
   }, [device, deviceType, setDeviceStatus]);
 

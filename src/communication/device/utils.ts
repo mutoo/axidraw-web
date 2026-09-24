@@ -1,13 +1,13 @@
 import EventEmitter from 'events';
 import Logger from 'js-logger';
 import { timeout } from '@/utils/time';
-import { Command, CommandGenerator } from '../ebb/command';
+import type { Command, CommandGenerator } from '../ebb/command';
 import r from '../ebb/commands/r';
 import v from '../ebb/commands/v';
 import { checkVersion } from '../ebb/utils';
 import { DEVICE_EVENT_CONNECTED, DEVICE_EVENT_DISCONNECTED } from './consts';
-import { IDevice, IDeviceConnector } from './device';
-import { WSDevice } from './webscoket-type';
+import type { IDevice, IDeviceConnector } from './device';
+import type { WSDevice } from './webscoket-type';
 
 export const logger = Logger.get('device');
 

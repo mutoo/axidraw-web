@@ -6,7 +6,7 @@ allowBuilds:
   # Native addon; ships prebuilds and only compiles when none matches (e.g. some Raspberry Pi setups).
   '@serialport/bindings-cpp': true
   # Platform binaries come from optional dependencies, the install script is not needed.
-  esbuild: false
+  unrs-resolver: false
 
 patchedDependencies:
   # Adds the missing "types" export condition so TypeScript can resolve PortInfo.

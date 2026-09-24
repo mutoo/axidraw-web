@@ -1,5 +1,5 @@
 import { ENDING_OK_CR_NL } from '@/communication/ebb/constants';
-import { VirtualPlotterContext } from '..';
+import type { VirtualPlotterContext } from '..';
 import { CreateCommand } from '../command';
 
 export const cmd = 'QB';

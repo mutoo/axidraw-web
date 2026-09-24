@@ -1,9 +1,9 @@
-import { Point2D } from '@/math/geom';
+import type { Point2D } from '@/math/geom';
 import arcToLines from './arc-to-lines';
 import bezierToLines from './bezier-to-lines';
 import { quadToCubicBezierControlPoints, transformLine } from './math';
 import svgPathNormalizer from './path';
-import {
+import type {
   CurveTo,
   DrawToCommand,
   EllipticalArc,
@@ -16,8 +16,8 @@ import {
   SmoothQuadBezierCurveTo,
   VerticalLineTo,
 } from './path/parser';
-import { SingleCommand } from './path/utils';
-import { SvgToLinesOptions } from './svg-to-lines';
+import type { SingleCommand } from './path/utils';
+import type { SvgToLinesOptions } from './svg-to-lines';
 import { attachIds } from './utils';
 
 export default function* pathToLines(
@@ -28,7 +28,7 @@ export default function* pathToLines(
   opt: SvgToLinesOptions,
 ) {
   let prevPos: Point2D = [0, 0];
-  let currPos: Point2D = [0, 0];
+  let currPos: Point2D;
   // store the start position of last Move command
   let startPos: Point2D | null = null;
   // store prev cmd, useful to get control points for connected beziers

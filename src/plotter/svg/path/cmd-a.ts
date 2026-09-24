@@ -1,7 +1,8 @@
-import { EllipticalArc } from './parser';
+import type { EllipticalArc } from './parser';
 import { stepXY } from './steppers';
 import { transformerXY } from './transformers';
-import { Context, normalize, SingleCommand } from './utils';
+import type { Context, SingleCommand } from './utils';
+import { normalize } from './utils';
 
 export default function* (command: EllipticalArc, context: Context) {
   const [cmd, ...params] = command;

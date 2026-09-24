@@ -1,5 +1,6 @@
-import { Point2D } from '@/math/geom';
+import type { Point2D } from '@/math/geom';
 
+import type { MBR } from './utils';
 import {
   batchAddToNode,
   extendMbrPlan,
@@ -7,7 +8,6 @@ import {
   mergeMbrs,
   minDist,
   minMaxDist,
-  MBR,
 } from './utils';
 
 export type NodeType = 'rtree-type-node-internal' | 'rtree-type-node-leaf';
