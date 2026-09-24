@@ -55,7 +55,7 @@ Try the [Composer](https://axidraw.mutoo.im/#composer) if you wondering how the 
 
 ## Run locally
 
-Make sure you have `node v20+` and `pnpm` installed. Then checkout the repo and run `pnpm i` to install all the dependencies.
+Make sure you have Node.js 24 (see `.nvmrc`) and pnpm 12 installed. Then checkout the repo and run `pnpm i` to install all the dependencies.
 
 ```
 $ pnpm dev
@@ -72,6 +72,8 @@ $ pnpm build
 $ bash ./scripts/create-cert.sh
 $ pnpm run server
 ```
+
+The server runs directly on Node.js (native TypeScript support, no build step needed). The WebSocket proxy is protected by a password, `axidraw-web` by default. Set the `AXIDRAW_AUTH` environment variable to change it, e.g. `AXIDRAW_AUTH=my-secret pnpm run server`.
 
 ### Self-signed cert
 
@@ -97,13 +99,13 @@ The cert generation script will also provide extra DNS including your hostname, 
 # e.g. your hostname is raspberry-pi.local
 # and your LAN ip is 192.168.3.14
 https://raspberry-pi.local:8443
-https://192.168.3.14.nip.io:8433
+https://192.168.3.14.nip.io:8443
 ```
 
 N.B. The certificate can be download at from browser.
 
 ```
-htps://<Device-IP>:8443/ca
+https://<Device-IP>:8443/ca
 ```
 
 This very handy when you run the web server on Raspberry PI or other computer and access it at your work device.
@@ -127,7 +129,7 @@ Feel free to run dev build if you like to inspect how the app work with devTools
 $ pnpm dev
 ```
 
-it will run a dev server at `https://localhost:5173`, which will popup automatically in your browser.
+it will run a dev server at `http://localhost:5173`.
 
 ## Run on Raspberry PI
 
