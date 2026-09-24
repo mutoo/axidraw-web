@@ -328,12 +328,12 @@ describe('travel', () => {
 
   it('speeds up and slows down on the way', () => {
     const moves = travel({ a1: 20000, a2: 3000 }, 1);
-    // in motor steps a ms, where 50 mm/s is about 5.65
+    // in motor steps a ms, where 80 mm/s is about 9.04
     const speeds = moves.map(
       ({ step1, step2, duration }) => Math.hypot(step1, step2) / duration,
     );
     const top = Math.max(...speeds);
-    expect(top).toBeCloseTo(5.65, 1);
+    expect(top).toBeCloseTo(9.04, 1);
     expect(speeds[0]).toBeLessThan(top / 5);
     expect(speeds.at(-1)).toBeLessThan(top / 5);
     const peak = speeds.indexOf(top);

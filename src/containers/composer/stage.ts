@@ -14,10 +14,10 @@ export const pageSizes = plotterPageSizes.filter(
 );
 
 // the pen walks from the origin to the song and back at this speed
-const TRAVEL_SPEED = 50; // mm/s
+const TRAVEL_SPEED = 80; // mm/s
 // speeding up and slowing down at this rate, which the motors sing as a
 // glide up and down, and which is gentler on them than a sudden start or stop
-const TRAVEL_ACCEL = 100; // mm/s²
+const TRAVEL_ACCEL = 200; // mm/s²
 // in moves of about this long
 const RAMP_STEP = 20; // ms
 
