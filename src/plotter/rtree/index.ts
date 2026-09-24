@@ -47,8 +47,8 @@ export const createRTree = <T extends DataNode>(
   let nodeUniqId = 0;
 
   const createNodeOfParent = (parent: InternalNode<T> | null, type: NodeType) =>
-    function _createNode<E extends T | InternalEntry<T>>(
-      ...entries: E[]
+    function _createNode(
+      ...entries: (T | InternalEntry<T>)[]
     ): InternalNode<T> | LeafNode<T> {
       if (type === 'rtree-type-node-internal') {
         return {
@@ -69,8 +69,8 @@ export const createRTree = <T extends DataNode>(
     };
 
   function maybeSplit(
-    createNodeFn: <E extends T | InternalEntry<T>>(
-      ...entries: E[]
+    createNodeFn: (
+      ...entries: (T | InternalEntry<T>)[]
     ) => LeafNode<T> | InternalNode<T>,
     node: InternalNode<T> | LeafNode<T>,
   ) {
@@ -140,12 +140,13 @@ export const createRTree = <T extends DataNode>(
       addToNodePlan.node.mbr = addToNodePlan.extendedMbr;
     }
     if (node === root) {
-      root = createNodeOfParent(null, 'rtree-type-node-internal')(
+      const newRoot = createNodeOfParent(null, 'rtree-type-node-internal')(
         node0,
         node1,
       ) as InternalNode<T>;
-      node0.parent = root;
-      node1.parent = root;
+      root = newRoot;
+      node0.parent = newRoot;
+      node1.parent = newRoot;
       return;
     }
 
@@ -305,10 +306,7 @@ export const createRTree = <T extends DataNode>(
     },
     insert(entry: T) {
       if (!root) {
-        root = createNodeOfParent(
-          null,
-          'rtree-type-node-leaf',
-        )(entry) as LeafNode<T>;
+        root = createNodeOfParent(null, 'rtree-type-node-leaf')(entry);
         return;
       }
       insert(root, entry);

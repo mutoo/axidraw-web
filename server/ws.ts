@@ -1,18 +1,18 @@
-import { Server } from 'https';
-import { Express } from 'express';
-import { SerialPort } from 'serialport';
+import type { Server } from 'node:https';
+import type { Express } from 'express';
+import type { SerialPort } from 'serialport';
 import { WebSocket, WebSocketServer } from 'ws';
-import {
+import type {
   ServerMessage,
   ClientMessage,
-} from '../src/communication/device/webscoket-type';
+} from '../src/communication/device/webscoket-type.ts';
 import {
   WEBSOCKET_STATUS_AUTHORIZED,
   WEBSOCKET_STATUS_CONNECTED,
   WEBSOCKET_STATUS_DISCONNECTED,
   WEBSOCKET_STATUS_STANDBY,
-} from './consts';
-import { connectToDevice, listDevices } from './serial-port';
+} from './consts.ts';
+import { connectToDevice, listDevices } from './serial-port.ts';
 
 const authCode = process.env.AXIDRAW_AUTH || 'axidraw-web';
 

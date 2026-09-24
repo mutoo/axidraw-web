@@ -1,6 +1,6 @@
-import { PortInfo } from '@serialport/bindings-interface';
+import type { PortInfo } from '@serialport/bindings-interface';
 import { SerialPort } from 'serialport';
-import { delay } from './utils';
+import { delay } from './utils.ts';
 
 export const AXIDRAW_VENDOR_ID = '04d8';
 export const AXIDRAW_PRODUCT_ID = 'fd92';

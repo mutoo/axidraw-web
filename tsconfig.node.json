@@ -1,21 +1,16 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "nodenext",
+    "types": ["node"],
     "skipLibCheck": true,
 
-    /* Imports */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    /* Node.js type stripping: server/ runs as-is with `node server/index.ts` */
     "allowImportingTsExtensions": true,
-    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     "moduleDetection": "force",
     "noEmit": true,
 

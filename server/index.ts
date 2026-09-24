@@ -1,9 +1,9 @@
 import * as fs from 'node:fs';
 import * as https from 'node:https';
-import { SecureContextOptions } from 'tls';
-import * as express from 'express';
+import type { SecureContextOptions } from 'node:tls';
+import express from 'express';
 
-import setupWebSocket from './ws';
+import setupWebSocket from './ws.ts';
 
 const app = express();
 
