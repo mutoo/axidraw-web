@@ -11,6 +11,72 @@ const countEntries = (node: InternalEntry<DataNode> | null): number => {
   return node.entries.reduce((n, child) => n + countEntries(child), 0);
 };
 
+// seeded pseudo-random numbers in [0, 1), so that failures reproduce
+const mulberry32 = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), seed | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+// what's wrong with the tree's structure, and the ids of its entries
+const checkTree = (
+  root: InternalEntry<DataNode> | null,
+  nodeCapacity: number,
+) => {
+  const problems: string[] = [];
+  const ids: number[] = [];
+  const leafDepths = new Set<number>();
+  const walk = (node: InternalEntry<DataNode>, depth: number) => {
+    const size = node.entries.length;
+    if (size === 0 || size > nodeCapacity) {
+      problems.push(`node ${node.nid} has ${size} entries`);
+    }
+    const mbr = mergeMbrs(node.entries.map((e) => e.mbr));
+    if (JSON.stringify(mbr) !== JSON.stringify(node.mbr)) {
+      problems.push(`node ${node.nid} has a loose MBR`);
+    }
+    if (node.type === 'rtree-type-node-leaf') {
+      leafDepths.add(depth);
+      ids.push(...node.entries.map((e) => e.id));
+      return;
+    }
+    for (const child of node.entries) {
+      if (child.parent !== node) {
+        problems.push(`node ${child.nid} has a wrong parent`);
+      }
+      walk(child, depth + 1);
+    }
+  };
+  if (root) {
+    if (root.parent !== null) problems.push('the root has a parent');
+    if (root.type === 'rtree-type-node-internal' && root.entries.length < 2) {
+      problems.push('the root has a single child');
+    }
+    walk(root, 0);
+  }
+  if (leafDepths.size > 1) problems.push('leaves at different depths');
+  return { problems, ids: ids.sort((a, b) => a - b) };
+};
+
+// the nearest entry to p (the smallest id of the equally near ones)
+const linearNearest = (entries: Map<number, DataNode>, [x, y]: Point2D) => {
+  let nearest: DataNode | null = null;
+  let nearestDistSq = Infinity;
+  for (const entry of entries.values()) {
+    const [ex, ey] = entry.mbr.p0;
+    const distSq = (x - ex) ** 2 + (y - ey) ** 2;
+    if (
+      distSq < nearestDistSq ||
+      (distSq === nearestDistSq && entry.id < nearest!.id)
+    ) {
+      nearest = entry;
+      nearestDistSq = distSq;
+    }
+  }
+  return nearest;
+};
+
 describe('rtree', () => {
   it('rejects a minimum that a split cannot satisfy', () => {
     expect(() => createRTree(0, 4)).toThrow();
@@ -74,17 +140,19 @@ describe('rtree', () => {
       });
     });
     it('insert 10000 random points', () => {
+      const random = mulberry32(1);
       const rtree = createRTree(2, 4);
-      expect(() => {
-        for (let i = 0; i < 10000; i += 1) {
-          const x = (Math.random() * 512) | 0;
-          const y = (Math.random() * 512) | 0;
-          rtree.insert({
-            id: i,
-            mbr: pointAsMbr([x, y]),
-          });
-        }
-      }).not.toThrow();
+      for (let i = 0; i < 10000; i += 1) {
+        const x = (random() * 512) | 0;
+        const y = (random() * 512) | 0;
+        rtree.insert({
+          id: i,
+          mbr: pointAsMbr([x, y]),
+        });
+      }
+      const { problems, ids } = checkTree(rtree.root, 4);
+      expect(problems).toEqual([]);
+      expect(ids).toEqual(Array.from({ length: 10000 }, (_, i) => i));
     });
   });
 
@@ -224,5 +292,77 @@ describe('rtree', () => {
       }
       expect(rtree.root).toBe(null);
     });
+  });
+
+  describe('random operations', () => {
+    const layouts: [string, (random: () => number) => Point2D][] = [
+      ['scattered points', (random) => [random() * 300, random() * 200]],
+      // many duplicates and equally near points
+      [
+        'points on a small grid',
+        (random) => [(random() * 30) | 0, (random() * 30) | 0],
+      ],
+      // MBRs with no width
+      ['points on a line', (random) => [5, (random() * 400) | 0]],
+    ];
+    const params: [minimum: number, nodeCapacity: number][] = [
+      [2, 4],
+      [4, 9],
+    ];
+    for (const [layout, randomPoint] of layouts) {
+      for (const [minimum, nodeCapacity] of params) {
+        it(`matches a linear scan: ${layout}, ${minimum}/${nodeCapacity}`, () => {
+          const random = mulberry32(minimum * 100 + nodeCapacity);
+          const rtree = createRTree(minimum, nodeCapacity);
+          const entries = new Map<number, DataNode>();
+          const expectValidTree = () => {
+            const { problems, ids } = checkTree(rtree.root, nodeCapacity);
+            expect(problems).toEqual([]);
+            expect(ids).toEqual([...entries.keys()].sort((a, b) => a - b));
+          };
+          let nextId = 1;
+          for (let step = 0; step < 3000; step += 1) {
+            const op = random();
+            if (op < 0.5 || entries.size < 5) {
+              const entry = {
+                id: nextId,
+                mbr: pointAsMbr(randomPoint(random)),
+              };
+              nextId += 1;
+              rtree.insert(entry);
+              entries.set(entry.id, entry);
+            } else if (op < 0.8) {
+              const ids = [...entries.keys()];
+              const entry = entries.get(ids[(random() * ids.length) | 0])!;
+              expect(rtree.remove(entry.mbr, (e) => e.id === entry.id)).toBe(
+                true,
+              );
+              entries.delete(entry.id);
+            } else {
+              const p: Point2D = [
+                ((random() * 350) | 0) - 25,
+                ((random() * 450) | 0) - 25,
+              ];
+              expect(rtree.nnSearch(p, (e) => e.id)).toBe(
+                linearNearest(entries, p)!.id,
+              );
+            }
+            if (step % 10 === 0) expectValidTree();
+          }
+          expectValidTree();
+          // then empty it the way the planner does
+          let p: Point2D = [0, 0];
+          while (entries.size) {
+            const entry = rtree.nnSearch(p, (e) => e)!;
+            expect(entry.id).toBe(linearNearest(entries, p)!.id);
+            rtree.remove(entry.mbr, (e) => e.id === entry.id);
+            entries.delete(entry.id);
+            p = entry.mbr.p0;
+            if (entries.size % 10 === 0) expectValidTree();
+          }
+          expect(rtree.root).toBe(null);
+        });
+      }
+    }
   });
 });
