@@ -1,0 +1,13 @@
+# Only resolve versions published at least 14 days ago (supply-chain cooldown).
+minimumReleaseAge: 20160
+
+# Dependency install scripts are blocked unless listed here.
+allowBuilds:
+  # Native addon; ships prebuilds and only compiles when none matches (e.g. some Raspberry Pi setups).
+  '@serialport/bindings-cpp': true
+  # Platform binaries come from optional dependencies, the install script is not needed.
+  esbuild: false
+
+patchedDependencies:
+  # Adds the missing "types" export condition so TypeScript can resolve PortInfo.
+  '@serialport/bindings-interface@1.2.2': patches/@serialport__bindings-interface@1.2.2.patch
