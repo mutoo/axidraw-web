@@ -65,7 +65,7 @@ describe('rtree', () => {
       rtree.remove(entry.mbr, () => false);
       expect(rtree.root!.entries.length).toBe(1);
     });
-    it('condense tree after remove', () => {
+    it('drops emptied nodes and shortens the tree after remove', () => {
       const entries = [
         { id: 0, mbr: pointAsMbr([10, 10]) },
         { id: 1, mbr: pointAsMbr([13, 13]) },
@@ -85,11 +85,19 @@ describe('rtree', () => {
       expect(
         (rtree.root!.entries[1] as LeafNode<DataNode>).entries.length,
       ).toEqual(2);
+      // an underfull leaf is kept, just with a smaller MBR
       rtree.remove(entries[1].mbr, (e) => e.id === entries[1].id);
-      expect(rtree.root!.entries.length).toEqual(1);
+      expect(rtree.root!.entries.length).toEqual(2);
       expect(
-        (rtree.root!.entries[0] as LeafNode<DataNode>).entries.length,
-      ).toEqual(4);
+        (rtree.root!.entries[1] as LeafNode<DataNode>).entries.length,
+      ).toEqual(1);
+      expect(rtree.root!.entries[1].mbr).toEqual(pointAsMbr([14, 14]));
+      // an emptied leaf is dropped, and the root's only child replaces it
+      rtree.remove(entries[2].mbr, (e) => e.id === entries[2].id);
+      expect(rtree.root!.type).toBe('rtree-type-node-leaf');
+      expect(rtree.root!.parent).toBe(null);
+      expect(rtree.root!.entries.length).toEqual(3);
+      expect(rtree.root!.mbr).toEqual({ p0: [10, 10], p1: [12, 12] });
     });
   });
 

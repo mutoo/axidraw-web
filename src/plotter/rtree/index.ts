@@ -190,42 +190,37 @@ export const createRTree = <T extends DataNode>(
     );
   }
 
-  function reInsertEntries(node: InternalEntry<T>) {
-    if (node.type === 'rtree-type-node-internal') {
-      node.entries.forEach((n) => {
-        reInsertEntries(n);
-      });
-    } else {
-      node.entries.forEach((e) => {
-        if (!root) {
-          root = createNodeOfParent(null, 'rtree-type-node-leaf')(e);
-        } else {
-          insert(root, e);
-        }
-      });
-    }
-  }
-
-  function condenseTree(node: LeafNode<T>) {
-    const toReinsert: InternalEntry<T>[] = [];
-    let currentNode = node as InternalEntry<T>;
-    while (currentNode !== root) {
-      const parent = currentNode.parent!;
-      if (currentNode.entries.length < minimum) {
-        const idx = parent.entries.indexOf(currentNode);
-        parent.entries.splice(idx, 1);
-        toReinsert.push(currentNode);
+  // After an entry is removed from `leaf`, drop the nodes it left empty and
+  // shrink the MBRs up to the root. Unlike Guttman's R-tree, an underfull
+  // node is kept rather than having its entries inserted again: the planner
+  // empties the tree point by point, and re-inserting rebuilt whole subtrees
+  // over and over.
+  function condenseTree(leaf: LeafNode<T>) {
+    let node: InternalEntry<T> = leaf;
+    while (node.parent) {
+      const parent: InternalNode<T> = node.parent;
+      if (node.entries.length === 0) {
+        parent.entries.splice(parent.entries.indexOf(node), 1);
       } else {
-        currentNode.mbr = mergeMbrs(currentNode.entries.map((e) => e.mbr))!;
+        node.mbr = mergeMbrs(node.entries.map((e) => e.mbr))!;
       }
-      currentNode = parent;
+      node = parent;
     }
-    if (root.entries.length === 0) {
+    // node is the root now
+    if (node.entries.length === 0) {
       root = null;
+      return;
     }
-    toReinsert.forEach((n) => {
-      reInsertEntries(n);
-    });
+    node.mbr = mergeMbrs(node.entries.map((e) => e.mbr))!;
+    // a root with a single child is replaced by that child
+    while (
+      node.type === 'rtree-type-node-internal' &&
+      node.entries.length === 1
+    ) {
+      node = node.entries[0];
+    }
+    node.parent = null;
+    root = node;
   }
 
   function remove(
@@ -247,14 +242,6 @@ export const createRTree = <T extends DataNode>(
       }
       node.entries.splice(entryIdx, 1);
       condenseTree(node);
-    }
-    if (
-      node === root &&
-      node.entries.length === 1 &&
-      node.entries[0].type === 'rtree-type-node-internal'
-    ) {
-      root = node.entries[0] as InternalEntry<T>;
-      root.parent = null;
     }
   }
 
