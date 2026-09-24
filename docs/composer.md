@@ -2,7 +2,8 @@
 
 [`src/containers/composer`](../src/containers/composer) plays songs on the
 plotter by stepping its motors at the pitch of each note, channel 1 on one
-motor and channel 2 on the other.
+motor and channel 2 on the other. The songs are written in a small note
+notation, described in [composer-notation.md](composer-notation.md).
 [`player.ts`](../src/containers/composer/player.ts) sends a song to the EBB
 like this:
 
