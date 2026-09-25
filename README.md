@@ -2,11 +2,11 @@
 
 This project is work-in-progress!
 
-![screenshot](./docs/screenshot-setup.png)
+![screenshot](./docs/assets/screenshot-setup.png)
 
 Axidraw-Web allow artists to connect [AxiDraw](https://axidraw.com/) in the browser with the WebUSB API. Or connect to remote AxiDraw with WebSocket proxy. You may also enjoy plotting on a virutal AxiDraw in the browser if you don't have a physical one.
 
-![arch](./docs/axidaw-web-arch.png)
+![arch](./docs/assets/axidraw-web-arch.png)
 
 ## TODOs
 
