@@ -1,10 +1,12 @@
-import { Dices, ToggleLeft, TriangleAlert } from 'lucide-react';
-import type { ChangeEvent, SubmitEvent } from 'react';
-import { useRef, useState } from 'react';
+import { Dices, Info, ToggleLeft, TriangleAlert } from 'lucide-react';
+import type { ChangeEvent } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
+import DeviceConnector from '@/components/device-connector/device-connector';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
+import { useIdleTimeout } from '@/hooks/idle-timeout';
 import type { PageSize } from '@/plotter/page-sizes';
 import { randomSeed } from '@/utils/random';
 import type { PlayerStage } from '../player';
@@ -44,6 +46,11 @@ const errorMessage = (error: unknown) =>
 
 // a song loaded from a file is picked by its title, after this
 const LOADED = 'loaded:';
+
+// how long the device stays connected with nothing done, so it is free for
+// others: longer while no song has played yet, shorter once one has
+const IDLE_BEFORE_SONG = { ms: 5 * 60 * 1000, label: '5 minutes' };
+const IDLE_AFTER_SONG = { ms: 60 * 1000, label: 'a minute' };
 
 /**
  * Reads song files, or says which one stops them from loading.
@@ -121,14 +128,12 @@ const placeOnPage = ({
 };
 
 const MidiCommander = ({
-  device,
   pageSize,
   orientation,
   padding,
   playing,
   setPlaying,
 }: {
-  device: IDeviceConnector<unknown>;
   pageSize: PageSize;
   orientation: string;
   padding: number;
@@ -156,6 +161,25 @@ const MidiCommander = ({
   const [stage, setStage] = useState<PlayerStage | null>(null);
   const stopRequestedRef = useRef(false);
   const [results, setResults] = useState('');
+  const [device, setDevice] = useState<IDeviceConnector<unknown> | null>(null);
+  // whether a song has played since the device connected
+  const [played, setPlayed] = useState(false);
+  // how long the device was left idle, once it was disconnected for that
+  const [idleDisconnected, setIdleDisconnected] = useState<string | null>(null);
+  const onConnected = useCallback((connected: IDeviceConnector<unknown>) => {
+    setDevice(connected);
+    setPlayed(false);
+    setIdleDisconnected(null);
+  }, []);
+  const onDisconnected = useCallback(() => {
+    setDevice(null);
+  }, []);
+  const idle = played ? IDLE_AFTER_SONG : IDLE_BEFORE_SONG;
+  useIdleTimeout(device !== null && !playing, idle.ms, () => {
+    logger.info('Disconnect the idle device');
+    setIdleDisconnected(idle.label);
+    void device?.disconnectDevice();
+  });
   const placed = placeOnPage({
     channel1,
     channel2,
@@ -195,8 +219,7 @@ const MidiCommander = ({
       });
   };
 
-  const sendCommands = (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const startPlaying = (device: IDeviceConnector<unknown>) => {
     if (playing || !('placement' in placed)) return;
     const { start, moves } = placed.placement;
     trackEvent('play');
@@ -222,13 +245,14 @@ const MidiCommander = ({
       .finally(() => {
         setStage(null);
         setPlaying(false);
+        setPlayed(true);
       });
   };
 
   return (
-    <form className={formStyles.root} onSubmit={sendCommands}>
-      <h3>Midi Commander</h3>
-      <p>Compose notes and send commands to device.</p>
+    <div className={formStyles.root}>
+      <h3>Song</h3>
+      <p>Pick or compose a song, and preview how the pen moves on the page.</p>
       <label className={formStyles.inputLabel}>
         <span>Song:</span>
         <select
@@ -436,37 +460,63 @@ const MidiCommander = ({
           )}
         </>
       )}
-      <Button
-        variant="default"
-        type={playing ? 'button' : 'submit'}
-        disabled={stage === 'returning' || (!playing && 'problem' in placed)}
-        onClick={() => {
-          if (playing) {
-            stopRequestedRef.current = true;
-            trackEvent('stop');
-          }
-        }}
-      >
-        {playing ? 'Stop' : 'Play'}
-      </Button>
-      {stage && (
-        <p className="text-center text-sm text-muted-foreground">
-          {stageLabels[stage]}
-        </p>
+      <DeviceConnector
+        onConnected={onConnected}
+        onDisconnected={onDisconnected}
+      />
+      {!device && idleDisconnected && (
+        <Alert variant="default">
+          <Info className="h-4 w-4" />
+          <AlertTitle>Disconnected</AlertTitle>
+          <AlertDescription>
+            The device was left idle for {idleDisconnected}, so it was
+            disconnected. Connect again to play a song.
+          </AlertDescription>
+        </Alert>
       )}
-      <Alert variant="default">
-        <ToggleLeft className="h-4 w-4" />
-        <AlertTitle>Tip</AlertTitle>
-        <AlertDescription>
-          You could also press the PRG button on device to stop playing. The pen
-          goes back to the origin either way.
-        </AlertDescription>
-      </Alert>
-      <label className={formStyles.inputLabel}>
-        <span>Results:</span>
-        <textarea rows={3} value={results} readOnly />
-      </label>
-    </form>
+      {device && (
+        <>
+          <Button
+            variant="default"
+            disabled={
+              stage === 'returning' || (!playing && 'problem' in placed)
+            }
+            onClick={() => {
+              if (playing) {
+                stopRequestedRef.current = true;
+                trackEvent('stop');
+              } else {
+                startPlaying(device);
+              }
+            }}
+          >
+            {playing ? 'Stop' : 'Play'}
+          </Button>
+          {stage && (
+            <p className="text-center text-sm text-muted-foreground">
+              {stageLabels[stage]}
+            </p>
+          )}
+          {!playing && (
+            <p className="text-center text-sm text-muted-foreground">
+              The device disconnects after {idle.label} with nothing done.
+            </p>
+          )}
+          <Alert variant="default">
+            <ToggleLeft className="h-4 w-4" />
+            <AlertTitle>Tip</AlertTitle>
+            <AlertDescription>
+              You could also press the PRG button on device to stop playing. The
+              pen goes back to the origin either way.
+            </AlertDescription>
+          </Alert>
+          <label className={formStyles.inputLabel}>
+            <span>Results:</span>
+            <textarea rows={3} value={results} readOnly />
+          </label>
+        </>
+      )}
+    </div>
   );
 };
 

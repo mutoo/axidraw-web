@@ -1,7 +1,5 @@
 import classnames from 'clsx';
-import { useCallback, useState } from 'react';
-import type { IDeviceConnector } from '@/communication/device/device';
-import DeviceConnector from '@/components/device-connector/device-connector';
+import { useState } from 'react';
 import Footer from '@/components/footer/footer';
 import PageSwitcher from '@/components/page-switcher/page-switcher';
 import { Button } from '@/components/ui/button';
@@ -27,12 +25,8 @@ const Composer = () => {
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const [orientation, setOrientation] = useState(PAGE_ORIENTATION_LANDSCAPE);
   const [padding, setPadding] = useState(defaultPageSize.defaultPadding);
-  const [device, setDevice] = useState<IDeviceConnector<unknown> | null>(null);
   const [playing, setPlaying] = useState(false);
   usePageBusy(playing ? 'A song is playing.' : null);
-  const clearDevice = useCallback(() => {
-    setDevice(null);
-  }, []);
   const goTo = (next: COMPOSER_PHASE) => {
     setPhase(next);
     trackEvent('go to', COMPOSER_PHASE[next]);
@@ -85,20 +79,13 @@ const Composer = () => {
               Change page
             </Button>
           </div>
-          <DeviceConnector
-            onConnected={setDevice}
-            onDisconnected={clearDevice}
+          <MidiCommander
+            pageSize={pageSize}
+            orientation={orientation}
+            padding={padding}
+            playing={playing}
+            setPlaying={setPlaying}
           />
-          {device && (
-            <MidiCommander
-              device={device}
-              pageSize={pageSize}
-              orientation={orientation}
-              padding={padding}
-              playing={playing}
-              setPlaying={setPlaying}
-            />
-          )}
         </div>
       </div>
       <Footer />
