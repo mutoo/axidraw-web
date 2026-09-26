@@ -3,7 +3,9 @@ import { AlertTriangle } from 'lucide-react';
 import { observer } from 'mobx-react-lite';
 import { use, useEffect, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
-import DeviceConnector from '@/components/device-connector/device-connector';
+import DeviceConnector, {
+  FIRMWARE_URL,
+} from '@/components/device-connector/device-connector';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button} from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
@@ -15,6 +17,7 @@ import {
   PLOTTER_SPEED_MODE,
   PLOTTER_ACTION,
 } from '@/plotter/consts';
+import { firmwareProblem } from '@/plotter/plotter';
 import { PlotterContext } from '../../context';
 import { PLANNING_PHASE } from '../../presenters/planning';
 import { trackEvent } from '../../utils';
@@ -28,6 +31,9 @@ const Plotting = observer(({ ...props }) => {
   const device = work.device.get();
   const plottingInProgress = work.plottingInProgress.get();
   usePageBusy(plottingInProgress ? 'A plot is in progress.' : null);
+  const problem = device
+    ? firmwareProblem(device.version, work.speedMode)
+    : null;
   const [connectedDevice, setConnectedDevice] =
     useState<IDeviceConnector<unknown> | null>(null);
   useEffect(() => {
@@ -84,11 +90,28 @@ const Plotting = observer(({ ...props }) => {
       {device && (
         <section className="space-y-4">
           <h3>Plotting</h3>
+          {problem && (
+            <Alert variant="default">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>EBB firmware {device.version}</AlertTitle>
+              <AlertDescription>
+                {problem}{' '}
+                <a
+                  className="underline"
+                  href={FIRMWARE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  More on firmware
+                </a>
+              </AlertDescription>
+            </Alert>
+          )}
           <form
             className={styles.form}
             onSubmit={(e) => {
               e.preventDefault();
-              if (plottingInProgress || !planning.motions) return;
+              if (plottingInProgress || !planning.motions || problem) return;
               trackEvent('control', 'plot');
               void work.plot({ motions: planning.motions });
             }}
@@ -204,7 +227,7 @@ const Plotting = observer(({ ...props }) => {
             />
             <div className="col-start-2">
               {work.plotterStatus === PLOTTER_STATUS_STANDBY && (
-                <Button variant="default" type="submit">
+                <Button variant="default" type="submit" disabled={!!problem}>
                   Start
                 </Button>
               )}

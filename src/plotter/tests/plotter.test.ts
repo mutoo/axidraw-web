@@ -5,7 +5,7 @@ import type { Command } from '@/communication/ebb/command';
 import { xyDist2aaSteps } from '@/math/ebb';
 import type { Point2D } from '@/math/geom';
 import { MOTION_PEN_DOWN, PLOTTER_SPEED_MODE } from '../consts';
-import plot from '../plotter';
+import plot, { firmwareProblem } from '../plotter';
 
 type SM = [duration: number, a1: number, a2: number];
 
@@ -92,6 +92,33 @@ describe('constant speed plotting', () => {
       }
       // and it returns home at the end
       expect([a1, a2]).toEqual([0, 0]);
+    },
+  );
+});
+
+describe('firmwareProblem', () => {
+  const { ACCELERATING, CONSTANT } = PLOTTER_SPEED_MODE;
+
+  it.each([
+    ['2.8.1', ACCELERATING],
+    ['2.7.0', ACCELERATING],
+    ['2.6.0', CONSTANT],
+  ])('lets firmware %s plot in speed mode %i', (version, speedMode) => {
+    expect(firmwareProblem(version, speedMode)).toBeNull();
+  });
+
+  it('needs 2.7.0 to plot with acceleration, which moves with LM', () => {
+    expect(firmwareProblem('2.6.5', ACCELERATING)).toBe(
+      'Acceleration needs EBB firmware 2.7.0 or later. Plot at constant velocity instead.',
+    );
+  });
+
+  it.each([CONSTANT, ACCELERATING])(
+    'needs 2.6.0 for any plot, which starts with SR (speed mode %i)',
+    (speedMode) => {
+      expect(firmwareProblem('2.5.5', speedMode)).toBe(
+        'Plotting needs EBB firmware 2.6.0 or later.',
+      );
     },
   );
 });

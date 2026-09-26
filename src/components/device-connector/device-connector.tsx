@@ -1,5 +1,5 @@
 import { ChevronsLeftRightEllipsis } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { trackCategoryEvent } from '@/analystic';
 import {
   DEVICE_TYPE_USB,
@@ -21,7 +21,25 @@ import { Button } from '../ui/button';
 
 const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
+// the README's notes on the EBB firmware versions the apps work with
+export const FIRMWARE_URL = 'https://github.com/mutoo/axidraw-web#ebb-firmware';
+
 const trackEvent = trackCategoryEvent('connector');
+
+const FirmwareNote = () => (
+  <p className="text-sm text-muted-foreground">
+    Works best with EBB firmware 2.7.0 to 2.8.1. Older versions can do less, and
+    3.x can't connect yet.{' '}
+    <a
+      className="underline"
+      href={FIRMWARE_URL}
+      target="_blank"
+      rel="noreferrer"
+    >
+      More on firmware
+    </a>
+  </p>
+);
 
 const DeviceOption = ({
   label,
@@ -70,6 +88,7 @@ const DeviceConnector = ({
   const [wsAuth, setWSAuth] = useState('axidraw-web');
   const [virtualVersion, setVirtualVersion] = useState('2.7.0');
   const [virtualPaper, setVirtualPaper] = useState(defaultPageSize.id);
+  const virtualVersionHintId = useId();
 
   useEffect(() => {
     if (!device) return;
@@ -166,17 +185,27 @@ const DeviceConnector = ({
           )}
           {deviceType === DEVICE_TYPE_VIRTUAL && (
             <>
-              <label className={formStyles.inputLabel}>
-                <span>Version:</span>
-                <select
-                  value={virtualVersion}
-                  onChange={(e) => {
-                    setVirtualVersion(e.target.value);
-                  }}
+              <div className="grid grid-cols-1 gap-2">
+                <label className={formStyles.inputLabel}>
+                  <span>Version:</span>
+                  <select
+                    value={virtualVersion}
+                    aria-describedby={virtualVersionHintId}
+                    onChange={(e) => {
+                      setVirtualVersion(e.target.value);
+                    }}
+                  >
+                    <option>2.7.0</option>
+                  </select>
+                </label>
+                <p
+                  id={virtualVersionHintId}
+                  className="text-sm text-muted-foreground"
                 >
-                  <option>2.7.0</option>
-                </select>
-              </label>
+                  The EBB firmware version the virtual plotter reports. The apps
+                  check it before they send a command, as with a real AxiDraw.
+                </p>
+              </div>
               <label className={formStyles.inputLabel}>
                 <span>Paper:</span>
                 <PageSizeSelect
@@ -199,6 +228,7 @@ const DeviceConnector = ({
               </Button>
             </>
           )}
+          {deviceType !== DEVICE_TYPE_VIRTUAL && <FirmwareNote />}
         </>
       )}
       {deviceStatus === DEVICE_STATUS_CONNECTED && (

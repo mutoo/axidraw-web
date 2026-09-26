@@ -2,6 +2,7 @@ import type { IComputedValue } from 'mobx';
 import type { IDeviceConnector } from '@/communication/device/device';
 import * as commands from '@/communication/ebb';
 import { SM_MAX_MS_PER_STEP } from '@/communication/ebb/constants';
+import { checkVersion } from '@/communication/ebb/utils';
 import { aa2xy, servoTime, xyDist2aaSteps } from '@/math/ebb';
 import type { Line2D } from '@/math/geom';
 import { distSq } from '@/math/geom';
@@ -31,6 +32,32 @@ export const initialContext = {
 };
 
 export type PlotterFlow = AsyncGenerator<string, string, PLOTTER_ACTION | null>;
+
+/**
+ * Why a device with this EBB firmware can't plot in this speed mode, or null
+ * if it can. Every plot starts by setting the servo power timeout with SR,
+ * and plotting with acceleration moves with LM.
+ */
+export const firmwareProblem = (
+  version: string,
+  speedMode: PLOTTER_SPEED_MODE,
+): string | null => {
+  // the version a command needs, if the firmware is older
+  const needed = (command: { version?: string }) =>
+    command.version && !checkVersion(version, command.version)
+      ? command.version
+      : null;
+  const forPlotting = needed(commands.sr);
+  if (forPlotting) {
+    return `Plotting needs EBB firmware ${forPlotting} or later.`;
+  }
+  const forAcceleration =
+    speedMode === PLOTTER_SPEED_MODE.ACCELERATING ? needed(commands.lm) : null;
+  if (forAcceleration) {
+    return `Acceleration needs EBB firmware ${forAcceleration} or later. Plot at constant velocity instead.`;
+  }
+  return null;
+};
 
 async function* plot({
   device,

@@ -87,6 +87,47 @@ with three ways to connect:
 
 ![Connecting over WebUSB, or through the WebSocket proxy on a Raspberry Pi](docs/assets/axidraw-web-arch.png)
 
+## EBB firmware
+
+AxiDraw Web supports EBB firmware 2.x, and is tested with firmware 2.8.1. It
+doesn't support firmware 3.x yet: see [Firmware 3.x](#firmware-3x). Once a
+device is connected, the device connector shows its firmware version. The
+virtual plotter acts as firmware 2.7.0.
+
+- **2.7.0 to 2.8.1**: everything works.
+- **2.6.0 to 2.6.x**: everything but plotting with acceleration, which moves
+  with `LM`. The plotter plots at constant velocity.
+- **2.4.3 to 2.5.x**: the composer and the debugger work. The plotter can't
+  plot, as every plot starts by setting the servo power timeout with `SR`.
+- **Before 2.4.3**: AxiDraw Web can't connect.
+- **3.0 and later**: not supported yet. AxiDraw Web can't connect.
+
+In the debugger, a command the firmware is too old for fails, and says which
+version it needs. Evil Mad Scientist explains
+[how to update the firmware](https://wiki.evilmadscientist.com/Updating_EBB_firmware),
+and documents the commands of
+[firmware 2.x](https://evil-mad.github.io/EggBot/ebb2.html) and
+[firmware 3.x](https://evil-mad.github.io/EggBot/ebb.html).
+
+### Firmware 3.x
+
+Firmware 3.x isn't supported yet, as AxiDraw Web can't connect to it.
+Connecting sends `R` to reset the EBB, then `V` for its version. Firmware
+2.4.3 to 2.8.1 answers `R` with `OK` twice, as the reset clears the step
+counters with `CS`, which sends its own `OK`, and AxiDraw Web waits for both.
+Firmware 3.0 answers with one `OK`, as firmware before 2.4.3 did, so
+connecting fails after 60 seconds with `EBB Command timeout: R`.
+
+Supporting 3.x also means handling a few commands it changes. It keeps the
+replies of 2.x unless `CU,10,1` turns on its new ones, which AxiDraw Web
+doesn't send, but:
+
+- `QB`, which the plotter and the composer read the PRG button with, is
+  deprecated in favour of `QG`.
+- `QG` reports other things in bits 6 and 7, which the debugger reads as
+  2.x does.
+- `PC`, `PG` and `T`, which the debugger offers, are gone.
+
 ## Plotting through the WebSocket proxy
 
 When the AxiDraw is plugged into another computer, such as a Raspberry Pi
