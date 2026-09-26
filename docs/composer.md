@@ -8,6 +8,12 @@ written in a small note notation, described in
 
 ## Playing a song
 
+To prepare a new song, the optional `create-song` Codex skill can turn a
+score or numbered notation into a `.song` file, or write an original tune.
+See [Creating a song with Codex](composer-notation.md#creating-a-song-with-codex).
+Load the resulting file with **Load song**, or drop it on the box under the
+Song list in **Midi Commander**.
+
 First, set up the page: its size, orientation and padding. Put the pen at
 the origin and line the page up with it, as for plotting. The AxiDraw has
 no limit switches, so wherever the pen is when a song starts is the

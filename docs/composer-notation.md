@@ -105,7 +105,11 @@ doesn't check the range, and the EBB could step much faster.
 
 ## Writing a song
 
-Songs are TypeScript files in
+For help transcribing or arranging a song, see
+[Creating a song with Codex](#creating-a-song-with-codex). For a local file
+that Midi Commander can load, see [Song files](#song-files).
+
+Bundled songs are TypeScript files in
 [`songs`](../src/containers/composer/songs), each built with `createSong`
 and `bars` from [`utils.ts`](../src/containers/composer/utils.ts):
 
@@ -182,6 +186,46 @@ every song:
 every song on A4 and on the page size with the least room, at several motor
 modes, paddings and tempos, and checks that the pen stays inside the
 padding.
+
+### Creating a song with Codex
+
+The optional `create-song` skill creates and edits music for this composer.
+It can transcribe a score or numbered notation (简谱), arrange a melody and
+bass for the two motors, or write an original tune.
+
+The skill lives in
+[`.agents/skills/create-song/SKILL.md`](../.agents/skills/create-song/SKILL.md)
+and is shared with the repository. It uses the current checkout's files and
+does not need a personal installation or a fixed path on your computer.
+
+Open this checkout in Codex and start a request
+with `$create-song`. Attach the score or give its source, and specify the
+sections, tempo, and voices you want. For example:
+
+```text
+$create-song Convert this numbered score into a .song file at 100 BPM.
+Keep the full melody in channel 1 and add a simple bass in channel 2.
+```
+
+```text
+$create-song Write an original eight-bar tune in C major at 120 BPM,
+with melody and bass, and save it as songs/morning-walk.song.
+```
+
+By default, the result is a local `songs/<title>.song` file, ignored by
+Git. Load it with **Load song** or drag it into Midi Commander. To add a
+built-in song instead, ask explicitly for a bundled TypeScript song. The
+music and its arrangement must be free to redistribute, with any required
+credits; the skill also adds its export to `songs/index.ts`.
+
+The skill checks notation, pitch range, bar lengths, channel alignment,
+and planned motion. It reports changes such as octave transpositions,
+rhythm approximations, or reduced chords. For bundled songs, it runs the
+song and stage tests and the TypeScript check. Those tests do not discover
+local `.song` files, so the skill parses and checks the actual file
+separately. These checks do not require a connected plotter, and passing
+them does not prove that a transcription matches the source; review the
+melody and any reported simplifications before playing.
 
 ## Song files
 

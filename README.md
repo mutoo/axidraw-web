@@ -67,6 +67,13 @@ with songs that are free to share, loads others from `.song` files, and can
 draw with the pen as it plays. See [docs/composer.md](docs/composer.md) and
 [docs/composer-notation.md](docs/composer-notation.md).
 
+The project includes a
+[`create-song` skill](.agents/skills/create-song/SKILL.md). Open this project
+in Codex and ask, for example, `$create-song Turn this score into a .song file
+with melody and bass at 100 BPM`. See
+[Creating a song with Codex](docs/composer-notation.md#creating-a-song-with-codex)
+for the skill's location, more examples, and the checks it runs.
+
 All the apps share one list of page sizes: ISO A1 to A6 and B4 to B6, US
 sizes, cards and art paper, and the plot area of each AxiDraw model.
 
@@ -225,7 +232,7 @@ which is run by hand.
 - [Composer](docs/composer.md): playing a song, and how the player sends it
   to the EBB.
 - [Composer notation](docs/composer-notation.md): the note notation,
-  writing songs, and song files.
+  writing songs by hand or with the `create-song` skill, and song files.
 - [R-tree](docs/rtree.md): the spatial index behind the plotting order, and
   the measurements behind its design.
 
