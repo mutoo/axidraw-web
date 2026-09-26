@@ -1,4 +1,5 @@
 export const DEVICE_TYPE_USB = 'axidraw-web-device-type-usb';
+export const DEVICE_TYPE_SERIAL = 'axidraw-web-device-type-serial';
 export const DEVICE_TYPE_WEBSOCKET = 'axidraw-web-device-type-ws';
 export const DEVICE_TYPE_VIRTUAL = 'axidraw-web-device-type-virtual';
 

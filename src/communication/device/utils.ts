@@ -48,7 +48,9 @@ export const executeCommand = async <T extends any[], R>(
   ]);
 };
 
-export const selectFirstDevice = (devices: (USBDevice | WSDevice)[]) => {
+export const selectFirstDevice = (
+  devices: (USBDevice | SerialPort | WSDevice)[],
+) => {
   return Promise.resolve(devices[0]);
 };
 

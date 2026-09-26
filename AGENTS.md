@@ -3,10 +3,12 @@
 This file provides guidance to AI coding agents (Claude Code, Codex and others) when working with code in this repository.
 
 AxiDraw Web drives an AxiDraw pen plotter from the browser. It talks to the
-plotter's controller, the EiBotBoard (EBB), over WebUSB, through a WebSocket
-proxy (`server/`), or to an emulated plotter in a popup window.
+plotter's controller, the EiBotBoard (EBB), over WebUSB or Web Serial,
+through a WebSocket proxy (`server/`), or to an emulated plotter in a popup
+window.
 [README.md](README.md) describes the apps for users. [docs/](docs) holds the
-details: [virtual plotter](docs/virtual-plotter.md),
+details: [connecting](docs/connecting.md),
+[virtual plotter](docs/virtual-plotter.md),
 [composer](docs/composer.md), [composer notation](docs/composer-notation.md)
 and [R-tree](docs/rtree.md).
 
@@ -60,11 +62,12 @@ There are four apps, hash-routed and lazy-loaded in
   the parsing. `options.version` is the oldest firmware with the command,
   checked before sending. The debugger lists every export of `ebb/index.ts`,
   so a command exported there shows up in it.
-- **Devices** (`src/communication/device/`): `usb.ts`, `websocket.ts` and
-  `virtual.ts` each provide a raw `IDevice`, and `createDeviceBind` in
-  `utils.ts` wraps it into the `IDeviceConnector` every app uses:
-  `executeCommand(cmd, ...params)`, connected and disconnected events, and
-  the firmware `version`. Connecting sends `R`, then `V` for the version.
+- **Devices** (`src/communication/device/`): `usb.ts`, `serial.ts`,
+  `websocket.ts` and `virtual.ts` each provide a raw `IDevice`, and
+  `createDeviceBind` in `utils.ts` wraps it into the `IDeviceConnector`
+  every app uses: `executeCommand(cmd, ...params)`, connected and
+  disconnected events, and the firmware `version`. Connecting sends `R`,
+  then `V` for the version.
 - **Responses** go through `handleEBBMessages` (`ebb/messages/ebb.ts`), which
   hands incoming bytes to the oldest waiting command, so responses are
   matched to commands strictly in the order they were sent. A response

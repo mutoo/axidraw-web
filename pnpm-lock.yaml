@@ -254,6 +254,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.3.0
         version: 19.3.0(@types/react@19.3.0)
+      '@types/w3c-web-serial':
+        specifier: ^1.0.8
+        version: 1.0.8
       '@types/w3c-web-usb':
         specifier: ^1.0.14
         version: 1.0.14
@@ -1039,6 +1042,9 @@ packages:
 
   '@types/serve-static@2.2.0':
     resolution: {integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==}
+
+  '@types/w3c-web-serial@1.0.8':
+    resolution: {integrity: sha512-QQOT+bxQJhRGXoZDZGLs3ksLud1dMNnMiSQtBA0w8KXvLpXX4oM4TZb6J0GgJ8UbCaHo5s9/4VQT8uXy9JER2A==}
 
   '@types/w3c-web-usb@1.0.14':
     resolution: {integrity: sha512-Qu3Nn6JFuF4+sHKYl+IcX9vYiI40ogleXzFFSxoE1W94rG98o/kXs8uJ0QSfFzuwBCZWlGfUGpPkgwuuX4PchA==}
@@ -3728,6 +3734,8 @@ snapshots:
     dependencies:
       '@types/http-errors': 2.0.4
       '@types/node': 24.13.4
+
+  '@types/w3c-web-serial@1.0.8': {}
 
   '@types/w3c-web-usb@1.0.14': {}
 

@@ -2,6 +2,7 @@ import { ChevronsLeftRightEllipsis } from 'lucide-react';
 import { useState, useEffect, useId } from 'react';
 import { trackCategoryEvent } from '@/analystic';
 import {
+  DEVICE_TYPE_SERIAL,
   DEVICE_TYPE_USB,
   DEVICE_TYPE_WEBSOCKET,
   DEVICE_TYPE_VIRTUAL,
@@ -23,6 +24,9 @@ const defaultWSAddress = `wss://${window.location.host}/axidraw`;
 
 // the README's notes on the EBB firmware versions the apps work with
 export const FIRMWARE_URL = 'https://github.com/mutoo/axidraw-web#ebb-firmware';
+// the docs on how the ways to connect differ
+export const CONNECTING_URL =
+  'https://github.com/mutoo/axidraw-web/blob/main/docs/connecting.md';
 
 const trackEvent = trackCategoryEvent('connector');
 
@@ -105,16 +109,33 @@ const DeviceConnector = ({
       <h3>Device</h3>
       {deviceStatus === DEVICE_STATUS_DISCONNECTED && (
         <>
-          <p>Connect to AxiDraw via USB, WebSocket or Virtual Plotter.</p>
+          <p>
+            Connect to AxiDraw via Web USB, Web Serial, Web Socket or Virtual
+            Plotter.{' '}
+            <a
+              className="underline"
+              href={CONNECTING_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Which one?
+            </a>
+          </p>
           <DeviceOption
             type={DEVICE_TYPE_USB}
-            label={'USB'}
+            label={'Web USB'}
+            deviceType={deviceType}
+            setDeviceType={setDeviceType}
+          />
+          <DeviceOption
+            type={DEVICE_TYPE_SERIAL}
+            label={'Web Serial'}
             deviceType={deviceType}
             setDeviceType={setDeviceType}
           />
           <DeviceOption
             type={DEVICE_TYPE_WEBSOCKET}
-            label={'WebSocket'}
+            label={'Web Socket'}
             deviceType={deviceType}
             setDeviceType={setDeviceType}
           />
@@ -131,7 +152,8 @@ const DeviceConnector = ({
               <AlertDescription>{connectionError}</AlertDescription>
             </Alert>
           )}
-          {deviceType === DEVICE_TYPE_USB && (
+          {(deviceType === DEVICE_TYPE_USB ||
+            deviceType === DEVICE_TYPE_SERIAL) && (
             <div className="grid grid-cols-2 gap-4 lg:gap-6">
               <Button
                 variant="secondary"
@@ -234,8 +256,9 @@ const DeviceConnector = ({
       {deviceStatus === DEVICE_STATUS_CONNECTED && (
         <>
           <div className="grid grid-flow-col items-center gap-4">
-            {deviceType === DEVICE_TYPE_USB && <p>USB</p>}
-            {deviceType === DEVICE_TYPE_WEBSOCKET && <p>WebSocket</p>}
+            {deviceType === DEVICE_TYPE_USB && <p>Web USB</p>}
+            {deviceType === DEVICE_TYPE_SERIAL && <p>Web Serial</p>}
+            {deviceType === DEVICE_TYPE_WEBSOCKET && <p>Web Socket</p>}
             {deviceType === DEVICE_TYPE_VIRTUAL && <p>Virtual Plotter</p>}
             <p>EBB v{deviceVersion}</p>
             <Button

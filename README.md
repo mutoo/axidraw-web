@@ -3,9 +3,9 @@
 AxiDraw Web runs an [AxiDraw](https://axidraw.com/) pen plotter from the
 browser, with nothing to install. It plots SVG files, sends commands by
 hand to the AxiDraw's controller, the EiBotBoard (EBB), and plays music on
-its motors. The browser talks to the AxiDraw over WebUSB, or through a
-WebSocket proxy on the computer the AxiDraw is plugged into, and a virtual
-AxiDraw stands in when there is no plotter at hand.
+its motors. The browser talks to the AxiDraw over WebUSB or Web Serial, or
+through a WebSocket proxy on the computer the AxiDraw is plugged into, and a
+virtual AxiDraw stands in when there is no plotter at hand.
 
 The latest version runs at **[axidraw.mutoo.im](https://axidraw.mutoo.im)**.
 
@@ -80,13 +80,17 @@ sizes, cards and art paper, and the plot area of each AxiDraw model.
 ## Connecting
 
 The plotter, the debugger and the composer share one device connector,
-with three ways to connect:
+with four ways to connect. [docs/connecting.md](docs/connecting.md) explains
+how they differ, and which to pick.
 
-- **USB** talks to the AxiDraw directly over WebUSB, which Chromium-based
-  browsers such as Chrome and Edge support. **Pair new device** opens the
-  browser's device picker; **Connect** uses an AxiDraw paired before, and
-  opens the picker if there is none.
-- **WebSocket** goes through the proxy server in this repository, running
+- **Web USB** talks to the AxiDraw's USB interface directly, which
+  Chromium-based browsers such as Chrome and Edge support. **Pair new
+  device** opens the browser's device picker; **Connect** uses an AxiDraw
+  paired before, and opens the picker if there is none.
+- **Web Serial** opens the serial port the operating system gives the
+  AxiDraw, in the same browsers, with the same two buttons. It works where
+  WebUSB can't claim the AxiDraw, such as on Windows.
+- **Web Socket** goes through the proxy server in this repository, running
   on the computer the AxiDraw is plugged into. See
   [Plotting through the WebSocket proxy](#plotting-through-the-websocket-proxy).
 - **Virtual Plotter** opens the virtual plotter, with the firmware version
@@ -150,7 +154,7 @@ bash ./scripts/create-cert.sh
 pnpm run server
 ```
 
-Then open `https://<host>:8443`, pick **WebSocket** in the device
+Then open `https://<host>:8443`, pick **Web Socket** in the device
 connector, and connect. The URL defaults to the server's own proxy,
 `wss://<host>:8443/axidraw`, and the password to `axidraw-web`. To use
 another password, start the server with `AXIDRAW_AUTH` set to it:
@@ -167,8 +171,9 @@ needs a C++ toolchain.
 
 ### Certificate
 
-The server only serves HTTPS: browsers allow WebUSB only in a secure
-context, and a page loaded over HTTPS can only open secure WebSockets.
+The server only serves HTTPS: browsers allow WebUSB and Web Serial only in
+a secure context, and a page loaded over HTTPS can only open secure
+WebSockets.
 [`scripts/create-cert.sh`](scripts/create-cert.sh) creates a certificate
 authority, and a certificate signed by it for the server, in `server/cert`:
 
@@ -210,14 +215,14 @@ measurement ID, for example in `.env.local`.
 
 ### Layout
 
-| Path                | What's there                                                      |
-| ------------------- | ----------------------------------------------------------------- |
-| `src/containers`    | The apps: plotter, virtual plotter, debugger and composer.        |
-| `src/communication` | Device connections (WebUSB, WebSocket, virtual) and EBB commands. |
-| `src/plotter`       | SVG to lines, motion planning, speed profiles and time estimates. |
-| `src/components`    | UI the apps share, such as the device connector.                  |
-| `server`            | The HTTPS server and the WebSocket proxy.                         |
-| `docs`              | Documentation.                                                    |
+| Path                | What's there                                                                  |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `src/containers`    | The apps: plotter, virtual plotter, debugger and composer.                    |
+| `src/communication` | Device connections (WebUSB, Web Serial, WebSocket, virtual) and EBB commands. |
+| `src/plotter`       | SVG to lines, motion planning, speed profiles and time estimates.             |
+| `src/components`    | UI the apps share, such as the device connector.                              |
+| `server`            | The HTTPS server and the WebSocket proxy.                                     |
+| `docs`              | Documentation.                                                                |
 
 ### Deployment
 
@@ -227,6 +232,8 @@ which is run by hand.
 
 ## Documentation
 
+- [Connecting](docs/connecting.md): WebUSB, Web Serial, WebSocket and the
+  virtual plotter, how they differ, and which to pick.
 - [Virtual plotter](docs/virtual-plotter.md): its window, free mode, the
   EBB commands it knows, and how it talks to the main window.
 - [Composer](docs/composer.md): playing a song, and how the player sends it
