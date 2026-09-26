@@ -7,9 +7,18 @@
 }
 
 .panel {
-  @apply fixed inset-0 text-base;
+  @apply fixed inset-0 flex flex-col text-base;
 
   left: auto;
   width: 450px;
   background-color: #efefef;
+}
+
+.header {
+  @apply px-8 pt-8;
+}
+
+/* each panel fills it and scrolls on its own */
+.panels {
+  @apply relative flex-1;
 }

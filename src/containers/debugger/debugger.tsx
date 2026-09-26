@@ -2,6 +2,7 @@ import classnames from 'clsx';
 import { useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
+import PageSwitcher from '@/components/page-switcher/page-switcher';
 import formStyles from '@/components/ui/form.module.css';
 import sheetsStyles from '@/components/ui/sheet.module.css';
 import Footer from '../../components/footer/footer';
@@ -14,6 +15,7 @@ const Debugger = () => {
   return (
     <>
       <div className={classnames(formStyles.root, sheetsStyles.root)}>
+        <PageSwitcher />
         <DeviceConnector
           onConnected={setDevice}
           onDisconnected={() => {

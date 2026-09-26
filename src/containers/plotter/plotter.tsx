@@ -1,4 +1,5 @@
 import Footer from '@/components/footer/footer';
+import PageSwitcher from '@/components/page-switcher/page-switcher';
 import Planning from './components/panels/planning';
 import Plotting from './components/panels/plotting';
 import Setup from './components/panels/setup';
@@ -13,9 +14,14 @@ const Plotter = () => {
         <Footer />
       </main>
       <aside className={styles.panel}>
-        <Setup />
-        <Planning />
-        <Plotting />
+        <header className={styles.header}>
+          <PageSwitcher />
+        </header>
+        <div className={styles.panels}>
+          <Setup />
+          <Planning />
+          <Plotting />
+        </div>
       </aside>
     </>
   );

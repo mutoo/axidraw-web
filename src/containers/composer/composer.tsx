@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { IDeviceConnector } from '@/communication/device/device';
 import DeviceConnector from '@/components/device-connector/device-connector';
 import Footer from '@/components/footer/footer';
+import PageSwitcher from '@/components/page-switcher/page-switcher';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
 import sheetsStyles from '@/components/ui/sheet.module.css';
@@ -10,6 +11,7 @@ import {
   PAGE_ORIENTATION_LANDSCAPE,
   PAGE_ORIENTATION_PORTRAIT,
 } from '@/containers/plotter/presenters/page';
+import { usePageBusy } from '@/hooks/page-busy';
 import { defaultPageSize, pageSizeLabel } from '@/plotter/page-sizes';
 import MidiCommander from './components/midi-commander';
 import PageSetup from './components/page-setup';
@@ -27,6 +29,7 @@ const Composer = () => {
   const [padding, setPadding] = useState(defaultPageSize.defaultPadding);
   const [device, setDevice] = useState<IDeviceConnector<unknown> | null>(null);
   const [playing, setPlaying] = useState(false);
+  usePageBusy(playing ? 'A song is playing.' : null);
   const clearDevice = useCallback(() => {
     setDevice(null);
   }, []);
@@ -38,6 +41,7 @@ const Composer = () => {
   return (
     <>
       <div className={classnames(formStyles.root, sheetsStyles.root)}>
+        <PageSwitcher />
         {phase === COMPOSER_PHASE.SETUP && (
           <PageSetup
             pageSize={pageSize}

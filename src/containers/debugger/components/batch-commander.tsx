@@ -5,14 +5,18 @@ import * as commands from '@/communication/ebb';
 import type { Command } from '@/communication/ebb/command';
 import { Button } from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
+import { usePageBusy } from '@/hooks/page-busy';
 import { trackEvent } from '../utils';
 
 const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
   const [batch, setBatch] = useState('');
   const [results, setResults] = useState('');
+  const [running, setRunning] = useState(false);
+  usePageBusy(running ? 'Batch commands are running.' : null);
   const sendCommands = useCallback(
     (e: SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
+      setRunning(true);
       void (async () => {
         try {
           trackEvent('batch');
@@ -41,6 +45,8 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           setResults(resultStr);
         } catch (err) {
           setResults(String(err));
+        } finally {
+          setRunning(false);
         }
       })();
     },
@@ -60,7 +66,9 @@ const BatchCommander = ({ device }: { device: IDeviceConnector<unknown> }) => {
           }}
         />
       </label>
-      <Button type="submit">Send</Button>
+      <Button type="submit" disabled={running}>
+        Send
+      </Button>
       <label className={formStyles.inputLabel}>
         <span>Results:</span>
         <textarea rows={3} defaultValue={results} readOnly />

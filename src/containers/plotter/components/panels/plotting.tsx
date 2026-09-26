@@ -7,6 +7,7 @@ import DeviceConnector from '@/components/device-connector/device-connector';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button} from '@/components/ui/button';
 import formStyles from '@/components/ui/form.module.css';
+import { usePageBusy } from '@/hooks/page-busy';
 import {
   PLOTTER_STATUS_PAUSED,
   PLOTTER_STATUS_PLOTTING,
@@ -26,6 +27,7 @@ const Plotting = observer(({ ...props }) => {
   const { planning, work } = use(PlotterContext);
   const device = work.device.get();
   const plottingInProgress = work.plottingInProgress.get();
+  usePageBusy(plottingInProgress ? 'A plot is in progress.' : null);
   const [connectedDevice, setConnectedDevice] =
     useState<IDeviceConnector<unknown> | null>(null);
   useEffect(() => {
